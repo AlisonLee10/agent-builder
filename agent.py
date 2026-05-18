@@ -53,19 +53,10 @@ agent = create_openai_tools_agent(agent_llm, tools, prompt)
 executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
 
-def run_agent(user_prompt: str) -> str:
-    result = executor.invoke({"input": user_prompt})
-    return result["output"]
-
-
-def parse_agent_output(raw: str) -> str:
-    """
-    Assembles the final post from the agent's structured output.
-    Omits the sources block if there are no sources.
-    """
-    content   = ""
-    hashtags  = ""
-    sources   = ""
+def parse_agent_output(raw: str) -> dict:
+    content  = ""
+    hashtags = ""
+    sources  = ""
 
     current_section = None
     for line in raw.splitlines():
@@ -77,11 +68,11 @@ def parse_agent_output(raw: str) -> str:
             current_section = "sources"
         else:
             if current_section == "content":
-                content += line + "\n"
+                content  += line + "\n"
             elif current_section == "hashtags":
                 hashtags += line + "\n"
             elif current_section == "sources":
-                sources += line + "\n"
+                sources  += line + "\n"
 
     content  = content.strip()
     hashtags = hashtags.strip()
@@ -91,4 +82,14 @@ def parse_agent_output(raw: str) -> str:
     if sources and sources.lower() != "none":
         parts.append(f"📰 Sources:\n{sources}")
 
-    return "\n\n".join(p for p in parts if p)
+    return {
+        "content":   content,
+        "hashtags":  hashtags,
+        "sources":   sources if sources.lower() != "none" else "",
+        "full_post": "\n\n".join(p for p in parts if p),
+    }
+
+
+def run_agent(user_prompt: str) -> dict:
+    result = executor.invoke({"input": user_prompt})
+    return parse_agent_output(result["output"])
