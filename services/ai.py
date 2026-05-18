@@ -1,29 +1,42 @@
-import os
-from openai import OpenAI
-from dotenv import load_dotenv
+from langchain_core.messages import SystemMessage, HumanMessage
+from services.llm import llm
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-#1b
-def generate_content(user_prompt: str) -> str:
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a social media copywriter. Writean engaging marketing post under 100 words."},
-            {"role": "user", "content": user_prompt}
-        ]
-    )
-    return response.choices[0].message.content.strip()
+def generate_content(user_prompt: str, news_context: str = "", trends_context: str = "") -> str:
+    context_blocks = []
+    if news_context:
+        context_blocks.append(f"Recent news:\n{news_context}")
+    if trends_context:
+        context_blocks.append(f"Current trends:\n{trends_context}")
 
-#1d
+    if context_blocks:
+        system = (
+            "You are a social media copywriter. "
+            "Write an engaging marketing post under 200 words. "
+            "Reference real facts from the context naturally. "
+            "Do not invent statistics. No hashtags."
+        )
+        user_message = f"Topic: {user_prompt}\n\n" + "\n\n".join(context_blocks)
+    else:
+        system       = "You are a social media copywriter. Write an engaging marketing post under 200 words. No hashtags."
+        user_message = user_prompt
+
+    response = llm.invoke([
+        SystemMessage(content=system),
+        HumanMessage(content=user_message),
+    ])
+    return response.text.strip()
+
+
 def generate_hashtags(user_prompt: str) -> list[str]:
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "Generate relevant hashtags for a social media post. Consider industry, niche, brand type, and region if mentioned. These hashtags will guide you write the post.Return ONLY hashtags, one per line, minimum 3, maximum 7. Each must start with #."},
-            {"role": "user", "content": f"Generate hashtags for: {user_prompt}"}
-        ]
-    )
-    raw = response.choices[0].message.content.strip()
+    response = llm.invoke([
+        SystemMessage(content=(
+            "Generate relevant hashtags for a social media post. "
+            "Consider industry, niche, brand type, and region if mentioned. "
+            "Return ONLY hashtags, one per line, minimum 3, maximum 8. "
+            "Each must start with #."
+        )),
+        HumanMessage(content=f"Generate hashtags for: {user_prompt}"),
+    ])
+    raw = response.text.strip()
     return [line.strip() for line in raw.splitlines() if line.strip().startswith("#")]
