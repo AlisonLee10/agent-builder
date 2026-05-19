@@ -76,3 +76,14 @@ def post_to_discord_tool(content: str) -> str:
     """
     success = post_to_discord(content)
     return "O Posted to Discord successfully." if success else "X Failed to post to Discord."
+
+
+@tool
+def brand_context_tool(query: str) -> str:
+    """
+    Retrieve brand guidelines, tone of voice, approved claims,
+    forbidden phrases, and product information from the company knowledge base. 
+    Always call this FIRST before generating any content.
+    """
+    from services.rag import retrieve_brand_context
+    return retrieve_brand_context(query)

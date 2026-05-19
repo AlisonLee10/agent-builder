@@ -1,65 +1,109 @@
-from agent           import run_agent
-from services.discord import post_to_discord
-from services.storage import save_campaign
-from services.verify  import run_verification
+from agent                         import run_agent
+from services.discord              import post_to_discord
+from services.storage              import save_campaign
+from services.verify               import run_verification
+from services.prompt_validation    import validate_user_prompt
+def _sources_for_save(output: dict, articles: list[dict]) -> list[str]:
+    if articles:
+        return [
+            f"- [{a['title']}]({a['url']})"
+            for a in articles
+            if a.get("title") and a.get("url")
+        ]
+    raw = output.get("sources", "").strip()
+    if not raw:
+        return []
+    return [line.strip() for line in raw.splitlines() if line.strip()]
 
-print("\n=== Marketing Agent ===")
-user_prompt = input("What do you want to post about? ").strip()
 
-if not user_prompt:
-    print("No input. Exiting.")
-    exit()
+def print_header():
+    print("\n" + "="*50)
+    print("       Marketing Agent — AI Powered")
+    print("="*50)
 
-# Agent generates content
-print("\nAgent is working...\n")
-output = run_agent(user_prompt)
 
-# Verification loop (LangGraph)
-print("\nVerifying content...\n")
-verification = run_verification(output["content"])
+def run_campaign():
+    user_prompt = input("\nWhat do you want to post about?\n→ ").strip()
 
-verdict = verification["verdict"]
-icon    = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
-print(f"{icon} Verdict: {verdict.upper()}")
-print(f"   {verification['summary']}")
+    valid, reason = validate_user_prompt(user_prompt)
+    if not valid:
+        print(f"\n⚠️  {reason}")
+        return
 
-if verification["issues"]:
-    for issue in verification["issues"]:
-        print(f"   · {issue}")
+    print("\n[1/3] Agent is researching and writing...")
+    output = run_agent(user_prompt)
+    if output.get("rejected"):
+        print("\n⚠️  Agent could not produce content — input is not a valid marketing topic.")
+        return
 
-# If content was revised, update the full post
-if verification["content"] != output["content"]:
-    print("\n  Content was revised to fix issues.")
-    output["content"]   = verification["content"]
-    parts               = [output["content"], output["hashtags"]]
-    if output["sources"]:
-        parts.append(f"📰 Sources:\n{output['sources']}")
-    output["full_post"] = "\n\n".join(p for p in parts if p)
+    hashtags_list = [
+        h.strip() for h in output["hashtags"].split()
+        if h.strip().startswith("#")
+    ]
+    articles = output["articles"]
+    sources  = _sources_for_save(output, articles)
+    print(f"      Done. ({len(articles)} articles fetched)" if articles else "      Done.")
 
-# Hard stop if rejected
-if verdict == "rejected":
-    print("\n❌ Content rejected — not safe to post.")
-    saved = save_campaign(user_prompt, output["full_post"], [], status="denied")
-    print(f"Saved as denied → {saved}")
-    exit()
+    print("\n[2/3] Verifying content...")
+    verification = run_verification(output["content"], user_prompt=user_prompt)
 
-# Show draft
-print("\n" + "="*50)
-print("DRAFT — Please review before posting:")
-print("="*50)
-print(output["full_post"])
-print("="*50)
+    verdict = verification["verdict"]
+    icon    = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
+    print(f"      {icon}  {verdict.upper()} — {verification['summary']}")
 
-# Human approval
-approval = input("\nApprove and post to Discord? (y/n): ").strip().lower()
+    if verification["revision_count"] > 0:
+        print(f"      Revised {verification['revision_count']} time(s) to fix issues.")
 
-if approval == "y":
-    success = post_to_discord(output["full_post"])
-    if success:
-        saved = save_campaign(user_prompt, output["full_post"], [], status="posted")
-        print(f"\n✅ Posted and saved → {saved}")
+    if verification["content"] != output["content"]:
+        output["content"]   = verification["content"]
+        parts               = [output["content"], output["hashtags"]]
+        if output["sources"]:
+            parts.append(f"📰 Sources:\n{output['sources']}")
+        output["full_post"] = "\n\n".join(p for p in parts if p)
+
+    if verdict == "rejected":
+        print("\n❌ Content rejected — not safe to post.")
+        saved = save_campaign(
+            user_prompt, output["content"], hashtags_list,
+            status="denied", sources=sources, articles=articles,
+            full_post=output["full_post"],
+        )
+        print(f"   Saved as denied → {saved}")
+        return
+
+    print("\n[3/3] Review your draft:\n")
+    print("─" * 50)
+    print(output["full_post"])
+    print("─" * 50)
+
+    approval = input("\nApprove and post to Discord? (y/n): ").strip().lower()
+
+    if approval == "y":
+        success = post_to_discord(output["full_post"])
+        if success:
+            saved = save_campaign(
+                user_prompt, output["content"], hashtags_list,
+                status="posted", sources=sources, articles=articles,
+                full_post=output["full_post"],
+            )
+            print(f"\n✅ Posted and saved → {saved}")
+        else:
+            print("\n❌ Discord post failed.")
     else:
-        print("\n❌ Discord post failed.")
-else:
-    saved = save_campaign(user_prompt, output["full_post"], [], status="denied")
-    print(f"\n🚫 Not posted. Saved → {saved}")
+        saved = save_campaign(
+            user_prompt, output["content"], hashtags_list,
+            status="denied", sources=sources, articles=articles,
+            full_post=output["full_post"],
+        )
+        print(f"\n🚫 Not posted. Saved → {saved}")
+
+
+if __name__ == "__main__":
+    print_header()
+
+    while True:
+        run_campaign()
+        again = input("\nRun another campaign? (y/n): ").strip().lower()
+        if again != "y":
+            print("\nGoodbye!\n")
+            break

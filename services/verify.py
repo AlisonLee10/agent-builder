@@ -16,6 +16,7 @@ verifier_llm = ChatOpenAI(
 # ── State ──────────────────────────────────────────────────────
 class VerificationState(TypedDict):
     content:        str
+    user_prompt:    str
     verdict:        str
     issues:         list[str]
     summary:        str
@@ -26,12 +27,18 @@ class VerificationState(TypedDict):
 # ── Nodes ──────────────────────────────────────────────────────
 def verify_node(state: VerificationState) -> dict:
     response = verifier_llm.invoke([
-        SystemMessage(content="""You are a content safety reviewer.
-Evaluate the social media post for:
+        SystemMessage(content="""You are a content safety and relevance reviewer.
+
+First, check whether the ORIGINAL USER REQUEST is a legitimate marketing topic.
+Reject if the request is gibberish, keyboard smash, symbols only, vague non-topics
+("post smth", "im tired"), unrelated chat, or not asking to promote something specific.
+
+Then evaluate the GENERATED POST for:
 - Harmful, offensive, or inappropriate content
 - False or unverified statistics
 - Misleading claims
 - Overly aggressive or spammy language
+- Generic filler content that ignores a nonsense or irrelevant prompt
 
 Reply ONLY with valid JSON, no markdown:
 {
@@ -40,8 +47,12 @@ Reply ONLY with valid JSON, no markdown:
   "summary": "one sentence explanation"
 }
 
-If the content is clean, return "approved" with an empty issues list."""),
-        HumanMessage(content=f"Review this post:\n\n{state['content']}"),
+If the user request is not a valid marketing topic, verdict must be "rejected".
+If the content is clean and matches a valid request, return "approved" with empty issues."""),
+        HumanMessage(content=(
+            f"Original user request:\n{state['user_prompt']}\n\n"
+            f"Generated post:\n{state['content']}"
+        )),
     ])
 
     raw = response.text.strip().replace("```json", "").replace("```", "")
@@ -117,9 +128,14 @@ def build_verification_graph():
 verification_graph = build_verification_graph()
 
 
-def run_verification(content: str, max_revisions: int = 3) -> dict:
+def run_verification(
+    content: str,
+    user_prompt: str = "",
+    max_revisions: int = 3,
+) -> dict:
     return verification_graph.invoke({
         "content":        content,
+        "user_prompt":    user_prompt,
         "verdict":        "",
         "issues":         [],
         "summary":        "",
