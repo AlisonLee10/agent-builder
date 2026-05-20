@@ -1,4 +1,5 @@
 import json
+from locale import textdomain
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.documents import Document
@@ -32,11 +33,12 @@ def _load_all_campaigns() -> list[dict]:
 
 
 def _to_document(campaign: dict) -> Document:
-    """Convert a campaign dict into an embeddable LangChain Document."""
-    user_prompt = campaign.get("user_prompt", "")
-    content     = campaign.get("content", campaign.get("full_post", ""))[:300]
-    status      = campaign.get("status", "unknown")
-    hashtags    = " ".join(campaign.get("hashtags", []))
+    user_prompt   = campaign.get("user_prompt", "")
+    content       = campaign.get("content", campaign.get("full_post", ""))[:300]
+    status        = campaign.get("status", "unknown")
+    hashtags      = " ".join(campaign.get("hashtags", []))
+    issues        = campaign.get("issues", [])
+    denial_reason = campaign.get("denial_reason", "")
 
     text = (
         f"User wanted: {user_prompt}\n"
@@ -45,14 +47,23 @@ def _to_document(campaign: dict) -> Document:
         f"Status: {status}"
     )
 
+    if status == "denied" and (issues or denial_reason):
+        issues_str = "; ".join(issues) if isinstance(issues, list) else str(issues)
+        if issues_str:
+            text += f"\nIssues found: {issues_str}"
+        if denial_reason:
+            text += f"\nDenial reason: {denial_reason}"
+
     return Document(
         page_content = text,
         metadata     = {
-            "status":      status,
-            "timestamp":   campaign.get("timestamp", ""),
-            "filename":    campaign.get("_filename", ""),
-            "user_prompt": user_prompt,
-            "hashtags":    ", ".join(campaign.get("hashtags", [])),
+            "status":        status,
+            "timestamp":     campaign.get("timestamp", ""),
+            "filename":      campaign.get("_filename", ""),
+            "user_prompt":   user_prompt,
+            "hashtags":      ", ".join(campaign.get("hashtags", [])),
+            "issues":        "; ".join(issues) if isinstance(issues, list) else "",
+            "denial_reason": denial_reason,
         },
     )
 
@@ -164,7 +175,7 @@ def search_campaigns(
 
     return results[:k]
 
-
+# 3d
 def get_few_shot_examples(query: str, k: int = 2) -> str:
     """
     Find k approved campaigns similar to this query and format
@@ -202,4 +213,74 @@ def get_few_shot_examples(query: str, k: int = 2) -> str:
         lines.append(f"Hashtags : {meta.get('hashtags', '')}")
 
     lines.append("\n=== End of examples ===")
+    return "\n".join(lines)
+
+def get_denied_examples(content: str, k: int = 2) -> str:
+    """
+    Search for similar denied campaigns and return their failure
+    patterns as a warning block for the verifier.
+    Searches by content similarity — finds what looked similar and failed.
+    """
+    index = load_campaign_index()
+    if index is None:
+        return ""
+
+    results_with_scores = index.similarity_search_with_score(content, k=k * 3)
+
+    # Wider threshold than few-shot (1.4) — even loose matches are useful warnings
+    filtered = [
+        doc for doc, score in results_with_scores
+        if score < 1.4 and doc.metadata.get("status") == "denied"
+        and (doc.metadata.get("issues") or doc.metadata.get("denial_reason"))
+    ][:k]
+
+    if not filtered:
+        return ""
+
+    lines = ["=== Similar past campaigns that were denied — watch for these issues ==="]
+    for i, doc in enumerate(filtered, 1):
+        meta   = doc.metadata
+        issues = meta.get("issues", "")
+        reason = meta.get("denial_reason", "")
+        lines.append(f"\n[Past denial {i}]")
+        if issues:
+            lines.append(f"Issues found : {issues}")
+        if reason:
+            lines.append(f"Denial reason: {reason}")
+    lines.append("\n=== Be especially vigilant about the patterns above ===")
+
+    return "\n".join(lines)
+
+
+def get_approved_examples_for_verification(content: str, k: int = 2) -> str:
+    """
+    Find similar approved campaigns as a quality references for the verifier.
+    Searches by content similarity - finds what looked similar and passed.
+    """
+    index = load_campaign_index()
+    if index is None:
+        return ""
+
+    results_with_scores = index.similarity_search_with_score(content, k=k * 3)
+
+    filtered = [
+        doc for doc, score in results_with_scores
+        if score < 1.2 and doc.metadata.get("status") == "posted"
+    ][:k]
+
+    if not filtered:
+        return ""
+
+    lines = ["=== Similar approved content — use as quality reference ==="]
+    for i, doc in enumerate(filtered, 1):
+        content_line = ""
+        for line in doc.page_content.splitlines():
+            if line.startswith("Content:"):
+                content_line = line[len("Content:"):].strip()
+                break
+        lines.append(f"\n[Approved example {i}]")
+        lines.append(f"Content  : {content_line[:250]}")
+        lines.append(f"Hashtags : {doc.metadata.get('hashtags', '')}")
+    lines.append("\n=== End of approved references ===")
+
     return "\n".join(lines)
