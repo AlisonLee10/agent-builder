@@ -1,6 +1,22 @@
+import os
+from langchain_openai        import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from services.llm import llm
 
+# 3d
+_few_shot_examples: str = ""
+
+def set_few_shot_examples(examples: str) -> None:
+    global _few_shot_examples
+    _few_shot_examples = examples
+
+def clear_few_shot_examples() -> None:
+    global _few_shot_examples
+    _few_shot_examples = ""
 
 def generate_content(user_prompt: str, news_context: str = "", trends_context: str = "") -> str:
     context_blocks = []
@@ -13,7 +29,8 @@ def generate_content(user_prompt: str, news_context: str = "", trends_context: s
         system = (
             "You are a social media copywriter. "
             "Write an engaging marketing post under 200 words. "
-            "Reference real facts from the context naturally. "
+            "If style examples are provided, match their tone and quality. "
+            "If news or trend context is provided, reference real facts naturally. "
             "Do not invent statistics. No hashtags."
         )
         user_message = f"Topic: {user_prompt}\n\n" + "\n\n".join(context_blocks)
