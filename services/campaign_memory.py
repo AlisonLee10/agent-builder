@@ -1,5 +1,4 @@
 import json
-from locale import textdomain
 from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.documents import Document

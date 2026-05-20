@@ -39,7 +39,7 @@ def run_campaign():
     # Rejected by verifier / reviser
     if verdict == "rejected":
         print("\n❌ Content rejected — not safe to post.")
-        print("   Saving campaign...", end="", flush=True)
+        print(" Saving campaign...", end="", flush=True)
         saved = save_campaign(
             user_prompt,
             output["content"],
@@ -66,11 +66,11 @@ def run_campaign():
 
     # approved  by human
     if approval == "y":
-        print("   Posting to Discord...", end="", flush=True)
+        print(" Posting to Discord...", end="", flush=True)
         success = post_to_discord(output["full_post"])
         if success:
             print(" ✅")
-            print("  Saving campaign...", end="", flush=True)
+            print(" Saving campaign...", end="", flush=True)
             saved = save_campaign(
                 user_prompt,
                 output["full_post"],
@@ -81,10 +81,10 @@ def run_campaign():
                 verdict_info=verification,
             )
             print(" ✅")
-            print(" Updaintg memory index...", end="", flush=True)
+            print("  Updating memory index...", end="", flush=True)
             try:
-                add_campaign_to_index(saved)    # ← update memory
-                print(f"\n✅ Posted and saved → {saved}")
+                add_campaign_to_index(saved)
+                print(" ✅")
             except Exception as e:
                 print(f" ⚠️  ({e})")
             print(f"\n✅ Posted and saved → {saved}")
@@ -93,7 +93,7 @@ def run_campaign():
             print("\n❌ Discord post failed.")
     # denied by human
     else:
-        print("  Saving campaign...", end="", flush=True)
+        print(" Saving campaign...", end="", flush=True)
         saved = save_campaign(
             user_prompt,
             output["content"],
