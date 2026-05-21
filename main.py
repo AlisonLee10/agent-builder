@@ -12,6 +12,7 @@ def run_campaign():
         return
 
     print("\n[1/3] Agent is researching and writing...")
+    # HERE 여기!!!!!!!!
     output        = run_agent(user_prompt)
     hashtags_list = [
         h.strip() for h in output["hashtags"].split()
@@ -21,6 +22,7 @@ def run_campaign():
     print(f"      Done. ({len(articles)} articles fetched)" if articles else "      Done.")
 
     print("\n[2/3] Verifying content...")
+    # HERE 여기!!!!!!!
     verification = run_verification(output["content"])
     verdict      = verification["verdict"]
     icon         = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
