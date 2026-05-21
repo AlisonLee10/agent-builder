@@ -6,6 +6,7 @@ from services.tool_selector import select_tools
 from services.campaign_memory import get_few_shot_examples
 from services.ai              import set_few_shot_examples, clear_few_shot_examples
 from services.progress        import show_progress
+from services.agent_trace     import record_agent_scratchpad_to_langsmith
 
 load_dotenv()
 
@@ -38,6 +39,7 @@ Return the final post in exactly this format — no extra commentary:
 <source links or None>
 """),
     ("human", "{input}"),
+    # The agent_scratchpad is where LangChain stores the growing list of tool calls and results between loop iterations.
     MessagesPlaceholder(variable_name="agent_scratchpad"),
 ])
 
@@ -113,6 +115,13 @@ def run_agent(user_prompt: str) -> dict:
 
     with show_progress("      Generating content"):
         result = executor.invoke({"input": user_prompt})
+
+    record_agent_scratchpad_to_langsmith(
+        user_prompt,
+        result.get("intermediate_steps", []),
+        result.get("output"),
+    )
+
     output = parse_agent_output(result["output"])
     output["articles"] = _extract_articles_from_steps(
         result.get("intermediate_steps",[])
