@@ -1,0 +1,54 @@
+{
+  "timestamp": "2026-05-21T10:49:04.283922",
+  "status": "posted",
+  "user_prompt": "Collect some relevant news articles about Agentic AI, and write a marketing post about our app, FlowAII",
+  "content": "Unlock your potential with FlowAI, the ultimate productivity app designed to give you back those precious hours in your day. Imagine saving 2 hours daily through intelligent automation that learns from your unique work habits. FlowAI seamlessly integrates with over 50 tools you already use, making your workflow smoother and more efficient.\n\nIn a world where technology is rapidly evolving, the recent buzz around Agentic AI underscores the importance of smart tools that adapt to our needs. FlowAI embodies this evolution, empowering you to focus on what truly matters while we handle the repetitive tasks.\n\nStarting at just $29/month, FlowAI is the investment you need to transform your work life. Don’t let your to-do list control you—take charge with FlowAI and watch your productivity soar. Are you ready to redefine what you can achieve in a day? Download FlowAI today and start your journey towards smarter work!\n\n#FlowAII #AIApp #ProductivityTools #SmartSolutions #TechInnovation #DigitalTransformation #WorkflowAutomation #BusinessEfficiency\n\n📰 Sources:\n• [Google I/O 2026: It's AI all the way down](https://www.redcircle.com/shows/533369fb-9ed1-4006-8b96-dd611195e62b/ep/4bf95e7a-1f9e-4194-8a8d-1bb65877a180)\n• [Accelerating AI impact in Singapore](https://blog.google/company-news/inside-google/around-the-globe/google-asia/singapore-government-partnership/)\n• [Google Flow adds agentic brainstorming, more precise editing tools and sharing features](https://siliconangle.com/2026/05/19/google-flow-adds-agentic-brainstorming-precise-editing-tools-sharing-features/)\n• [Why AI Agents Fail Marketing Teams Today](https://www.aipowerstacks.com/blog/why-ai-agents-fail-marketing-teams-today-mpcl15dj)\n• [tuiml 0.1.4](https://pypi.org/project/tuiml/0.1.4/)",
+  "hashtags": [
+    "#FlowAII",
+    "#AIApp",
+    "#ProductivityTools",
+    "#SmartSolutions",
+    "#TechInnovation",
+    "#DigitalTransformation",
+    "#WorkflowAutomation",
+    "#BusinessEfficiency"
+  ],
+  "sources": [
+    "• [Google I/O 2026: It's AI all the way down](https://www.redcircle.com/shows/533369fb-9ed1-4006-8b96-dd611195e62b/ep/4bf95e7a-1f9e-4194-8a8d-1bb65877a180)",
+    "• [Accelerating AI impact in Singapore](https://blog.google/company-news/inside-google/around-the-globe/google-asia/singapore-government-partnership/)",
+    "• [Google Flow adds agentic brainstorming, more precise editing tools and sharing features](https://siliconangle.com/2026/05/19/google-flow-adds-agentic-brainstorming-precise-editing-tools-sharing-features/)",
+    "• [Why AI Agents Fail Marketing Teams Today](https://www.aipowerstacks.com/blog/why-ai-agents-fail-marketing-teams-today-mpcl15dj)",
+    "• [tuiml 0.1.4](https://pypi.org/project/tuiml/0.1.4/)"
+  ],
+  "articles": [
+    {
+      "title": "Google I/O 2026: It's AI all the way down",
+      "description": "In this bonus episode, Devindra and Executive Editor Cherlynn Low break down all of the major news from Google's I/O 2026 developer conference. And yes, you guessed it, it's pretty much all about AI. We dive into the new Gemini Omni model, the massive AI inte…",
+      "url": "https://www.redcircle.com/shows/533369fb-9ed1-4006-8b96-dd611195e62b/ep/4bf95e7a-1f9e-4194-8a8d-1bb65877a180"
+    },
+    {
+      "title": "Accelerating AI impact in Singapore",
+      "description": "Today, we’re deepening our AI investments in Singapore through a new partnership.",
+      "url": "https://blog.google/company-news/inside-google/around-the-globe/google-asia/singapore-government-partnership/"
+    },
+    {
+      "title": "Google Flow adds agentic brainstorming, more precise editing tools and sharing features",
+      "description": "Google Flow was one of the headline announcements at last year’s I/O event, and it got more attention during this year’s edition today. Flow is a creative studio that’s powered by various artificial intelligence models, which users can prompt to create, edit …",
+      "url": "https://siliconangle.com/2026/05/19/google-flow-adds-agentic-brainstorming-precise-editing-tools-sharing-features/"
+    },
+    {
+      "title": "Why AI Agents Fail Marketing Teams Today",
+      "description": "Why AI agents fail marketing teams today: They promise automation, but struggle with cost, setup, and security. My honest take on the current state and what to expect.",
+      "url": "https://www.aipowerstacks.com/blog/why-ai-agents-fail-marketing-teams-today-mpcl15dj"
+    },
+    {
+      "title": "tuiml 0.1.4",
+      "description": "An open-source agentic ML ecosystem with a clean Python API, MCP server for AI agents, and a community Hub for sharing algorithms, datasets, and models",
+      "url": "https://pypi.org/project/tuiml/0.1.4/"
+    }
+  ],
+  "verdict": "approved",
+  "issues": [],
+  "denial_reason": "The post is promotional and does not contain harmful, offensive, or misleading content.",
+  "full_post": "Unlock your potential with FlowAI, the ultimate productivity app designed to give you back those precious hours in your day. Imagine saving 2 hours daily through intelligent automation that learns from your unique work habits. FlowAI seamlessly integrates with over 50 tools you already use, making your workflow smoother and more efficient.\n\nIn a world where technology is rapidly evolving, the recent buzz around Agentic AI underscores the importance of smart tools that adapt to our needs. FlowAI embodies this evolution, empowering you to focus on what truly matters while we handle the repetitive tasks.\n\nStarting at just $29/month, FlowAI is the investment you need to transform your work life. Don’t let your to-do list control you—take charge with FlowAI and watch your productivity soar. Are you ready to redefine what you can achieve in a day? Download FlowAI today and start your journey towards smarter work!\n\n#FlowAII #AIApp #ProductivityTools #SmartSolutions #TechInnovation #DigitalTransformation #WorkflowAutomation #BusinessEfficiency\n\n📰 Sources:\n• [Google I/O 2026: It's AI all the way down](https://www.redcircle.com/shows/533369fb-9ed1-4006-8b96-dd611195e62b/ep/4bf95e7a-1f9e-4194-8a8d-1bb65877a180)\n• [Accelerating AI impact in Singapore](https://blog.google/company-news/inside-google/around-the-globe/google-asia/singapore-government-partnership/)\n• [Google Flow adds agentic brainstorming, more precise editing tools and sharing features](https://siliconangle.com/2026/05/19/google-flow-adds-agentic-brainstorming-precise-editing-tools-sharing-features/)\n• [Why AI Agents Fail Marketing Teams Today](https://www.aipowerstacks.com/blog/why-ai-agents-fail-marketing-teams-today-mpcl15dj)\n• [tuiml 0.1.4](https://pypi.org/project/tuiml/0.1.4/)"
+}

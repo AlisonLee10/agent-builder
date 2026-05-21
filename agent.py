@@ -5,6 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from services.tool_selector import select_tools
 from services.campaign_memory import get_few_shot_examples
 from services.ai              import set_few_shot_examples, clear_few_shot_examples
+from services.progress        import show_progress
 
 load_dotenv()
 
@@ -110,7 +111,8 @@ def run_agent(user_prompt: str) -> dict:
         return_intermediate_steps = True,
     )
 
-    result = executor.invoke({"input": user_prompt})
+    with show_progress("      Generating content"):
+        result = executor.invoke({"input": user_prompt})
     output = parse_agent_output(result["output"])
     output["articles"] = _extract_articles_from_steps(
         result.get("intermediate_steps",[])

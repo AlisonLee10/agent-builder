@@ -141,16 +141,19 @@ def run_verification(content: str, max_revisions: int = 3) -> dict:
     else:
         print("  [Memory] No refernece campaigns yet - using rules only")
 
-    return verification_graph.invoke({
-        "content": content,
-        "verdict": "",
-        "issues": [],
-        "summary": "",
-        "revision_count": 0,
-        "max_revisions": max_revisions,
-        "denied_examples": denied_ex,
-        "approved_examples": approved_ex,
-    })
+    from services.progress import show_progress
+
+    with show_progress("      Verifying content"):
+        return verification_graph.invoke({
+            "content": content,
+            "verdict": "",
+            "issues": [],
+            "summary": "",
+            "revision_count": 0,
+            "max_revisions": max_revisions,
+            "denied_examples": denied_ex,
+            "approved_examples": approved_ex,
+        })
 
 """
 def run_verification(content: str, max_revisions: int = 3) -> dict:
