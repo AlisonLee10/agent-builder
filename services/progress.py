@@ -2,7 +2,7 @@ import sys
 import threading
 from contextlib import contextmanager
 
-
+# progress bar
 @contextmanager
 def show_progress(message: str = "Working", interval: float = 0.4):
     """Show animated dots on one terminal line while a long task runs."""

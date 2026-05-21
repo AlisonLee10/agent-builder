@@ -9,12 +9,7 @@ from services.campaign_memory import get_denied_examples
 
 load_dotenv()
 
-verifier_llm = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0,
-)
-
-
+from services.llm import llm
 
 class VerificationState(TypedDict):
     content:         str
@@ -35,7 +30,7 @@ def verify_node(state: VerificationState) -> dict:
             f"\n\n{state['denied_examples']}\n"
         )
 
-    response = verifier_llm.invoke([
+    response = llm.invoke([
         SystemMessage(content=(
             "You are a content safety reviewer."
             f"{denied_section}"
@@ -74,7 +69,7 @@ def verify_node(state: VerificationState) -> dict:
 def revise_node(state: VerificationState) -> dict:
     issues_text = "\n".join(f"- {i}" for i in state["issues"])
 
-    response = verifier_llm.invoke([
+    response = llm.invoke([
         SystemMessage(content=(
             "You are a copy editor. Fix the issues in the post "
             "while keeping the same message, tone, and length. "

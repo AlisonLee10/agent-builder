@@ -90,7 +90,7 @@ def parse_agent_output(raw: str) -> dict:
 
 def run_agent(user_prompt: str) -> dict:
 
-    # Retrieve few shot examples from memory (#3d)
+    # retrieve few shot examples from memory (#3d)
     examples = get_few_shot_examples(user_prompt, k = 2)
     set_few_shot_examples(examples)
 
