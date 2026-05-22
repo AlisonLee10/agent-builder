@@ -3,6 +3,7 @@ from services.discord           import post_to_discord
 from services.storage           import save_campaign, sources_to_list
 from services.verify            import run_verification
 from services.campaign_memory   import load_or_build_index, add_campaign_to_index
+from services.prompt_validation import validate_user_prompt
 
 
 def run_campaign():
@@ -11,8 +12,16 @@ def run_campaign():
         print("No input provided.")
         return
 
+    print("\n[0/3] Analyzing your prompt...")
+    valid, reason = validate_user_prompt(user_prompt)
+    if not valid:
+        print(f"      ❌ Rejected — {reason}")
+        print("      (No content generation — fix your prompt and try again.)")
+        return
+
+    print("      ✅ Prompt accepted")
+
     print("\n[1/3] Agent is researching and writing...")
-    # HERE 여기!!!!!!!!
     output        = run_agent(user_prompt)
     hashtags_list = [
         h.strip() for h in output["hashtags"].split()
@@ -22,7 +31,6 @@ def run_campaign():
     print(f"      Done. ({len(articles)} articles fetched)" if articles else "      Done.")
 
     print("\n[2/3] Verifying content...")
-    # HERE 여기!!!!!!!
     verification = run_verification(output["content"])
     verdict      = verification["verdict"]
     icon         = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
