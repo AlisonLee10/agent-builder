@@ -6,8 +6,11 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from services.campaign_memory import get_denied_examples
+from services.logger import get_logger
 
 load_dotenv()
+
+log = get_logger(__name__)
 
 from services.llm import llm
 
@@ -132,9 +135,9 @@ def run_verification(content: str, max_revisions: int = 3) -> dict:
         found.append("denied referneces")
 
     if found:
-        print(f"  [Memory] Verifier calibrated with: {' + '.join(found)}")
+        log.debug(f"Verifier calibrated with: {' + '.join(found)}")
     else:
-        print("  [Memory] No refernece campaigns yet - using rules only")
+        log.debug("No reference campaigns yet — verifier using rules only")
 
     from services.progress import show_progress
 

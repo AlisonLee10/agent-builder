@@ -1,11 +1,13 @@
 import os
-from langchain_openai        import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from dotenv import load_dotenv
 
+from services.llm import llm
+from services.logger import get_logger
+
 load_dotenv()
 
-from services.llm import llm
+log = get_logger(__name__)
 
 # 3d
 _few_shot_examples: str = ""
@@ -19,6 +21,7 @@ def clear_few_shot_examples() -> None:
     _few_shot_examples = ""
 
 def generate_content(user_prompt: str, news_context: str = "", trends_context: str = "") -> str:
+    log.debug(f"generate_content — prompt length {len(user_prompt)}")
     context_blocks = []
     if news_context:
         context_blocks.append(f"Recent news:\n{news_context}")
@@ -46,6 +49,7 @@ def generate_content(user_prompt: str, news_context: str = "", trends_context: s
 
 
 def generate_hashtags(user_prompt: str) -> list[str]:
+    log.debug(f"generate_hashtags — topic length {len(user_prompt)}")
     response = llm.invoke([
         SystemMessage(content=(
             "Generate relevant hashtags for a social media post. "

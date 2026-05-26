@@ -1,6 +1,9 @@
 import os
 import requests
 from dotenv import load_dotenv
+from services.logger import get_logger
+
+log = get_logger(__name__)
 
 load_dotenv()
 
@@ -10,6 +13,7 @@ NEWS_API_URL = "https://newsapi.org/v2/everything"
 _last_fetched_articles: list[dict] = []
 
 def fetch_news(query: str, max_articles: int = 5) -> list[dict]:
+    
     global _last_fetched_articles
     params = {
         "q":        query,
@@ -19,10 +23,11 @@ def fetch_news(query: str, max_articles: int = 5) -> list[dict]:
         "apiKey":   NEWS_API_KEY,
     }
 
+    log.debug(f"NewsAPI request: query='{query}', max={max_articles}")
     response = requests.get(NEWS_API_URL, params=params)
 
     if response.status_code != 200:
-        print(f"  [NewsAPI] Error {response.status_code}: {response.text}")
+        log.error(f"NewsAPI error {response.status_code}: {response.text}")
         _last_fetched_articles = []
         return []
 
@@ -36,7 +41,8 @@ def fetch_news(query: str, max_articles: int = 5) -> list[dict]:
         for a in articles
         if a.get("title") and a.get("description")
     ]
-
+    
+    log.debug(f"NewsAPI returned {len(result)} articles")
     _last_fetched_articles = result
     return result
 

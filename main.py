@@ -4,40 +4,46 @@ from services.storage           import save_campaign, sources_to_list
 from services.verify            import run_verification
 from services.campaign_memory   import load_or_build_index, add_campaign_to_index
 from services.prompt_validation import validate_user_prompt
+from services.logger            import get_logger
+
+log = get_logger(__name__)
 
 
 def run_campaign():
     user_prompt = input("\nWhat do you want to post about?\n→ ").strip()
     if not user_prompt:
-        print("No input provided.")
+        log.warning("No input provided")
         return
 
-    print("\n[0/3] Analyzing your prompt...")
+    log.debug("[0/3] Analyzing your prompt...")
     valid, reason = validate_user_prompt(user_prompt)
     if not valid:
-        print(f"      ❌ Rejected — {reason}")
-        print("      (No content generation — fix your prompt and try again.)")
+        log.warning(f"Prompt rejected — {reason}")
+        log.debug("No content generation — fix your prompt and try again")
         return
 
-    print("      ✅ Prompt accepted")
+    log.debug("Prompt accepted")
 
-    print("\n[1/3] Agent is researching and writing...")
+    log.debug("[1/3] Agent is researching and writing...")
     output        = run_agent(user_prompt)
     hashtags_list = [
         h.strip() for h in output["hashtags"].split()
         if h.strip().startswith("#")
     ]
     articles = output["articles"]
-    print(f"      Done. ({len(articles)} articles fetched)" if articles else "      Done.")
+    if articles:
+        log.debug(f"Agent done — {len(articles)} articles fetched")
+    else:
+        log.debug("Agent done")
 
-    print("\n[2/3] Verifying content...")
+    log.debug("[2/3] Verifying content...")
     verification = run_verification(output["content"])
     verdict      = verification["verdict"]
     icon         = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
-    print(f"      {icon}  {verdict.upper()} — {verification['summary']}")
+    log.debug(f"{icon} {verdict.upper()} — {verification['summary']}")
 
     if verification["revision_count"] > 0:
-        print(f"      Revised {verification['revision_count']} time(s)")
+        log.debug(f"Revised {verification['revision_count']} time(s)")
 
     if verification["content"] != output["content"]:
         output["content"]   = verification["content"]
@@ -46,10 +52,9 @@ def run_campaign():
             parts.append(f"📰 Sources:\n{output['sources']}")
         output["full_post"] = "\n\n".join(p for p in parts if p)
 
-    # Rejected by verifier / reviser
     if verdict == "rejected":
-        print("\n❌ Content rejected — not safe to post.")
-        print(" Saving campaign...", end="", flush=True)
+        log.warning("Content rejected — not safe to post")
+        log.debug("Saving denied campaign...")
         saved = save_campaign(
             user_prompt,
             output["content"],
@@ -57,30 +62,26 @@ def run_campaign():
             status="denied",
             verdict_info = verification,
         )
-        print(" ✅")
-        print("  Updating memory index...", end="", flush=True)
+        log.debug("Updating memory index...")
         try:
             add_campaign_to_index(saved)
-            print(" ✅")
         except Exception as e:
-            print(f" ⚠️  ({e})")
-        print(f"   Saved as denied → {saved}")
+            log.warning(f"Memory index update failed: {e}")
+        log.debug(f"Saved as denied → {saved}")
         return
 
-    print("\n[3/3] Review your draft:\n")
+    log.debug("[3/3] Review your draft:")
     print("─" * 50)
     print(output["full_post"])
     print("─" * 50)
 
     approval = input("\nApprove and post to Discord? (y/n): ").strip().lower()
 
-    # approved  by human
     if approval == "y":
-        print(" Posting to Discord...", end="", flush=True)
+        log.debug("Posting to Discord...")
         success = post_to_discord(output["full_post"])
         if success:
-            print(" ✅")
-            print(" Saving campaign...", end="", flush=True)
+            log.debug("Saving posted campaign...")
             saved = save_campaign(
                 user_prompt,
                 output["full_post"],
@@ -90,20 +91,16 @@ def run_campaign():
                 articles=output.get("articles", []),
                 verdict_info=verification,
             )
-            print(" ✅")
-            print("  Updating memory index...", end="", flush=True)
+            log.debug("Updating memory index...")
             try:
                 add_campaign_to_index(saved)
-                print(" ✅")
             except Exception as e:
-                print(f" ⚠️  ({e})")
-            print(f"\n✅ Posted and saved → {saved}")
+                log.warning(f"Memory index update failed: {e}")
+            log.debug(f"Posted and saved → {saved}")
         else:
-            # verified, but posting failed bc of webhook error
-            print("\n❌ Discord post failed.")
-    # denied by human
+            log.warning("Discord post failed")
     else:
-        print(" Saving campaign...", end="", flush=True)
+        log.debug("Saving user-denied campaign...")
         saved = save_campaign(
             user_prompt,
             output["content"],
@@ -116,27 +113,25 @@ def run_campaign():
                 "summary": "User chose not to post",
             },
         )
-        print(" ✅")
-        print("  Updating memory index...", end="", flush=True)
+        log.debug("Updating memory index...")
         try:
-            add_campaign_to_index(saved) 
-            print(" ✅")
+            add_campaign_to_index(saved)
         except Exception as e:
-            print(f" ⚠️  ({e})")
-        print(f"\n🚫 Not posted. Saved → {saved}")
+            log.warning(f"Memory index update failed: {e}")
+        log.debug(f"Not posted. Saved → {saved}")
 
 
 if __name__ == "__main__":
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("       Marketing Agent — AI Powered")
-    print("="*50)
+    print("=" * 50)
 
-    print("\nInitializing campaign memory...")
+    log.debug("Initializing campaign memory...")
     load_or_build_index()
 
     while True:
         run_campaign()
         again = input("\nRun another campaign? (y/n): ").strip().lower()
         if again != "y":
-            print("\nGoodbye!\n")
+            log.debug("Goodbye")
             break

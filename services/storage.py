@@ -2,6 +2,10 @@ import json
 import os
 from datetime import datetime
 
+from services.logger import get_logger
+
+log = get_logger(__name__)
+
 
 def sources_to_list(sources: str | list[str] | None) -> list[str]:
     """Normalize agent sources (string or list) for JSON storage."""
@@ -46,4 +50,5 @@ def save_campaign(
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
+    log.debug(f"Campaign saved — status={status} → {filename}")
     return filename

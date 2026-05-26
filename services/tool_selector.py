@@ -2,6 +2,7 @@ import json
 
 from langchain_openai          import ChatOpenAI
 from langchain_core.messages   import SystemMessage, HumanMessage
+from services.logger import get_logger
 
 from services.tools import (
     brand_context_tool,
@@ -11,6 +12,8 @@ from services.tools import (
     generate_content_tool,
     generate_hashtags_tool,
 )
+
+log = get_logger(__name__)
 
 try:
     import tiktoken
@@ -79,12 +82,12 @@ def select_tools(prompt: str) -> list:
         all_tokens  = sum(_count_tokens(t.description) for t in _ALL_TOOLS.values())
         used_tokens = sum(_count_tokens(t.description) for t in selected)
         saved       = all_tokens - used_tokens
-        print(f"  [Tools] {len(selected)}/6 · saved {saved} tokens")
+        log.debug(f"Tools {len(selected)}/6 selected · saved {saved} description tokens")
     else:
-        print(f"  [Tools] {len(selected)}/6")
+        log.debug(f"Tools {len(selected)}/6 selected")
 
-    print(f"    ✅ using  : {', '.join(unique)}")
-    print(f"    ⏭️  skipped: {', '.join(not_used) if not_used else 'none'}")
+    log.debug(f"Using: {', '.join(unique)}")
+    log.debug(f"Skipped: {', '.join(not_used) if not_used else 'none'}")
 
     return selected
 
@@ -94,12 +97,12 @@ def _print_tool_report(selected_names: list[str], selected_tools: list) -> None:
     skipped     = [n for n in all_names if n not in selected_names]
     total       = len(all_names)
 
-    print(f"  [Tools] {len(selected_names)}/{total} selected")
-    print(f"      Using:   {', '.join(selected_names)}")
-    print(f"      Skipped: {', '.join(skipped) if skipped else '(none)'}")
+    log.debug(f"Tools {len(selected_names)}/{total} selected")
+    log.debug(f"Using: {', '.join(selected_names)}")
+    log.debug(f"Skipped: {', '.join(skipped) if skipped else '(none)'}")
 
     if TIKTOKEN_AVAILABLE:
         all_tokens  = sum(_count_tokens(t.description) for t in _ALL_TOOLS.values())
         used_tokens = sum(_count_tokens(t.description) for t in selected_tools)
         saved       = all_tokens - used_tokens
-        print(f"      Tokens:  {used_tokens} description tokens used (saved {saved})")
+        log.debug(f"Tool description tokens: {used_tokens} used (saved {saved})")

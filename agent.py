@@ -7,8 +7,11 @@ from services.campaign_memory import get_few_shot_examples
 from services.ai              import set_few_shot_examples, clear_few_shot_examples
 from services.progress        import show_progress
 from services.agent_trace     import record_agent_scratchpad_to_langsmith
+from services.logger          import get_logger
 
 load_dotenv()
+
+log = get_logger(__name__)
 
 agent_llm = ChatOpenAI(
     model="gpt-4o",
@@ -97,9 +100,9 @@ def run_agent(user_prompt: str) -> dict:
     set_few_shot_examples(examples)
 
     if examples:
-        print("   [Memory] Similar approved cammpaigns found - using as style examples")
+        log.debug("Similar approved campaigns found — using as style examples")
     else:
-        print("   [Memory] No similar campaigns yet - writing from scratch")
+        log.debug("No similar campaigns yet — writing from scratch")
 
     # dynamic tool selection
     selected_tools = select_tools(user_prompt)

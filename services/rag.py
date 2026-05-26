@@ -3,8 +3,11 @@ from dotenv import load_dotenv
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_core.documents import Document
+from services.logger import get_logger
 
 load_dotenv()
+
+log = get_logger(__name__)
 
 COMPANY_DATA_PATH = "company_data.json"
 
@@ -86,10 +89,13 @@ def chunk_company_data(data: dict) -> list[Document]:
 
 
 def build_vector_store() -> FAISS:
+    log.debug("Building brand RAG vector store from company_data.json")
     data = load_company_data()
     docs = chunk_company_data(data)
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-    return FAISS.from_documents(docs, embeddings)
+    index = FAISS.from_documents(docs, embeddings)
+    log.debug(f"Brand RAG index ready — {len(docs)} documents")
+    return index
 
 
 # Build once when the module is first imported
@@ -98,6 +104,7 @@ _retriever = _vector_store.as_retriever(search_kwargs={"k": 3})
 
 
 def retrieve_brand_context(query: str) -> str:
+    log.debug(f"retrieve_brand_context — query='{query[:80]}'")
     docs = _retriever.invoke(query)
     if not docs:
         return ""
