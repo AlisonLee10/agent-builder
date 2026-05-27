@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Agent</title>
+  <style>
+    body        { font-family: sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; }
+    h1          { font-size: 22px; margin-bottom: 24px; }
+    h2          { font-size: 17px; margin: 0 0 16px; }
+    label       { font-weight: 600; font-size: 14px; }
+    textarea    { width: 100%; height: 80px; padding: 8px; font-size: 14px;
+                  border: 1px solid #ccc; border-radius: 4px; margin-top: 8px;
+                  box-sizing: border-box; resize: vertical; }
+    button      { padding: 9px 22px; font-size: 14px; cursor: pointer;
+                  border: none; border-radius: 4px; margin-top: 10px; margin-right: 8px; }
+    #run-btn    { background: #2563eb; color: white; }
+    #run-btn:disabled { background: #93c5fd; cursor: not-allowed; }
+    #loading    { color: #6b7280; font-style: italic; margin-top: 16px; display: none; }
+    #result     { margin-top: 28px; display: none; }
+    hr          { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+    .lbl        { font-size: 12px; font-weight: 600; text-transform: uppercase;
+                  letter-spacing: .05em; color: #6b7280; margin-bottom: 4px; }
+    pre         { background: #f8f8f8; border: 1px solid #e5e7eb; border-radius: 6px;
+                  padding: 16px; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
+    .verdict    { font-weight: 700; font-size: 15px; }
+    .approved   { color: #16a34a; }
+    .rejected   { color: #dc2626; }
+    .needs_revision { color: #d97706; }
+    #post-area  { margin-top: 20px; display: none; }
+    #approve-btn { background: #16a34a; color: white; }
+    #deny-btn    { background: #dc2626; color: white; }
+    #status-msg  { margin-top: 12px; font-weight: 600; display: none; }
+
+    /* ── Campaign history ───────────────────────────────────── */
+    #history         { margin-top: 8px; }
+    .campaign-card   { border: 1px solid #e5e7eb; border-radius: 8px;
+                       padding: 14px 16px; margin-bottom: 10px; }
+    .card-top        { display: flex; align-items: flex-start;
+                       justify-content: space-between; gap: 12px; }
+    .card-left       { flex: 1; min-width: 0; }
+    .card-prompt     { font-size: 14px; font-weight: 500;
+                       white-space: nowrap; overflow: hidden;
+                       text-overflow: ellipsis; }
+    .card-meta       { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .card-hashtags   { font-size: 12px; color: #2563eb; margin-top: 6px; }
+    .badge           { font-size: 11px; font-weight: 600; padding: 3px 9px;
+                       border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
+    .badge-posted    { background: #dcfce7; color: #15803d; }
+    .badge-denied    { background: #fee2e2; color: #b91c1c; }
+    .view-btn        { font-size: 12px; padding: 4px 12px; margin-top: 0;
+                       background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+    .card-detail     { display: none; margin-top: 14px; }
+    .card-detail pre { margin-top: 6px; }
+    #history-empty   { color: #9ca3af; font-size: 14px; font-style: italic; }
+    #refresh-btn     { font-size: 12px; padding: 5px 12px; background: #f3f4f6;
+                       color: #374151; border: 1px solid #d1d5db; margin-top: 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Marketing Agent</h1>
+
+  <!-- ── INPUT ─────────────────────────────────────────────── -->
+  <label for="prompt">What do you want to post about?</label>
+  <textarea
+    id          = "prompt"
+    placeholder = "e.g. Launch our AI productivity app FlowAI targeting busy professionals aged 25–40"
+  ></textarea>
+  <br>
+  <button id="run-btn" onclick="runAgent()">Generate</button>
+
+  <div id="loading">Agent is researching and writing — this takes 10–30 seconds...</div>
+
+  <!-- ── RESULT ─────────────────────────────────────────────── -->
+  <div id="result">
+    <hr>
+    <h2>Generated Post</h2>
+
+    <div class="lbl">Verdict</div>
+    <div class="verdict" id="verdict"></div>
+    <div style="color:#6b7280; font-size:13px; margin-top:4px" id="summary"></div>
+
+    <br>
+    <div class="lbl">Full Post</div>
+    <pre id="full-post"></pre>
+
+    <div class="lbl">Hashtags</div>
+    <div id="hashtags" style="font-size:13px; color:#2563eb;"></div>
+
+    <div id="post-area">
+      <br>
+      <button id="approve-btn" onclick="approve()">✅ Approve &amp; Post to Discord</button>
+      <button id="deny-btn"    onclick="deny()">🚫 Deny</button>
+    </div>
+
+    <div id="status-msg"></div>
+  </div>
+
+  <!-- ── CAMPAIGN HISTORY ───────────────────────────────────── -->
+  <hr>
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <h2 style="margin:0">Campaign History</h2>
+    <button id="refresh-btn" onclick="loadCampaigns()">↻ Refresh</button>
+  </div>
+
+  <div id="history">
+    <div id="history-empty">No campaigns yet.</div>
+  </div>
+
+
+  <script>
+    const API = ""
+    let currentRun = null
+
+    // ── Agent run ─────────────────────────────────────────────
+    async function runAgent() {
+      const prompt = document.getElementById("prompt").value.trim()
+      if (!prompt) { alert("Please enter a prompt"); return }
+
+      document.getElementById("result").style.display      = "none"
+      document.getElementById("loading").style.display     = "block"
+      document.getElementById("run-btn").disabled          = true
+      document.getElementById("status-msg").style.display  = "none"
+
+      try {
+        const res = await fetch(`${API}/api/run`, {
+          method:  "POST",
+          headers: {"Content-Type": "application/json"},
+          body:    JSON.stringify({prompt}),
+        })
+        if (!res.ok) {
+          const err = await res.json()
+          alert("Error " + res.status + ": " + JSON.stringify(err.detail))
+          return
+        }
+        const data = await res.json()
+        currentRun = data
+        displayResult(data)
+      } catch (e) {
+        alert("Could not reach server. Is it running?\n" + e.message)
+      } finally {
+        document.getElementById("loading").style.display = "none"
+        document.getElementById("run-btn").disabled      = false
+      }
+    }
+
+    function displayResult(data) {
+      const verdictEl       = document.getElementById("verdict")
+      verdictEl.textContent = data.verdict
+      verdictEl.className   = "verdict " + data.verdict
+
+      document.getElementById("summary").textContent   = data.summary
+      document.getElementById("full-post").textContent = data.full_post
+      document.getElementById("hashtags").textContent  = data.hashtags.join("  ")
+      document.getElementById("result").style.display  = "block"
+
+      document.getElementById("post-area").style.display =
+        data.verdict === "rejected" ? "none" : "block"
+    }
+
+    // ── Approve ───────────────────────────────────────────────
+    async function approve() {
+      if (!currentRun) return
+      setStatus("Posting to Discord...", "#6b7280")
+
+      const res = await fetch(`${API}/api/post`, {
+        method:  "POST",
+        headers: {"Content-Type": "application/json"},
+        body:    JSON.stringify({
+          run_id:       currentRun.run_id,
+          full_post:    currentRun.full_post,
+          prompt:       document.getElementById("prompt").value.trim(),
+          hashtags:     currentRun.hashtags,
+          verdict_info: {verdict: currentRun.verdict, summary: currentRun.summary},
+        }),
+      })
+
+      if (res.ok) {
+        setStatus("✅ Posted to Discord!", "#16a34a")
+        reset()
+        loadCampaigns()         // ← refresh history
+      } else {
+        setStatus("❌ Discord post failed", "#dc2626")
+      }
+    }
+
+    // ── Deny ─────────────────────────────────────────────────
+    async function deny() {
+      if (!currentRun) return
+
+      const res = await fetch(`${API}/api/deny`, {
+        method:  "POST",
+        headers: {"Content-Type": "application/json"},
+        body:    JSON.stringify({
+          run_id:    currentRun.run_id,
+          full_post: currentRun.full_post,
+          prompt:    document.getElementById("prompt").value.trim(),
+          hashtags:  currentRun.hashtags,
+        }),
+      })
+
+      if (res.ok) {
+        setStatus("🚫 Denied and saved", "#d97706")
+        reset()
+        loadCampaigns()         // ← refresh history
+      }
+    }
+
+    // ── Campaign history ──────────────────────────────────────
+    async function loadCampaigns() {
+      try {
+        const res  = await fetch(`${API}/api/campaigns`)
+        const list = await res.json()
+
+        const container = document.getElementById("history")
+        const empty     = document.getElementById("history-empty")
+
+        if (!list.length) {
+          empty.style.display = "block"
+          return
+        }
+
+        empty.style.display = "none"
+
+        // Remove old cards, keep the empty notice element
+        container.querySelectorAll(".campaign-card").forEach(el => el.remove())
+
+        list.forEach(c => {
+          const card = buildCard(c)
+          container.appendChild(card)
+        })
+
+      } catch (e) {
+        console.error("Could not load campaigns:", e)
+      }
+    }
+
+    function buildCard(c) {
+      const card = document.createElement("div")
+      card.className = "campaign-card"
+      card.id        = "card-" + c.filename
+
+      const time      = formatTime(c.timestamp)
+      const hashText  = c.hashtags.length ? c.hashtags.join(" ") : "—"
+      const badgeCls  = c.status === "posted" ? "badge-posted" : "badge-denied"
+      const badgeTxt  = c.status === "posted" ? "✅ posted" : "🚫 denied"
+      const promptShort = c.user_prompt.length > 80
+        ? c.user_prompt.slice(0, 80) + "…"
+        : c.user_prompt
+
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="card-left">
+            <div class="card-prompt" title="${esc(c.user_prompt)}">${esc(promptShort)}</div>
+            <div class="card-meta">${time} · run ${c.run_id || "—"}</div>
+            <div class="card-hashtags">${esc(hashText)}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
+            <span class="badge ${badgeCls}">${badgeTxt}</span>
+            <button class="view-btn" onclick="toggleDetail('${c.filename}')">View ▾</button>
+          </div>
+        </div>
+        <div class="card-detail" id="detail-${c.filename}">
+          <div class="lbl">Full Post</div>
+          <pre id="post-${c.filename}">Loading...</pre>
+        </div>
+      `
+      return card
+    }
+
+    async function toggleDetail(filename) {
+      const detail = document.getElementById("detail-" + filename)
+      const isOpen = detail.style.display === "block"
+
+      if (isOpen) {
+        detail.style.display = "none"
+        return
+      }
+
+      detail.style.display = "block"
+
+      // Only fetch if not already loaded
+      const pre = document.getElementById("post-" + filename)
+      if (pre.textContent === "Loading...") {
+        try {
+          const res  = await fetch(`${API}/api/campaigns/${filename}`)
+          const data = await res.json()
+          pre.textContent = data.full_post || data.content || "No content saved."
+        } catch (e) {
+          pre.textContent = "Could not load."
+        }
+      }
+    }
+
+    // ── Helpers ───────────────────────────────────────────────
+    function formatTime(iso) {
+      if (!iso) return "—"
+      const d = new Date(iso)
+      return d.toLocaleDateString() + " " +
+             d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+    }
+
+    function setStatus(msg, color) {
+      const el         = document.getElementById("status-msg")
+      el.textContent   = msg
+      el.style.color   = color
+      el.style.display = "block"
+    }
+
+    function reset() {
+      currentRun = null
+      document.getElementById("post-area").style.display = "none"
+    }
+
+    // Load history on page open
+    loadCampaigns()
+  </script>
+
+</body>
+</html>

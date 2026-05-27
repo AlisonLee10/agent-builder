@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain.chat_models import init_chat_model
 from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from services.tool_selector import select_tools
@@ -7,16 +7,13 @@ from services.campaign_memory import get_few_shot_examples
 from services.ai              import set_few_shot_examples, clear_few_shot_examples
 from services.progress        import show_progress
 from services.agent_trace     import record_agent_scratchpad_to_langsmith
-from services.logger          import get_logger
+from services.logger          import get_logger, get_run_id
 
 load_dotenv()
 
 log = get_logger(__name__)
 
-agent_llm = ChatOpenAI(
-    model="gpt-4o",
-    temperature=0,
-)
+agent_llm = init_chat_model("gpt-4o", temperature=0)
 
 # Flexible prompt — works with any subset of tools
 prompt = ChatPromptTemplate.from_messages([
@@ -93,7 +90,7 @@ def parse_agent_output(raw: str) -> dict:
     }
 
 
-def run_agent(user_prompt: str) -> dict:
+def run_agent(user_prompt: str, *, debug: bool = False) -> dict:
 
     # retrieve few shot examples from memory (#3d)
     examples = get_few_shot_examples(user_prompt, k = 2)
@@ -108,16 +105,24 @@ def run_agent(user_prompt: str) -> dict:
     selected_tools = select_tools(user_prompt)
 
     # build and run agent
+    log.debug(f"Building agent with {len(selected_tools)} tools")
     agent = create_openai_tools_agent(agent_llm, selected_tools, prompt)
     executor = AgentExecutor(
         agent = agent,
         tools = selected_tools,
-        verbose = False,
+        verbose = debug,
         return_intermediate_steps = True,
     )
 
+    log.debug("Invoking AgentExecutor")
     with show_progress("      Generating content"):
-        result = executor.invoke({"input": user_prompt})
+        result = executor.invoke(
+            {"input": user_prompt},
+            config={
+                "metadata": {"run_id": get_run_id()},
+                "tags": ["marketing-agent"],
+            },
+        )
 
     record_agent_scratchpad_to_langsmith(
         user_prompt,
@@ -125,12 +130,11 @@ def run_agent(user_prompt: str) -> dict:
         result.get("output"),
     )
 
+    log.debug("AgentExecutor finished — parsing output")
     output = parse_agent_output(result["output"])
     output["articles"] = _extract_articles_from_steps(
-        result.get("intermediate_steps",[])
+        result.get("intermediate_steps", [])
     )
 
-    # Always clean up cache
     clear_few_shot_examples()
-
     return output

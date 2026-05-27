@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import SystemMessage, HumanMessage
 from langgraph.graph import StateGraph, START, END
 from services.campaign_memory import get_denied_examples
-from services.logger import get_logger
+from services.logger import get_logger, get_run_id
 
 load_dotenv()
 
@@ -142,16 +142,22 @@ def run_verification(content: str, max_revisions: int = 3) -> dict:
     from services.progress import show_progress
 
     with show_progress("      Verifying content"):
-        return verification_graph.invoke({
-            "content": content,
-            "verdict": "",
-            "issues": [],
-            "summary": "",
-            "revision_count": 0,
-            "max_revisions": max_revisions,
-            "denied_examples": denied_ex,
+        return verification_graph.invoke(
+        {
+            "content":           content,
+            "verdict":           "",
+            "issues":            [],
+            "summary":           "",
+            "revision_count":    0,
+            "max_revisions":     max_revisions,
+            "denied_examples":   denied_ex,
             "approved_examples": approved_ex,
-        })
+        },
+        config={
+            "metadata": {"run_id": get_run_id()},
+            "tags":     ["verification"],
+        }
+    )
 
 """
 def run_verification(content: str, max_revisions: int = 3) -> dict:

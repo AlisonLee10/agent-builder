@@ -2,10 +2,9 @@ import json
 import os
 from datetime import datetime
 
-from services.logger import get_logger
+from services.logger import get_logger, get_run_id
 
 log = get_logger(__name__)
-
 
 def sources_to_list(sources: str | list[str] | None) -> list[str]:
     """Normalize agent sources (string or list) for JSON storage."""
@@ -27,10 +26,8 @@ def save_campaign(
     verdict_info: dict | None = None,
 ) -> str:
     os.makedirs("campaigns", exist_ok=True)
-
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     filename  = f"campaigns/{status}_{timestamp}.json"
-
     vi = verdict_info or {}
 
     data = {
