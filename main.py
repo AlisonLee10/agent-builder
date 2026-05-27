@@ -29,23 +29,23 @@ def run_campaign(*, debug: bool = False) -> None:
             log.warning("empty prompt — skipping")
             return
 
-        log.debug("[0/3] Analyzing your prompt...")
+        log.info("[0/3] Analyzing your prompt...")
         valid, reason = validate_user_prompt(user_prompt)
         if not valid:
             log.warning(f"Prompt rejected — {reason}")
-            log.debug("No content generation — fix your prompt and try again")
+            log.info("No content generation — fix your prompt and try again")
             return
 
         log.debug("Prompt accepted")
 
-        log.debug("[1/3] Agent is researching and writing...")
+        log.info("[1/3] Agent is researching and writing...")
         output        = run_agent(user_prompt, debug=debug)
         hashtags_list = [
             h.strip() for h in output["hashtags"].split()
             if h.strip().startswith("#")
         ]
         articles = output["articles"]
-        log.info(
+        log.debug(
             f"    Done. ({len(articles)} articles fetched)"
             if articles else "     Done."
         )
@@ -54,7 +54,7 @@ def run_campaign(*, debug: bool = False) -> None:
         else:
             log.debug("Agent done")
 
-        log.debug("[2/3] Verifying content...")
+        log.info("[2/3] Verifying content...")
         verification = run_verification(output["content"])
         verdict      = verification["verdict"]
         icon         = {"approved": "✅", "needs_revision": "⚠️", "rejected": "❌"}.get(verdict, "?")
@@ -82,13 +82,13 @@ def run_campaign(*, debug: bool = False) -> None:
             )
             log.debug("Updating memory index...")
             try:
-                add_campaign_to_index(saved)
+                add_campaign_to_index(saved["filename"])
             except Exception as e:
                 log.warning(f"Memory index update failed: {e}")
-            log.debug(f"Saved as denied → {saved}")
+            log.debug(f"Saved as denied → {saved['filename']}")
             return
 
-        log.debug("[3/3] Review your draft:")
+        log.info("[3/3] Review your draft:")
         print("─" * 50)
         print(output["full_post"])
         print("─" * 50)
@@ -96,29 +96,30 @@ def run_campaign(*, debug: bool = False) -> None:
         approval = input("\nApprove and post to Discord? (y/n): ").strip().lower()
 
         if approval == "y":
-            log.debug("Posting to Discord...")
+            log.info("Posting to Discord...")
             success = post_to_discord(output["full_post"])
             if success:
-                log.debug("Saving posted campaign...")
+                log.info("Saving posted campaign...")
                 saved = save_campaign(
                     user_prompt,
                     output["full_post"],
                     hashtags_list,
-                    status="posted",
-                    sources=sources_to_list(output.get("sources")),
-                    articles=output.get("articles", []),
-                    verdict_info=verification,
+                    status       = "posted",
+                    verdict_info = verification,
+                    platform     = "",
+                    sources      = output.get("sources",  ""),
+                    articles     = output.get("articles", []),
                 )
                 log.debug("Updating memory index...")
                 try:
-                    add_campaign_to_index(saved)
+                    add_campaign_to_index(saved["filename"])
                 except Exception as e:
                     log.warning(f"Memory index update failed: {e}")
-                log.debug(f"Posted and saved → {saved}")
+                log.debug(f"Posted and saved → {saved['filename']}")
             else:
                 log.warning("Discord post failed")
         else:
-            log.debug("Saving user-denied campaign...")
+            log.info("Saving user-denied campaign...")
             saved = save_campaign(
                 user_prompt,
                 output["content"],
@@ -130,13 +131,16 @@ def run_campaign(*, debug: bool = False) -> None:
                     "issues": [],
                     "summary": "User chose not to post",
                 },
+                platform     = None,
+                sources      = output.get("sources",  ""),
+                articles     = output.get("articles", []),
             )
             log.debug("Updating memory index...")
             try:
-                add_campaign_to_index(saved)
+                add_campaign_to_index(saved["filename"])
             except Exception as e:
                 log.warning(f"Memory index update failed: {e}")
-            log.debug(f"Not posted. Saved → {saved}")
+            log.debug(f"Not posted. Saved → {saved['filename']}")
 
     finally:
         clear_run_id()

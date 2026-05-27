@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import asyncio
 from pathlib import Path
 
 import uvicorn
@@ -12,6 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from agent import run_agent
 from services.verify import run_verification
+from services.storage import sources_to_list
 from services.logger import get_logger, new_run_id, clear_run_id
 
 log = get_logger(__name__)
@@ -69,6 +71,7 @@ class RunResponse(BaseModel):
     summary:   str
     full_post: str
     articles:  list[dict]
+    sources:   list[str]
 
 class PostRequest(BaseModel):
     run_id:      str
@@ -76,6 +79,9 @@ class PostRequest(BaseModel):
     prompt:      str
     hashtags:    list[str]
     verdict_info: dict = {}
+    platform:    str = Field(default="")
+    sources:     list[str] = []
+    articles:    list[dict] = []
 
 class CampaignSummary(BaseModel):
     run_id:      str
@@ -85,10 +91,20 @@ class CampaignSummary(BaseModel):
     hashtags:    list[str]
     verdict:     str
     filename:    str
+    sources:     list[str]
+    articles:    list[dict]
 
 class HealthResponse(BaseModel):
     status:  str
     version: str
+
+class EmailRequest(BaseModel):
+    run_id:    str
+    full_post: str
+    prompt:    str
+    hashtags:  list[str]
+    to:        str  = Field(..., description="Recipient email address")
+    subject:   str  = Field(default="Marketing Update")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -130,6 +146,7 @@ def run(request: RunRequest):
             verdict   = verification["verdict"],
             summary   = verification.get("summary", ""),
             full_post = output["full_post"],
+            sources   = sources_to_list(output.get("sources")),
             articles  = output.get("articles", []),
         )
 
@@ -142,18 +159,12 @@ def run(request: RunRequest):
 
 
 @app.post("/api/post", tags=["Campaigns"])
-def post_campaign(request: PostRequest):
-    """
-    Called after the user approves the content in the browser.
-    Posts to Discord and saves the campaign.
-    """
-    from services.discord        import post_to_discord
-    from services.storage        import save_campaign
+async def post_campaign(request: PostRequest):
+    from services.discord         import post_to_discord
+    from services.storage         import save_campaign
     from services.campaign_memory import add_campaign_to_index
 
-    log.info(f"POST /api/post — run_id: {request.run_id}")
-
-    success = post_to_discord(request.full_post)
+    success = await asyncio.to_thread(post_to_discord, request.full_post)
     if not success:
         raise HTTPException(status_code=502, detail="Discord post failed")
 
@@ -163,27 +174,50 @@ def post_campaign(request: PostRequest):
         request.hashtags,
         status       = "posted",
         verdict_info = request.verdict_info,
+        platform     = request.platform or "discord",
+        sources      = request.sources,
+        articles     = request.articles,
     )
-
     try:
-        add_campaign_to_index(saved)
+        add_campaign_to_index(saved["filename"])
     except Exception as e:
         log.warning(f"memory index update skipped: {e}")
 
-    log.info(f"campaign posted and saved → {saved}")
-    return {"status": "posted", "filename": saved}
+    return {"status": "posted", "id": saved["id"]}
 
 
-@app.post("/api/deny", tags=["Campaigns"])
-def deny_campaign(request: PostRequest):
-    """
-    Called when the user denies the content in the browser.
-    Saves as denied without posting.
-    """
+@app.post("/api/post-slack", tags=["Campaigns"])
+async def post_slack(request: PostRequest):
+    from services.slack           import post_to_slack
     from services.storage         import save_campaign
     from services.campaign_memory import add_campaign_to_index
 
-    log.info(f"POST /api/deny — run_id: {request.run_id}")
+    success = await asyncio.to_thread(post_to_slack, request.full_post)
+    if not success:
+        raise HTTPException(status_code=502, detail="Slack post failed")
+
+    saved = save_campaign(
+        request.prompt,
+        request.full_post,
+        request.hashtags,
+        status       = "posted",
+        verdict_info = request.verdict_info,
+        platform     = request.platform or "slack",
+        sources      = request.sources,
+        articles     = request.articles,
+    )
+    try:
+        add_campaign_to_index(saved["filename"])
+    except Exception as e:
+        log.warning(f"memory index update skipped: {e}")
+
+    return {"status": "posted", "platform": "slack", "id": saved["id"]}
+
+
+@app.post("/api/deny", tags=["Campaigns"])
+async def deny_campaign(request: PostRequest):
+    from services.storage         import save_campaign
+    from services.campaign_memory import add_campaign_to_index
 
     saved = save_campaign(
         request.prompt,
@@ -195,15 +229,36 @@ def deny_campaign(request: PostRequest):
             "issues":  [],
             "summary": "User chose not to post",
         },
+        platform     = None,                   # ← denied = no platform
+        sources      = request.sources,
+        articles     = request.articles,
     )
-
     try:
-        add_campaign_to_index(saved)
+        add_campaign_to_index(saved["filename"])
     except Exception as e:
         log.warning(f"memory index update skipped: {e}")
 
-    log.info(f"campaign denied and saved → {saved}")
-    return {"status": "denied", "filename": saved}
+    return {"status": "denied", "id": saved["id"]}
+
+
+@app.post("/api/post-email", tags=["Campaigns"])
+async def post_email(request: EmailRequest):
+    from services.gmail   import send_email
+    from services.storage import save_campaign
+
+    success = await asyncio.to_thread(
+        send_email, request.to, request.subject, request.full_post
+    )
+    if not success:
+        raise HTTPException(status_code=502, detail="Email send failed")
+
+    saved = save_campaign(
+        request.prompt, request.full_post, request.hashtags,
+        status   = "posted",
+        platform = "email",
+    )
+
+    return {"status": "posted", "platform": "email", "id": saved["id"]}
 
 
 @app.get("/api/campaigns", response_model=list[CampaignSummary], tags=["Campaigns"])
@@ -226,6 +281,8 @@ def list_campaigns():
                 hashtags    = data.get("hashtags",    []),
                 verdict     = data.get("verdict",     ""),
                 filename    = path.name,
+                sources     = data.get("sources",     []),
+                articles    = data.get("articles",    []),
             ))
         except (json.JSONDecodeError, OSError):
             continue

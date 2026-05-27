@@ -1,0 +1,6 @@
+2026-05-27 14:26:29 | INFO  | __main__                 | Campaign started - run ID: d65750
+2026-05-27 14:27:17 | DEBUG | __main__                 | [0/3] Analyzing your prompt...
+2026-05-27 14:27:18 | DEBUG | langsmith.client         | Tracing control thread func compress parallel called
+2026-05-27 14:27:18 | DEBUG | langsmith.client         | Handling batch in langsmith mode
+2026-05-27 14:27:20 | WARNING | __main__                 | Prompt rejected — This request is unrelated to promoting FlowAI or its products.
+2026-05-27 14:27:20 | DEBUG | __main__                 | No content generation — fix your prompt and try again

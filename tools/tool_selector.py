@@ -4,11 +4,11 @@ from langchain_openai          import ChatOpenAI
 from langchain_core.messages   import SystemMessage, HumanMessage
 from services.logger import get_logger
 
-from services.tools import (
+from tools.tools import (
     brand_context_tool,
     news_tool,
     news_sources_tool,
-    trends_tool,
+    reddit_tool,
     generate_content_tool,
     generate_hashtags_tool,
 )
@@ -27,7 +27,7 @@ _ALL_TOOLS = {
     "brand_context_tool":    brand_context_tool,
     "news_tool":             news_tool,
     "news_sources_tool":     news_sources_tool,
-    "trends_tool":           trends_tool,
+    "reddit_tool":           reddit_tool,
     "generate_content_tool": generate_content_tool,
     "generate_hashtags_tool":generate_hashtags_tool,
 }
@@ -65,7 +65,7 @@ def select_tools(prompt: str) -> list:
     if "news" in needed:
         names += ["news_tool", "news_sources_tool"]
     if "trends" in needed:
-        names.append("trends_tool")
+        names.append("reddit_tool")
 
     # deduplicate, preserve order
     seen, unique = set(), []

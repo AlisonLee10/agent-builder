@@ -89,10 +89,16 @@
     <div id="hashtags" style="font-size:13px; color:#2563eb;"></div>
 
     <div id="post-area">
-      <br>
-      <button id="approve-btn" onclick="approve()">✅ Approve &amp; Post to Discord</button>
-      <button id="deny-btn"    onclick="deny()">🚫 Deny</button>
-    </div>
+        <br>
+        <button id="approve-discord-btn" onclick="approve('discord')">
+          ✅ Post to Discord
+        </button>
+        <button id="approve-slack-btn" onclick="approve('slack')"
+                style="background:#4A154B; color:white;">
+          ✅ Post to Slack
+        </button>
+        <button id="deny-btn" onclick="deny()">🚫 Deny</button>
+      </div>
 
     <div id="status-msg"></div>
   </div>
@@ -160,52 +166,88 @@
     }
 
     // ── Approve ───────────────────────────────────────────────
-    async function approve() {
-      if (!currentRun) return
-      setStatus("Posting to Discord...", "#6b7280")
+    // replace the approve() function
+    async function approve(platform = "discord") {
+        if (!currentRun) return
 
-      const res = await fetch(`${API}/api/post`, {
-        method:  "POST",
-        headers: {"Content-Type": "application/json"},
-        body:    JSON.stringify({
-          run_id:       currentRun.run_id,
-          full_post:    currentRun.full_post,
-          prompt:       document.getElementById("prompt").value.trim(),
-          hashtags:     currentRun.hashtags,
-          verdict_info: {verdict: currentRun.verdict, summary: currentRun.summary},
-        }),
-      })
+        const endpoint = platform === "slack" ? "/api/post-slack" : "/api/post"
+        const label    = platform === "slack" ? "Slack"           : "Discord"
+        const btnId    = platform === "slack" ? "approve-slack-btn" : "approve-discord-btn"
+        const btn      = document.getElementById(btnId)
 
-      if (res.ok) {
-        setStatus("✅ Posted to Discord!", "#16a34a")
-        reset()
-        loadCampaigns()         // ← refresh history
-      } else {
-        setStatus("❌ Discord post failed", "#dc2626")
-      }
-    }
+        btn.disabled    = true
+        btn.textContent = `Posting to ${label}...`
 
-    // ── Deny ─────────────────────────────────────────────────
-    async function deny() {
-      if (!currentRun) return
+        const res = await fetch(`${API}${endpoint}`, {
+            method:  "POST",
+            headers: {"Content-Type": "application/json"},
+            body:    JSON.stringify({
+            run_id:       currentRun.run_id,
+            full_post:    currentRun.full_post,
+            prompt:       document.getElementById("prompt").value.trim(),
+            hashtags:     currentRun.hashtags,
+            verdict_info: {verdict: currentRun.verdict, summary: currentRun.summary},
+            platform:     platform,                   // ← explicit
+            sources:      currentRun.sources  || "",
+            articles:     currentRun.articles || [],
+            }),
+        })
 
-      const res = await fetch(`${API}/api/deny`, {
-        method:  "POST",
-        headers: {"Content-Type": "application/json"},
-        body:    JSON.stringify({
-          run_id:    currentRun.run_id,
-          full_post: currentRun.full_post,
-          prompt:    document.getElementById("prompt").value.trim(),
-          hashtags:  currentRun.hashtags,
-        }),
-      })
+        if (res.ok) {
+            btn.textContent      = `✅ Posted to ${label}`
+            btn.style.background = "#16a34a"
+            btn.style.opacity    = "0.7"
+            btn.style.cursor     = "default"
+            setStatus(`✅ Posted to ${label}!`, "#16a34a")
+            loadCampaigns()
+        } else {
+            btn.disabled    = false
+            btn.textContent = `✅ Post to ${label}`
+            setStatus(`❌ ${label} post failed`, "#dc2626")
+        }
+}
 
-      if (res.ok) {
-        setStatus("🚫 Denied and saved", "#d97706")
-        reset()
-        loadCampaigns()         // ← refresh history
-      }
-    }
+async function deny() {
+  if (!currentRun) return
+
+  const res = await fetch(`${API}/api/deny`, {
+    method:  "POST",
+    headers: {"Content-Type": "application/json"},
+    body:    JSON.stringify({
+      run_id:       currentRun.run_id,
+      full_post:    currentRun.full_post,
+      prompt:       document.getElementById("prompt").value.trim(),
+      hashtags:     currentRun.hashtags,
+      sources:      currentRun.sources  || "",
+      articles:     currentRun.articles || [],
+    }),
+  })
+
+  if (res.ok) {
+    setStatus("🚫 Denied and saved", "#d97706")
+    reset()
+    loadCampaigns()
+  }
+}
+
+function reset() {
+  currentRun = null
+  document.getElementById("post-area").style.display = "none"
+
+  // Restore both buttons to default state for the next run
+  const discordBtn             = document.getElementById("approve-discord-btn")
+  const slackBtn               = document.getElementById("approve-slack-btn")
+  discordBtn.disabled          = false
+  discordBtn.textContent       = "✅ Post to Discord"
+  discordBtn.style.background  = "#16a34a"
+  discordBtn.style.opacity     = "1"
+  discordBtn.style.cursor      = "pointer"
+  slackBtn.disabled            = false
+  slackBtn.textContent         = "✅ Post to Slack"
+  slackBtn.style.background    = "#4A154B"
+  slackBtn.style.opacity       = "1"
+  slackBtn.style.cursor        = "pointer"
+}
 
     // ── Campaign history ──────────────────────────────────────
     async function loadCampaigns() {

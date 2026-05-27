@@ -35,14 +35,16 @@ def news_sources_tool(query: str) -> str:
 
 
 @tool
-def trends_tool(query: str) -> str:
-    """Scan Google and Reddit for what is currently trending about a topic."""
-    log.debug(f"trends_tool — query='{query[:80]}'")
-    google = fetch_google_trends(query)
-    reddit = fetch_reddit_trends(query)
-    if not google and not reddit:
-        return "No trend signals found."
-    return format_trends_for_prompt(google, reddit)
+def reddit_tool(query: str) -> str:
+    """Search Reddit for hot posts and community discussion about a topic.
+    Use this to find what real people are saying, asking, and feeling about a subject."""
+    log.debug(f"reddit_tool called: '{query[:60]}'")
+    posts = fetch_reddit_trends(query)
+    if not posts:
+        log.warning("reddit_tool: no Reddit posts found")
+        return "No Reddit posts found."
+    log.debug(f"reddit_tool: {len(posts)} posts returned")
+    return format_trends_for_prompt([], posts)
 
 
 @tool

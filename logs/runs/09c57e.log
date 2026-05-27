@@ -1,0 +1,6 @@
+2026-05-27 14:48:18 | INFO  | __main__                 | Campaign started - run ID: 09c57e
+2026-05-27 14:48:23 | INFO  | __main__                 | [0/3] Analyzing your prompt...
+2026-05-27 14:48:24 | DEBUG | langsmith.client         | Tracing control thread func compress parallel called
+2026-05-27 14:48:24 | DEBUG | langsmith.client         | Handling batch in langsmith mode
+2026-05-27 14:48:25 | WARNING | __main__                 | Prompt rejected — Please provide a specific marketing brief related to FlowAI or its product.
+2026-05-27 14:48:25 | INFO  | __main__                 | No content generation — fix your prompt and try again

@@ -2,12 +2,13 @@ from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from services.tool_selector import select_tools
+from tools.tool_selector import select_tools
 from services.campaign_memory import get_few_shot_examples
 from services.ai              import set_few_shot_examples, clear_few_shot_examples
 from services.progress        import show_progress
 from services.agent_trace     import record_agent_scratchpad_to_langsmith
 from services.logger          import get_logger, get_run_id
+from tools.mcp_client    import get_mcp_client
 
 load_dotenv()
 
@@ -22,10 +23,13 @@ prompt = ChatPromptTemplate.from_messages([
 Steps (use only the tools you have):
 1. Call brand_context_tool FIRST — always
 2. If news_tool is available, fetch relevant articles
-3. If trends_tool is available, scan for current trends
-4. Call generate_content_tool with topic and all context gathered
-5. Call generate_hashtags_tool with the original topic
-6. If news_sources_tool is available and you used news_tool, call it for source links
+3. If reddit_tool is available, scan for current trends
+4. If tavily-search is available, search the web for current trends and context
+5. IF fetch is available and you have a specific URL worth reading, fetch it
+6 Call generate_content_tool with topic and all context gathered
+7. Call generate_hashtags_tool with the original topic
+8. If news_sources_tool is available and you used news_tool, call it for source links
+9. If check_brand_compliance is available, verify the generated content
 
 Return the final post in exactly this format — no extra commentary:
 
