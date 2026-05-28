@@ -30,6 +30,16 @@
     #post-area  { margin-top: 20px; display: none; }
     #approve-btn { background: #16a34a; color: white; }
     #deny-btn    { background: #dc2626; color: white; }
+    #denial-box  { display: none; margin-top: 16px; padding: 14px;
+                    border: 1px solid #fecaca; border-radius: 8px;
+                    background: #fef2f2; }
+    #denial-box label { display: block; font-size: 13px; font-weight: 600;
+                         color: #991b1b; margin-bottom: 8px; }
+    #denial-reason { width: 100%; min-height: 72px; padding: 8px; font-size: 14px;
+                      border: 1px solid #fca5a5; border-radius: 4px;
+                      box-sizing: border-box; resize: vertical; }
+    #confirm-deny-btn { background: #dc2626; color: white; margin-top: 8px; }
+    #cancel-deny-btn  { background: #f3f4f6; color: #374151; margin-top: 8px; }
     #status-msg  { margin-top: 12px; font-weight: 600; display: none; }
 
     /* ── Campaign history ───────────────────────────────────── */
@@ -55,6 +65,30 @@
     #history-empty   { color: #9ca3af; font-size: 14px; font-style: italic; }
     #refresh-btn     { font-size: 12px; padding: 5px 12px; background: #f3f4f6;
                        color: #374151; border: 1px solid #d1d5db; margin-top: 0; }
+    .examples-label  { font-size: 13px; font-weight: 600; color: #374151;
+                       margin: 14px 0 8px; display: block; }
+    .example-chips   { display: flex; flex-direction: column; gap: 8px; }
+    .example-chip    { text-align: left; padding: 10px 12px; font-size: 13px;
+                       line-height: 1.45; cursor: pointer; border-radius: 6px;
+                       border: 1px solid #d1d5db; background: #f9fafb; color: #1f2937; }
+    .example-chip:hover { border-color: #2563eb; background: #eff6ff; }
+    .email-block       { margin-top: 18px; padding-top: 16px;
+                         border-top: 1px solid #e5e7eb; }
+    .email-block .lbl   { margin-bottom: 8px; }
+    .email-fields       { display: flex; flex-wrap: wrap; gap: 10px;
+                         align-items: flex-end; margin-bottom: 8px; }
+    .email-field        { flex: 1; min-width: 200px; }
+    .email-field label  { display: block; font-size: 12px; font-weight: 600;
+                          color: #374151; margin-bottom: 4px; }
+    .email-field input  { width: 100%; padding: 8px; font-size: 14px;
+                          border: 1px solid #ccc; border-radius: 4px;
+                          box-sizing: border-box; }
+    #platform-plan      { font-size: 13px; color: #1d4ed8; margin: 12px 0 4px;
+                          padding: 10px 12px; background: #eff6ff;
+                          border-radius: 6px; border: 1px solid #bfdbfe; }
+    #platform-plan.empty { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+    .card-platforms     { font-size: 12px; color: #15803d; margin-top: 4px; }
+    .card-denial-reason { font-size: 12px; color: #b91c1c; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -65,8 +99,12 @@
   <label for="prompt">What do you want to post about?</label>
   <textarea
     id          = "prompt"
-    placeholder = "e.g. Launch our AI productivity app FlowAI targeting busy professionals aged 25–40"
+    placeholder = "e.g. Write a FlowAI post for busy professionals and post it to Discord and Slack"
   ></textarea>
+
+  <span class="examples-label">Try an example:</span>
+  <div class="example-chips" id="example-chips"></div>
+
   <br>
   <button id="run-btn" onclick="runAgent()">Generate</button>
 
@@ -88,16 +126,18 @@
     <div class="lbl">Hashtags</div>
     <div id="hashtags" style="font-size:13px; color:#2563eb;"></div>
 
+    <div id="platform-plan" class="empty" style="display:none"></div>
+
     <div id="post-area">
         <br>
-        <button id="approve-discord-btn" onclick="approve('discord')">
-          ✅ Post to Discord
-        </button>
-        <button id="approve-slack-btn" onclick="approve('slack')"
-                style="background:#4A154B; color:white;">
-          ✅ Post to Slack
-        </button>
-        <button id="deny-btn" onclick="deny()">🚫 Deny</button>
+        <button id="approve-btn" onclick="approve()">✅ Approve</button>
+        <button id="deny-btn" onclick="showDenialForm()">🚫 Deny</button>
+        <div id="denial-box">
+          <label for="denial-reason">Why are you denying this post? (required)</label>
+          <textarea id="denial-reason" placeholder="e.g. Too salesy, wrong tone, missing product benefits…"></textarea>
+          <button type="button" id="confirm-deny-btn" onclick="confirmDeny()">Confirm deny</button>
+          <button type="button" id="cancel-deny-btn" onclick="cancelDeny()">Cancel</button>
+        </div>
       </div>
 
     <div id="status-msg"></div>
@@ -119,6 +159,32 @@
     const API = ""
     let currentRun = null
 
+    const EXAMPLE_PROMPTS = [
+      "Marketing post: FlowAI productivity app for busy professionals, post to Discord",
+      "Scan trends on crypto and AI, write a FlowAI marketing post, then post to Discord and Slack",
+      "Write a FlowAI post and email it to team@company.com via Gmail",
+      "Collect news articles about the prospect of agentic AI in near future and write a marketing post about our company, then post the output to Discord and Slack",
+    ]
+
+    function useExamplePrompt(index) {
+      const textarea = document.getElementById("prompt")
+      textarea.value = EXAMPLE_PROMPTS[index]
+      textarea.focus()
+    }
+
+    function renderExampleChips() {
+      const container = document.getElementById("example-chips")
+      container.innerHTML = ""
+      EXAMPLE_PROMPTS.forEach((text, index) => {
+        const btn = document.createElement("button")
+        btn.type = "button"
+        btn.className = "example-chip"
+        btn.textContent = text
+        btn.onclick = () => useExamplePrompt(index)
+        container.appendChild(btn)
+      })
+    }
+
     // ── Agent run ─────────────────────────────────────────────
     async function runAgent() {
       const prompt = document.getElementById("prompt").value.trim()
@@ -137,7 +203,10 @@
         })
         if (!res.ok) {
           const err = await res.json()
-          alert("Error " + res.status + ": " + JSON.stringify(err.detail))
+          const detail = typeof err.detail === "string"
+            ? err.detail
+            : JSON.stringify(err.detail)
+          alert(detail)
           return
         }
         const data = await res.json()
@@ -161,92 +230,123 @@
       document.getElementById("hashtags").textContent  = data.hashtags.join("  ")
       document.getElementById("result").style.display  = "block"
 
-      document.getElementById("post-area").style.display =
-        data.verdict === "rejected" ? "none" : "block"
+      const showPost = data.verdict !== "rejected"
+      document.getElementById("post-area").style.display = showPost ? "block" : "none"
+
+      const planEl = document.getElementById("platform-plan")
+      if (showPost && data.platform_plan) {
+        planEl.style.display = "block"
+        planEl.textContent   = data.platform_plan
+        planEl.className     = ""
+      } else {
+        planEl.style.display = "none"
+      }
     }
 
-    // ── Approve ───────────────────────────────────────────────
-    // replace the approve() function
-    async function approve(platform = "discord") {
-        if (!currentRun) return
+    async function approve() {
+      if (!currentRun) return
 
-        const endpoint = platform === "slack" ? "/api/post-slack" : "/api/post"
-        const label    = platform === "slack" ? "Slack"           : "Discord"
-        const btnId    = platform === "slack" ? "approve-slack-btn" : "approve-discord-btn"
-        const btn      = document.getElementById(btnId)
+      const btn = document.getElementById("approve-btn")
+      btn.disabled    = true
+      btn.textContent = "Posting…"
 
-        btn.disabled    = true
-        btn.textContent = `Posting to ${label}...`
-
-        const res = await fetch(`${API}${endpoint}`, {
-            method:  "POST",
-            headers: {"Content-Type": "application/json"},
-            body:    JSON.stringify({
+      try {
+        const res = await fetch(`${API}/api/approve`, {
+          method:  "POST",
+          headers: {"Content-Type": "application/json"},
+          body:    JSON.stringify({
             run_id:       currentRun.run_id,
             full_post:    currentRun.full_post,
+            content:      currentRun.content,
             prompt:       document.getElementById("prompt").value.trim(),
             hashtags:     currentRun.hashtags,
             verdict_info: {verdict: currentRun.verdict, summary: currentRun.summary},
-            platform:     platform,                   // ← explicit
-            sources:      currentRun.sources  || "",
+            sources:      currentRun.sources  || [],
             articles:     currentRun.articles || [],
-            }),
+          }),
         })
 
         if (res.ok) {
-            btn.textContent      = `✅ Posted to ${label}`
-            btn.style.background = "#16a34a"
-            btn.style.opacity    = "0.7"
-            btn.style.cursor     = "default"
-            setStatus(`✅ Posted to ${label}!`, "#16a34a")
-            loadCampaigns()
+          const data = await res.json()
+          const labels = (data.posted_platforms || [])
+            .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+            .join(", ")
+          btn.textContent = "✅ Approved"
+          setStatus(`✅ Posted to ${labels}`, "#16a34a")
+          loadCampaigns()
         } else {
-            btn.disabled    = false
-            btn.textContent = `✅ Post to ${label}`
-            setStatus(`❌ ${label} post failed`, "#dc2626")
+          const err = await res.json().catch(() => ({}))
+          const detail = typeof err.detail === "string"
+            ? err.detail
+            : JSON.stringify(err.detail || res.statusText)
+          btn.disabled    = false
+          btn.textContent = "✅ Approve"
+          setStatus(`❌ ${detail}`, "#dc2626")
         }
+      } catch (e) {
+        btn.disabled    = false
+        btn.textContent = "✅ Approve"
+        setStatus(`❌ ${e.message}`, "#dc2626")
+      }
+    }
+
+function showDenialForm() {
+  if (!currentRun) return
+  document.getElementById("denial-box").style.display = "block"
+  document.getElementById("denial-reason").focus()
 }
 
-async function deny() {
+function cancelDeny() {
+  document.getElementById("denial-box").style.display = "none"
+  document.getElementById("denial-reason").value = ""
+}
+
+async function confirmDeny() {
   if (!currentRun) return
+
+  const reason = document.getElementById("denial-reason").value.trim()
+  if (!reason) {
+    alert("Please explain why you are denying this post.")
+    return
+  }
 
   const res = await fetch(`${API}/api/deny`, {
     method:  "POST",
     headers: {"Content-Type": "application/json"},
     body:    JSON.stringify({
-      run_id:       currentRun.run_id,
-      full_post:    currentRun.full_post,
-      prompt:       document.getElementById("prompt").value.trim(),
-      hashtags:     currentRun.hashtags,
-      sources:      currentRun.sources  || "",
-      articles:     currentRun.articles || [],
+      run_id:             currentRun.run_id,
+      full_post:          currentRun.full_post,
+      content:            currentRun.content,
+      prompt:             document.getElementById("prompt").value.trim(),
+      hashtags:           currentRun.hashtags,
+      sources:            currentRun.sources  || [],
+      articles:           currentRun.articles || [],
+      user_denial_reason: reason,
     }),
   })
 
   if (res.ok) {
-    setStatus("🚫 Denied and saved", "#d97706")
+    setStatus("🚫 Denied and saved with your feedback", "#d97706")
     reset()
     loadCampaigns()
+  } else {
+    const err = await res.json().catch(() => ({}))
+    const detail = typeof err.detail === "string"
+      ? err.detail
+      : JSON.stringify(err.detail || res.statusText)
+    alert(detail)
   }
 }
 
 function reset() {
   currentRun = null
   document.getElementById("post-area").style.display = "none"
+  document.getElementById("platform-plan").style.display = "none"
+  cancelDeny()
 
-  // Restore both buttons to default state for the next run
-  const discordBtn             = document.getElementById("approve-discord-btn")
-  const slackBtn               = document.getElementById("approve-slack-btn")
-  discordBtn.disabled          = false
-  discordBtn.textContent       = "✅ Post to Discord"
-  discordBtn.style.background  = "#16a34a"
-  discordBtn.style.opacity     = "1"
-  discordBtn.style.cursor      = "pointer"
-  slackBtn.disabled            = false
-  slackBtn.textContent         = "✅ Post to Slack"
-  slackBtn.style.background    = "#4A154B"
-  slackBtn.style.opacity       = "1"
-  slackBtn.style.cursor        = "pointer"
+  const btn = document.getElementById("approve-btn")
+  btn.disabled    = false
+  btn.textContent = "✅ Approve"
 }
 
     // ── Campaign history ──────────────────────────────────────
@@ -290,6 +390,12 @@ function reset() {
       const promptShort = c.user_prompt.length > 80
         ? c.user_prompt.slice(0, 80) + "…"
         : c.user_prompt
+      const platforms = (c.posted_platforms || []).length
+        ? "Posted to: " + c.posted_platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(", ")
+        : ""
+      const denialNote = c.status === "denied" && c.denial_reason
+        ? `<div class="card-denial-reason">Why denied: ${esc(c.denial_reason)}</div>`
+        : ""
 
       card.innerHTML = `
         <div class="card-top">
@@ -297,6 +403,8 @@ function reset() {
             <div class="card-prompt" title="${esc(c.user_prompt)}">${esc(promptShort)}</div>
             <div class="card-meta">${time} · run ${c.run_id || "—"}</div>
             <div class="card-hashtags">${esc(hashText)}</div>
+            ${platforms ? `<div class="card-platforms">${esc(platforms)}</div>` : ""}
+            ${denialNote}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
             <span class="badge ${badgeCls}">${badgeTxt}</span>
@@ -358,12 +466,7 @@ function reset() {
       el.style.display = "block"
     }
 
-    function reset() {
-      currentRun = null
-      document.getElementById("post-area").style.display = "none"
-    }
-
-    // Load history on page open
+    renderExampleChips()
     loadCampaigns()
   </script>
 

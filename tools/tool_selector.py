@@ -61,6 +61,17 @@ def select_tools(prompt: str) -> list:
     except (json.JSONDecodeError, ValueError):
         needed = []
 
+    if not isinstance(needed, list):
+        needed = []
+
+    lower = prompt.lower()
+    if any(w in lower for w in ("news", "article", "articles", "headline")):
+        if "news" not in needed:
+            needed.append("news")
+    if any(w in lower for w in ("trend", "trends", "reddit", "viral", "popular")):
+        if "trends" not in needed:
+            needed.append("trends")
+
     names = list(_CORE)
     if "news" in needed:
         names += ["news_tool", "news_sources_tool"]

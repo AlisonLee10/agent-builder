@@ -1,10 +1,14 @@
 import argparse
 from agent                      import run_agent
-from services.discord           import post_to_discord
-from services.storage           import save_campaign, sources_to_list
+from services.storage           import save_campaign, normalize_research_for_save
 from services.verify            import run_verification
 from services.campaign_memory   import load_or_build_index, add_campaign_to_index
 from services.prompt_validation import validate_user_prompt
+from services.platform_parser   import (
+    validate_posting_intent,
+    format_platform_plan,
+)
+from services.platform_posting  import post_to_platforms
 from services.logger            import get_logger, new_run_id, clear_run_id, cleanup_old_logs, set_level
 
 log = get_logger(__name__)
@@ -38,13 +42,26 @@ def run_campaign(*, debug: bool = False) -> None:
 
         log.debug("Prompt accepted")
 
+        plat_ok, plat_reason, intent = validate_posting_intent(user_prompt)
+        if not plat_ok:
+            log.warning(plat_reason)
+            print(f"\n⚠️  {plat_reason}")
+            return
+
+        log.info(format_platform_plan(intent))
+
         log.info("[1/3] Agent is researching and writing...")
         output        = run_agent(user_prompt, debug=debug)
         hashtags_list = [
             h.strip() for h in output["hashtags"].split()
             if h.strip().startswith("#")
         ]
-        articles = output["articles"]
+        sources_list, articles = normalize_research_for_save(
+            output.get("sources"),
+            output.get("articles", []),
+        )
+        output["sources"]  = sources_list
+        output["articles"] = articles
         log.debug(
             f"    Done. ({len(articles)} articles fetched)"
             if articles else "     Done."
@@ -64,11 +81,12 @@ def run_campaign(*, debug: bool = False) -> None:
             log.debug(f"Revised {verification['revision_count']} time(s)")
 
         if verification["content"] != output["content"]:
-            output["content"]   = verification["content"]
-            parts               = [output["content"], output["hashtags"]]
-            if output["sources"]:
-                parts.append(f"📰 Sources:\n{output['sources']}")
-            output["full_post"] = "\n\n".join(p for p in parts if p)
+            output["content"] = verification["content"]
+            from services.post_content import build_publishable_post
+            output["full_post"] = build_publishable_post(
+                output["content"],
+                output["hashtags"],
+            )
 
         if verdict == "rejected":
             log.warning("Content rejected — not safe to post")
@@ -79,6 +97,10 @@ def run_campaign(*, debug: bool = False) -> None:
                 hashtags_list,
                 status="denied",
                 verdict_info = verification,
+                sources      = sources_list,
+                articles     = articles,
+                full_post    = output["full_post"],
+                run_id       = run_id,
             )
             log.debug("Updating memory index...")
             try:
@@ -93,47 +115,83 @@ def run_campaign(*, debug: bool = False) -> None:
         print(output["full_post"])
         print("─" * 50)
 
-        approval = input("\nApprove and post to Discord? (y/n): ").strip().lower()
+        print(f"\n{format_platform_plan(intent)}")
+
+        approval = input("\nApprove and post? (y/n): ").strip().lower()
 
         if approval == "y":
-            log.info("Posting to Discord...")
-            success = post_to_discord(output["full_post"])
-            if success:
-                log.info("Saving posted campaign...")
-                saved = save_campaign(
-                    user_prompt,
-                    output["full_post"],
-                    hashtags_list,
-                    status       = "posted",
-                    verdict_info = verification,
-                    platform     = "",
-                    sources      = output.get("sources",  ""),
-                    articles     = output.get("articles", []),
+            if "gmail" in intent.platforms and not intent.gmail_to:
+                log.warning(
+                    "Gmail requested but no recipient in prompt — "
+                    "include e.g. 'send to user@example.com via Gmail'"
                 )
-                log.debug("Updating memory index...")
-                try:
-                    add_campaign_to_index(saved["filename"])
-                except Exception as e:
-                    log.warning(f"Memory index update failed: {e}")
-                log.debug(f"Posted and saved → {saved['filename']}")
-            else:
-                log.warning("Discord post failed")
+                return
+
+            log.info(f"Posting to {', '.join(intent.platforms)}...")
+            import asyncio
+            posted, failed, errors = asyncio.run(
+                post_to_platforms(
+                    output["full_post"],
+                    intent,
+                    content  = output["content"],
+                    hashtags = hashtags_list,
+                )
+            )
+            if failed:
+                for p in failed:
+                    log.warning(f"{p}: {errors.get(p, 'failed')}")
+                if not posted:
+                    log.warning("All platform posts failed")
+                    return
+                log.warning(f"Partial post — succeeded: {posted}")
+
+            log.info("Saving posted campaign...")
+            saved = save_campaign(
+                user_prompt,
+                output["full_post"],
+                hashtags_list,
+                status           = "posted",
+                verdict_info     = verification,
+                platform         = ",".join(posted),
+                posted_platforms = posted,
+                sources          = sources_list,
+                articles         = articles,
+                run_id           = run_id,
+            )
+            log.debug("Updating memory index...")
+            try:
+                add_campaign_to_index(saved["filename"])
+            except Exception as e:
+                log.warning(f"Memory index update failed: {e}")
+            log.debug(
+                f"Posted to {posted} and saved → {saved['filename']}"
+            )
         else:
+            print("\nWhy are you denying this post?")
+            user_denial_reason = input("→ ").strip()
+            if not user_denial_reason:
+                log.warning("Denial reason required — campaign not saved")
+                print("⚠️  Please provide a reason so the agent can learn from this.")
+                return
+
             log.info("Saving user-denied campaign...")
             saved = save_campaign(
                 user_prompt,
                 output["content"],
                 hashtags_list,
-                status="denied",
-                full_post=output["full_post"],
-                verdict_info = {
+                status             = "denied",
+                full_post          = output["full_post"],
+                verdict_info       = {
                     "verdict": "user_denied",
-                    "issues": [],
-                    "summary": "User chose not to post",
+                    "issues":  [],
+                    "summary": "",
                 },
-                platform     = None,
-                sources      = output.get("sources",  ""),
-                articles     = output.get("articles", []),
+                platform           = "",
+                posted_platforms   = [],
+                sources            = sources_list,
+                articles           = articles,
+                run_id             = run_id,
+                user_denial_reason = user_denial_reason,
             )
             log.debug("Updating memory index...")
             try:

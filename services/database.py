@@ -35,8 +35,17 @@ def init_db() -> None:
                 articles      TEXT
             )
         """)
+        _migrate_schema(conn)
         conn.commit()
     log.debug("database ready")
+
+
+def _migrate_schema(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(campaigns)")}
+    if "posted_platforms" not in cols:
+        conn.execute(
+            "ALTER TABLE campaigns ADD COLUMN posted_platforms TEXT DEFAULT '[]'"
+        )
 
 
 def insert_campaign(data: dict) -> int:
@@ -47,8 +56,8 @@ def insert_campaign(data: dict) -> int:
                 run_id, timestamp, status, user_prompt,
                 content, hashtags, full_post, verdict,
                 issues, denial_reason, platform,
-                sources, articles
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                sources, articles, posted_platforms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get("run_id",        ""),
             data.get("timestamp",     datetime.now().isoformat()),
@@ -65,6 +74,7 @@ def insert_campaign(data: dict) -> int:
                 else json.dumps(data.get("sources", [])),
             json.dumps(data.get("articles",  [])) if isinstance(data.get("articles"), list)
                 else json.dumps([]),
+            json.dumps(data.get("posted_platforms", [])),
         ))
         conn.commit()
         row_id = cursor.lastrowid
@@ -103,7 +113,7 @@ def get_all_campaigns_raw() -> list[dict]:
 
 def _row_to_dict(row: sqlite3.Row) -> dict:
     d = dict(row)
-    for field in ("hashtags", "issues", "articles"):
+    for field in ("hashtags", "issues", "articles", "posted_platforms"):
         if isinstance(d.get(field), str):
             try:
                 d[field] = json.loads(d[field])

@@ -49,12 +49,12 @@ def _to_document(campaign: dict) -> Document:
         f"Status: {status}"
     )
 
-    if status == "denied" and (issues or denial_reason):
+    if status == "denied":
         issues_str = "; ".join(issues) if isinstance(issues, list) else str(issues)
         if issues_str:
             text += f"\nIssues found: {issues_str}"
         if denial_reason:
-            text += f"\nDenial reason: {denial_reason}"
+            text += f"\nUser rejection feedback: {denial_reason}"
 
     return Document(
         page_content = text,
@@ -217,6 +217,41 @@ def get_few_shot_examples(query: str, k: int = 2) -> str:
     lines.append("\n=== End of examples ===")
     return "\n".join(lines)
 
+
+def get_denial_lessons_for_agent(query: str, k: int = 2) -> str:
+    """
+    Find similar user-denied campaigns and return what to avoid when writing.
+    """
+    index = load_campaign_index()
+    if index is None:
+        return ""
+
+    results_with_scores = index.similarity_search_with_score(query, k=k * 4)
+
+    filtered = [
+        doc for doc, score in results_with_scores
+        if score < 1.3
+        and doc.metadata.get("status") == "denied"
+        and (doc.metadata.get("denial_reason") or "").strip()
+    ][:k]
+
+    if not filtered:
+        return ""
+
+    lines = [
+        "=== Past drafts the user rejected — avoid these mistakes ===",
+    ]
+    for i, doc in enumerate(filtered, 1):
+        meta   = doc.metadata
+        reason = meta.get("denial_reason", "")
+        topic  = meta.get("user_prompt", "")[:120]
+        lines.append(f"\n[Rejected {i}]")
+        lines.append(f"Topic             : {topic}")
+        lines.append(f"Why user rejected : {reason}")
+    lines.append("\n=== End of rejection lessons ===")
+    return "\n".join(lines)
+
+
 def get_denied_examples(content: str, k: int = 2) -> str:
     """
     Search for similar denied campaigns and return their failure
@@ -248,7 +283,7 @@ def get_denied_examples(content: str, k: int = 2) -> str:
         if issues:
             lines.append(f"Issues found : {issues}")
         if reason:
-            lines.append(f"Denial reason: {reason}")
+            lines.append(f"User rejection feedback: {reason}")
     lines.append("\n=== Be especially vigilant about the patterns above ===")
 
     return "\n".join(lines)

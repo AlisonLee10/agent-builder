@@ -12,27 +12,48 @@ _judge_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 _COMPANY_DATA_PATH = Path(__file__).resolve().parent.parent / "company_data.json"
 
-# User must show they want a FlowAI (or company) marketing post — not random topics
-_MARKETING_INTENT_RE = re.compile(
+# Strong signals: clearly a FlowAI / company marketing brief
+_STRONG_MARKETING_RE = re.compile(
     r"(?:"
-    r"flow\s*ai|flowai|our\s+(?:app|product|brand|company|tool|platform|service)|"
-    r"this\s+(?:app|product|tool|platform)|"
-    r"(?:write|create|make|draft|generate|post|promot|market|announc|launch)|"
-    r"(?:campaign|marketing\s+post|social\s+media|linkedin|twitter|discord)|"
-    r"(?:productivity|automation|workflow|saas|b2b|professional)|"
-    r"(?:target\s+audience|key\s+benefit|sign\s*ups?|free\s+trial)|"
-    r"(?:news\s+about|trends?\s+about|articles?\s+about|scan\s+recent)"
+    r"flow\s*ai|flowai|our\s+(?:company|product|brand|app|tool|platform|service)|"
+    r"this\s+(?:company|product|app|tool|platform)|"
+    r"marketing\s+post|social\s+media\s+(?:post|campaign)|"
+    r"(?:write|create|draft|generate)\s+(?:a\s+)?(?:marketing\s+)?post\s+about|"
+    r"promot(?:e|ing)\s+(?:flow|our|the\s+product)|"
+    r"launch\s+(?:campaign|post)|"
+    r"news\s+articles?\s+about|trends?\s+(?:on|about)|articles?\s+about|scan\s+(?:recent\s+)?trends?"
     r")",
     re.I,
 )
 
-# Tokens / phrases with no real marketing topic (English + common Korean low-effort)
+# Weak words alone are NOT enough (post, discord, write, etc.)
+_WEAK_ONLY_RE = re.compile(
+    r"^(?:post|write|make|help|discord|slack|gmail|email|marketing|content|"
+    r"something|anything|smth|sth|tired|bored|done|ok|yes|no|test)\s*"
+    r"(?:post|write|make|discord|slack|gmail|smth|sth|something)?\s*\.?$",
+    re.I,
+)
+
+_UNRELATED_TOPIC_RE = re.compile(
+    r"(?:"
+    r"\b(?:cookie|cake|brownie|recipe|cooking|bake|baking|pizza|banana|milk)\b|"
+    r"\b(?:whale|dolphin|documentary|netflix|movie|film)\s+(?:about|on|recommend)?\b|"
+    r"recommend\s+(?:me\s+)?a\s+\w+\s+documentary|"
+    r"how\s+(?:big|large|hot)\s+is\s+(?:the\s+)?(?:sun|moon|earth)|"
+    r"\b(?:weather|forecast|temperature)\s+(?:today|tomorrow)?\b|"
+    r"\b(?:homework|essay|math|exam)\b|"
+    r"what\s+is\s+\d+\s*\+\s*\d+"
+    r")",
+    re.I,
+)
+
 VAGUE_EXACT = {
     "x", "hi", "hey", "test", "asdf", "qwerty", "idk", "idc", "nothing",
     "something", "anything", "whatever", "post", "post smth", "post sth",
     "post something", "im tired", "i'm tired", "i am tired", "help",
     "write something", "make a post", "do smth", "idk what",
     "ok", "yes", "no", "lol", "haha", "marketing", "social media",
+    "discord", "slack", "gmail", "email", "smth", "sth",
     "글써줘", "아무거나", "아무말", "뭐든지", "알아서", "아무거나 써줘", "글 써줘",
 }
 
@@ -41,21 +62,26 @@ VAGUE_PATTERNS = [
     re.compile(r"^i\s*'?m\s+(tired|bored|lazy|done)\.?$", re.I),
     re.compile(r"^(just\s+)?(post|write|make)\s+(a\s+)?(post|something)\.?$", re.I),
     re.compile(r"^write\s+(smth|something|anything)\.?$", re.I),
+    re.compile(r"^(discord|slack|gmail|email)\s*\.?$", re.I),
+    re.compile(r"^(im\s+)?tired[,.]?\s*(post|write)?", re.I),
     re.compile(r"^(글|포스트|게시글)\s*(써줘|작성|만들어).?$"),
     re.compile(r"^아무(거나|말).?$"),
 ]
 
 _WORD_RE = re.compile(r"[a-zA-Z0-9\uac00-\ud7a3']+")
 
-
-def _has_hangul(text: str) -> bool:
-    return any("\uac00" <= c <= "\ud7a3" for c in text)
-
 _GENERIC_WORDS = frozenset({
     "post", "write", "make", "about", "something", "anything", "help", "please",
     "the", "a", "an", "our", "my", "create", "generate", "marketing", "content",
+    "discord", "slack", "gmail", "email", "smth", "sth", "tired", "bored",
+    "done", "just", "output", "it", "to", "and", "then", "via",
     "글", "써", "써줘", "작성", "만들어", "해줘", "아무거나", "뭐든지",
 })
+
+_PLATFORM_WORDS = frozenset({
+    "discord", "slack", "gmail", "email", "linkedin", "twitter", "instagram",
+})
+
 
 def _brand_context_for_judge() -> str:
     try:
@@ -82,43 +108,42 @@ def _judge_system_prompt() -> str:
 
 {brand}
 
-REJECT (valid=false):
-- Gibberish, keyboard smash, symbols-only
-- Vague or low-effort ("post something", "im tired", "help")
-- Unrelated topics with no link to this brand (e.g. "banana milk", "cats", "weather today", "pizza recipe")
-- Random noun phrases that are not a marketing brief for FlowAI / the product above
-- Jokes, chit-chat, insults, or homework-style questions
-- User names a consumer product/food/hobby unless they clearly tie it to promoting FlowAI
+REJECT (valid=false) — always reject:
+- Gibberish, keyboard smash, symbols-only (e.g. "8uuq1ub", "////////")
+- Careless / low-effort: "im tired", "post smth", "discord", "write something", only a platform name
+- Unrelated topics: recipes, animals, documentaries, science trivia, weather, homework, jokes — unless clearly tied to promoting FlowAI
+- No mention of the company/product and no clear marketing task for FlowAI
 
-ACCEPT (valid=true):
-- Explicitly about promoting FlowAI, its product, features, audience, or a defined campaign
-- Clear instructions to write a marketing post about the company (may mention news/trends + FlowAI)
-- Specific campaign angle for this B2B productivity brand (e.g. morning routine campaign, Q2 launch)
+ACCEPT (valid=true) — only if:
+- User wants a marketing/social post promoting FlowAI or "our company/product" with a clear angle
+- OR explicit campaign brief (news/trends research + write post about FlowAI + optional platforms)
 
 Reply with ONLY valid JSON:
 {{"valid": true or false, "reason": "one short sentence for the user"}}"""
-
-
-def _has_marketing_intent(prompt: str) -> bool:
-    return bool(_MARKETING_INTENT_RE.search(prompt))
 
 
 def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
 
 
+def _has_hangul(text: str) -> bool:
+    return any("\uac00" <= c <= "\ud7a3" for c in text)
+
+
+def _extract_words(text: str) -> list[str]:
+    return _WORD_RE.findall(text)
+
+
 def _is_alphanumeric_mash(token: str) -> bool:
-    """Detect random letter+digit strings like 38grov1go8p or 183ygf83ge4bv."""
-    if len(token) < 5:
+    if len(token) < 4:
         return False
-    digits = sum(c.isdigit() for c in token)
+    digits  = sum(c.isdigit() for c in token)
     letters = sum(c.isalpha() for c in token)
-    if digits == 0 or letters == 0:
-        return False
-    if token[0].isdigit():
-        return True
-    if digits / len(token) >= 0.2:
-        return True
+    if digits and letters:
+        if token[0].isdigit():
+            return True
+        if digits / len(token) >= 0.15:
+            return True
     return False
 
 
@@ -135,7 +160,7 @@ def _looks_like_gibberish(token: str) -> bool:
     vowels = sum(1 for c in letters if c in "aeiou")
     vowel_ratio = vowels / len(letters)
 
-    if vowels == 0 and len(letters) >= 4:
+    if vowels == 0 and len(letters) >= 3:
         return True
     if len(letters) >= 5 and vowel_ratio < 0.2:
         return True
@@ -148,45 +173,37 @@ def _looks_like_gibberish(token: str) -> bool:
 def _is_vague(normalized: str) -> bool:
     if normalized in VAGUE_EXACT:
         return True
+    if _WEAK_ONLY_RE.match(normalized):
+        return True
     return any(p.match(normalized) for p in VAGUE_PATTERNS)
 
 
-def _extract_words(text: str) -> list[str]:
-    return _WORD_RE.findall(text)
-
-
-def _is_low_effort(normalized: str, meaningful: list[str]) -> bool:
-    """Careless / generic requests with no promotable subject."""
-    if normalized in VAGUE_EXACT:
-        return True
-    if len(meaningful) < 2 and len(normalized) < 30:
-        return True
-    if meaningful and all(w.lower() in _GENERIC_WORDS for w in meaningful):
-        return True
-    return False
-
-
-def _is_off_platform_topic(normalized: str, meaningful: list[str], prompt: str) -> bool:
-    """
-    Short prompts with no marketing/brand intent (e.g. 'banana milk') — reject locally, no agent.
-    """
-    if _has_marketing_intent(prompt):
+def _is_unrelated_topic(prompt: str) -> bool:
+    if _STRONG_MARKETING_RE.search(prompt):
         return False
-    if len(meaningful) <= 3 and len(normalized) < 55:
+    return bool(_UNRELATED_TOPIC_RE.search(prompt))
+
+
+def _is_careless_prompt(normalized: str, meaningful: list[str]) -> bool:
+    """Reject prompts with no real subject — only generic/platform words."""
+    if not meaningful:
+        return True
+    lower = [w.lower() for w in meaningful]
+    substantive = [
+        w for w in lower
+        if w not in _GENERIC_WORDS
+        and w not in _PLATFORM_WORDS
+        and len(w) >= 4
+    ]
+    if not substantive:
+        return True
+    if len(substantive) == 1 and substantive[0] in {"tired", "bored", "lazy", "done"}:
         return True
     return False
 
 
-def _heuristic_clear_accept(prompt: str, meaningful: list[str]) -> bool:
-    """Only skip LLM judge for long, clearly on-brand briefs."""
-    if not _has_marketing_intent(prompt):
-        return False
-    joined = " ".join(meaningful).lower()
-    if "flowai" in joined or "flow ai" in joined:
-        return len(prompt.strip()) >= 30
-    if len(meaningful) >= 5 and len(prompt.strip()) >= 50:
-        return True
-    return False
+def _has_strong_marketing_intent(prompt: str) -> bool:
+    return bool(_STRONG_MARKETING_RE.search(prompt))
 
 
 def _heuristic_validate(prompt: str) -> tuple[bool, str]:
@@ -200,7 +217,14 @@ def _heuristic_validate(prompt: str) -> tuple[bool, str]:
         return (
             False,
             "That's too vague for a marketing post. "
-            "Describe a product, service, or topic (e.g. 'FlowAI for busy professionals').",
+            "Describe what to promote (e.g. 'Write a FlowAI post for busy professionals, post to Discord').",
+        )
+
+    if _is_unrelated_topic(text):
+        return (
+            False,
+            "This agent only creates marketing posts for FlowAI. "
+            "Ask for a company campaign (e.g. 'Write a post about FlowAI for busy teams').",
         )
 
     letters = [c for c in text if c.isalpha()]
@@ -208,6 +232,12 @@ def _heuristic_validate(prompt: str) -> tuple[bool, str]:
         return (
             False,
             "Please use real words — not only symbols or numbers.",
+        )
+
+    if re.fullmatch(r"[\W_]+", text.replace(" ", "")):
+        return (
+            False,
+            "Input looks like random symbols. Describe your marketing topic in plain language.",
         )
 
     non_word = sum(1 for c in text if not c.isalnum() and not c.isspace())
@@ -225,7 +255,7 @@ def _heuristic_validate(prompt: str) -> tuple[bool, str]:
         return (
             False,
             "That doesn't look like a real topic. "
-            "Try a product name, campaign theme, or audience (e.g. 'FlowAI productivity app').",
+            "Try a product or campaign theme (e.g. 'FlowAI productivity app').",
         )
 
     meaningful = [
@@ -235,28 +265,14 @@ def _heuristic_validate(prompt: str) -> tuple[bool, str]:
     if not meaningful:
         return (
             False,
-            "Couldn't find a clear topic in your input. "
-            "Use specific words about what to promote.",
+            "Couldn't find a clear topic. Use specific words about what to promote.",
         )
 
-    if _is_low_effort(normalized, meaningful):
+    if _is_careless_prompt(normalized, meaningful):
         return (
             False,
-            "That's too vague for a marketing post. "
-            "Name a product, service, or topic to promote (e.g. 'FlowAI for busy teams').",
-        )
-
-    if _is_off_platform_topic(normalized, meaningful, text):
-        return (
-            False,
-            "This agent only creates posts for FlowAI. "
-            "Describe a campaign, feature, or angle for FlowAI (e.g. 'Write about FlowAI saving 2 hours a day').",
-        )
-
-    if len(normalized) < 10 and len(meaningful) < 2:
-        return (
-            False,
-            "Please add a bit more detail (at least ~10 characters or two clear words).",
+            "That's too vague — name FlowAI, a feature, or campaign angle "
+            "(not just 'post something' or a platform name).",
         )
 
     gibberish_count = sum(1 for w in words if _looks_like_gibberish(w))
@@ -264,6 +280,19 @@ def _heuristic_validate(prompt: str) -> tuple[bool, str]:
         return (
             False,
             "Input looks like random characters. Describe your marketing topic clearly.",
+        )
+
+    if len(normalized) < 12 and len(meaningful) < 2:
+        return (
+            False,
+            "Please add more detail (what to promote and optionally where to post).",
+        )
+
+    if not _has_strong_marketing_intent(text) and len(meaningful) < 4:
+        return (
+            False,
+            "Please include a clear FlowAI marketing task "
+            "(e.g. 'Write a post about FlowAI for busy professionals').",
         )
 
     return True, ""
@@ -281,31 +310,25 @@ def _llm_validate(prompt: str) -> tuple[bool, str]:
             return True, ""
         return False, result.get(
             "reason",
-            "This doesn't look like a marketing topic. Describe what you want to promote.",
+            "This doesn't look like a valid marketing brief for FlowAI.",
         )
     except json.JSONDecodeError:
-        # If the judge fails to parse, fail closed — do not generate
         return (
             False,
-            "Could not validate your topic. Please describe a clear product or campaign to promote.",
+            "Could not validate your prompt. Please describe a clear FlowAI marketing task.",
         )
 
 
 def validate_user_prompt(prompt: str) -> tuple[bool, str]:
     """
-    Analyze prompt before any agent/verification LLM runs.
-    Heuristics first (no tokens); LLM judge only for short borderline cases.
+    Run before any agent work. Heuristics reject obvious bad input;
+    LLM judge runs for everything else (fail closed).
     """
     ok, reason = _heuristic_validate(prompt)
     if not ok:
         return False, reason
 
-    words = _extract_words(prompt.strip())
-    meaningful = [
-        w for w in words
-        if not _looks_like_gibberish(w) and (len(w) >= 3 or _has_hangul(w))
-    ]
-    if _heuristic_clear_accept(prompt, meaningful):
+    if _has_strong_marketing_intent(prompt) and len(prompt.strip()) >= 40:
         return True, ""
 
     return _llm_validate(prompt)

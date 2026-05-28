@@ -3,8 +3,8 @@ from langchain.chat_models import init_chat_model
 from langchain_classic.agents import create_openai_tools_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from tools.tool_selector import select_tools
-from services.campaign_memory import get_few_shot_examples
-from services.ai              import set_few_shot_examples, clear_few_shot_examples
+from services.campaign_memory import get_few_shot_examples, get_denial_lessons_for_agent
+from services.ai              import set_campaign_memory, clear_few_shot_examples
 from services.progress        import show_progress
 from services.agent_trace     import record_agent_scratchpad_to_langsmith
 from services.logger          import get_logger, get_run_id
@@ -48,12 +48,39 @@ Return the final post in exactly this format — no extra commentary:
 ])
 
 
-def _extract_articles_from_steps(intermediate_steps: list) -> list[dict]:
-    from services.news import get_last_fetched_articles
+def _extract_research_from_steps(intermediate_steps: list) -> list[dict]:
+    """Collect news articles and trend signals from tool calls in this run."""
+    from services.news   import get_last_fetched_articles
+    from services.trends import get_last_fetched_trends
+
+    news_tools  = {"news_tool", "news_sources_tool"}
+    trend_tools = {"reddit_tool", "trends_tool"}
+
+    articles: list[dict] = []
+    seen_urls: set[str]  = set()
+
+    def _add(items: list[dict]) -> None:
+        for item in items:
+            url = (item.get("url") or "").strip()
+            key = url or (item.get("title") or "")
+            if key and key in seen_urls:
+                continue
+            if key:
+                seen_urls.add(key)
+            articles.append(item)
+
     for action, _ in intermediate_steps:
-        if hasattr(action, "tool") and action.tool in ("news_tool", "news_sources_tool"):
-            return get_last_fetched_articles()
-    return []
+        tool_name = getattr(action, "tool", None) or getattr(action, "name", None)
+        if tool_name in news_tools:
+            _add(get_last_fetched_articles())
+        if tool_name in trend_tools:
+            _add(get_last_fetched_trends())
+
+    if not articles:
+        _add(get_last_fetched_articles())
+        _add(get_last_fetched_trends())
+
+    return articles
 
 
 def parse_agent_output(raw: str) -> dict:
@@ -82,27 +109,29 @@ def parse_agent_output(raw: str) -> dict:
     hashtags = hashtags.strip()
     sources  = sources.strip()
 
-    parts = [content, hashtags]
-    if sources and sources.lower() != "none":
-        parts.append(f"📰 Sources:\n{sources}")
+    from services.post_content import build_publishable_post
+
+    sources_clean = sources if sources and sources.lower() != "none" else ""
 
     return {
         "content":   content,
         "hashtags":  hashtags,
-        "sources":   sources if sources.lower() != "none" else "",
-        "full_post": "\n\n".join(p for p in parts if p),
+        "sources":   sources_clean,
+        "full_post": build_publishable_post(content, hashtags),
     }
 
 
 def run_agent(user_prompt: str, *, debug: bool = False) -> dict:
 
-    # retrieve few shot examples from memory (#3d)
-    examples = get_few_shot_examples(user_prompt, k = 2)
-    set_few_shot_examples(examples)
+    approved = get_few_shot_examples(user_prompt, k=2)
+    lessons  = get_denial_lessons_for_agent(user_prompt, k=2)
+    set_campaign_memory(approved_examples=approved, denial_lessons=lessons)
 
-    if examples:
+    if approved:
         log.debug("Similar approved campaigns found — using as style examples")
-    else:
+    if lessons:
+        log.debug("Similar user-denied campaigns found — applying rejection lessons")
+    if not approved and not lessons:
         log.debug("No similar campaigns yet — writing from scratch")
 
     # dynamic tool selection
@@ -136,9 +165,26 @@ def run_agent(user_prompt: str, *, debug: bool = False) -> dict:
 
     log.debug("AgentExecutor finished — parsing output")
     output = parse_agent_output(result["output"])
-    output["articles"] = _extract_articles_from_steps(
-        result.get("intermediate_steps", [])
+    articles = _extract_research_from_steps(result.get("intermediate_steps", []))
+
+    from services.storage import normalize_research_for_save
+    from services.post_content import build_publishable_post
+
+    sources_list, articles = normalize_research_for_save(
+        output.get("sources", ""),
+        articles,
     )
+    output["sources"]  = sources_list
+    output["articles"] = articles
+    output["full_post"] = build_publishable_post(
+        output["content"],
+        output["hashtags"],
+    )
+
+    if articles:
+        log.debug(f"Attached {len(articles)} article(s) to campaign output")
+    if sources_list:
+        log.debug(f"Attached {len(sources_list)} source line(s) to campaign output")
 
     clear_few_shot_examples()
     return output

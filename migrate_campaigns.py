@@ -14,6 +14,7 @@ else:
             with open(path) as f:
                 data = json.load(f)
             data.setdefault("platform", "")
+            data.setdefault("posted_platforms", [])
             data.setdefault("sources",  "")
             data.setdefault("articles", [])
             insert_campaign(data)

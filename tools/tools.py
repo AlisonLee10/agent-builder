@@ -27,8 +27,12 @@ def news_tool(query: str) -> str:
 @tool
 def news_sources_tool(query: str) -> str:
     """Get formatted source URLs for news articles fetched about a topic."""
+    from services.news import get_last_fetched_articles
+
     log.debug(f"news_sources_tool — query='{query[:80]}'")
-    articles = fetch_news(query)
+    articles = get_last_fetched_articles()
+    if not articles:
+        articles = fetch_news(query)
     if not articles:
         return "No sources found."
     return format_sources(articles)
