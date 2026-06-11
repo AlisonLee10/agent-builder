@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 from services.logger import get_logger
-from shcema import AgentConfig, TaskType, StepConfig
+from shcema import AgentConfig, TaskType
 
 if TYPE_CHECKING:
     from domain_pack import DomainPack
@@ -254,8 +254,8 @@ async def _call_claude(system: str, user: str, model: str) -> str:
         system     = system,
         messages   = [{"role": "user", "content": user}],
     )
-    # response.content is a list of blocks; we want the first text block
-    return response.content[0].text.strip()
+    # response.content is a union of block types; only TextBlock has .text
+    return next(block.text for block in response.content if block.type == "text").strip()
 
 
 def _parse_config(raw: str) -> tuple[AgentConfig | None, str]:
