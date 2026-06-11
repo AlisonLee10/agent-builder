@@ -1,0 +1,217 @@
+# =============================================================================
+# domains/marketing/governance/content_policy.yaml
+#
+# Machine-readable governance rules evaluated by GovernanceLoader at runtime.
+# Checked BEFORE every LLM call and AFTER output is generated.
+#
+# WHY YAML NOT CODE
+# Rules here can be updated, audited, and reviewed without touching Python.
+# GovernanceLoader (Phase 2b) parses these into rule objects and calls
+# check(output, task_type) to evaluate them.
+#
+# RULE FIELDS
+#   id          → unique identifier, used in rejection_reason logs
+#   applies_to  → list of task_types this rule applies to, ["*"] = all tasks
+#   description → shown to the reviewer on violation
+#   type        → evaluation method (see list below)
+#   value       → what to check (word list / int / field name / string list)
+#   severity    → "error" blocks output; "warning" logs but allows through
+#
+# EVALUATION TYPES
+#   forbidden_word          → value is a list; fail if any word appears in output
+#   forbidden_phrase_start  → value is a list; fail if output starts with any phrase
+#   max_length              → value is int; fail if field exceeds N chars/words
+#   max_count               → value is int; fail if field appears more than N times
+#   required_field          → value is field name; fail if field is absent/empty
+#   required_present        → value is token list; fail if none of the tokens appear
+#   required_sections       → value is section name list; fail if any are missing
+#   approved_claims_only    → cross-check numeric claims against approved_claims list
+#   approved_sources_only   → value is domain list; warn if unlisted sources cited
+#   conditional_required_field → only applies when condition_field == condition_value
+# =============================================================================
+
+version: "1.0"
+
+rules:
+
+  # ── All content: forbidden brand phrases ──────────────────────────────────
+  - id: forbidden_brand_phrases
+    applies_to: ["*"]
+    description: >
+      These words are banned across all content regardless of task type.
+      They signal hype, cannot be substantiated, and damage brand credibility.
+      Source: company_data.json "forbidden_phrases" + services/ai.py tone rules.
+    type: forbidden_word
+    value:
+      - revolutionary
+      - game-changer
+      - game changer
+      - disruptive
+      - world-class
+      - best-in-class
+      - synergy
+      - paradigm shift
+      - cutting-edge
+      - next-generation
+    severity: error
+
+  # ── All content: no unverified statistics ─────────────────────────────────
+  - id: no_unverified_stats
+    applies_to: ["*"]
+    description: >
+      Only approved statistics from brand_guidelines.md may appear in content.
+      GovernanceLoader cross-references any percentage or numeric claim against
+      the approved_claims list below.
+    type: approved_claims_only
+    approved_claims:
+      - "saves an average of 2 hours per day"
+      - "used by 10,000+ professionals"
+      - "integrates with 50+ popular tools"
+    severity: error
+
+  # ── Email: subject line max length ────────────────────────────────────────
+  - id: email_subject_max_chars
+    applies_to: ["email_generation"]
+    description: >
+      Subject lines over 50 characters are clipped in most email clients,
+      causing open rate drops.
+    type: max_length
+    field: subject
+    value: 50
+    severity: error
+
+  # ── Email: personalization token required ─────────────────────────────────
+  - id: email_require_personalization
+    applies_to: ["email_generation"]
+    description: >
+      Every outreach email must reference the recipient by name or company.
+      Generic openers are not permitted.
+    type: required_present
+    value:
+      - "{{first_name}}"
+      - "{{company}}"
+      - "{{recipient}}"
+    severity: error
+
+  # ── Email: single CTA ─────────────────────────────────────────────────────
+  - id: email_single_cta
+    applies_to: ["email_generation"]
+    description: >
+      Each email must contain exactly one call to action.
+      Multiple CTAs reduce reply rate and confuse the reader.
+    type: max_count
+    field: cta
+    value: 1
+    severity: error
+
+  # ── Email: cold email word count ──────────────────────────────────────────
+  - id: email_cold_max_words
+    applies_to: ["email_generation"]
+    description: >
+      Cold outreach emails (sequence_step: 1) must be under 125 words.
+    type: max_length
+    field: body_words
+    value: 125
+    applies_when:
+      sequence_step: 1
+    severity: warning
+
+  # ── Email: nurture word count ─────────────────────────────────────────────
+  - id: email_nurture_max_words
+    applies_to: ["email_generation"]
+    description: >
+      Nurture and follow-up emails (sequence_step 2 or 3) must be under 200 words.
+    type: max_length
+    field: body_words
+    value: 200
+    applies_when:
+      sequence_step: [2, 3]
+    severity: warning
+
+  # ── Email: forbidden opening phrases ─────────────────────────────────────
+  - id: email_forbidden_openings
+    applies_to: ["email_generation"]
+    description: >
+      These opening phrases signal low-effort templating and are the most
+      common reason cold emails are ignored or marked as spam.
+      Source: services/ai.py hardcoded system prompt.
+    type: forbidden_phrase_start
+    value:
+      - "I hope this email finds you well"
+      - "I hope you're doing well"
+      - "My name is"
+      - "I wanted to reach out"
+      - "Just following up"
+      - "Hi there"
+      - "To whom it may concern"
+    severity: error
+
+  # ── Email: legal footer required (CAN-SPAM) ───────────────────────────────
+  - id: email_require_legal_footer
+    applies_to: ["email_generation"]
+    description: >
+      CAN-SPAM compliance requires a physical address and unsubscribe link
+      in all commercial email.
+    type: required_field
+    value: legal_footer
+    severity: error
+
+  # ── Email: spam trigger words ─────────────────────────────────────────────
+  - id: email_spam_triggers
+    applies_to: ["email_generation"]
+    description: >
+      These words trigger spam filters and reduce deliverability.
+    type: forbidden_word
+    value:
+      - "FREE"
+      - "WINNER"
+      - "CLICK NOW"
+      - "ACT FAST"
+      - "URGENT"
+      - "LIMITED TIME"
+      - "RISK-FREE"
+      - "NO OBLIGATION"
+    severity: warning
+
+  # ── Research: approved source domains ────────────────────────────────────
+  - id: research_approved_sources
+    applies_to: ["research_summary", "competitor_analysis"]
+    description: >
+      Research tasks must only cite reputable B2B and SaaS sources.
+      Personal blogs and unverified forums are excluded.
+    type: approved_sources_only
+    value:
+      - techcrunch.com
+      - crunchbase.com
+      - g2.com
+      - linkedin.com
+      - producthunt.com
+      - saastr.com
+      - venturebeat.com
+      - forbes.com
+      - hbr.org
+    severity: warning
+
+  # ── Reports: required sections ────────────────────────────────────────────
+  - id: report_required_sections
+    applies_to: ["campaign_brief", "competitor_analysis"]
+    description: >
+      Campaign briefs and competitor analyses must include all required sections.
+    type: required_sections
+    value:
+      - executive_summary
+      - key_metrics
+      - recommendations
+    severity: error
+
+  # ── GDPR mode (conditional) ───────────────────────────────────────────────
+  - id: gdpr_lawful_basis
+    applies_to: ["email_generation"]
+    description: >
+      When gdpr_mode is true (EU recipient lists), the email must include a
+      lawful basis statement per GDPR Article 13.
+    type: conditional_required_field
+    condition_field: gdpr_mode
+    condition_value: true
+    required_field: gdpr_statement
+    severity: error

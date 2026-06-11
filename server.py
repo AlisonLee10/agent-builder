@@ -22,6 +22,7 @@ from services.platform_parser import (
 )
 from services.platform_posting import post_to_platforms
 from services.prompt_validation import validate_user_prompt
+from services.denial_reason_validation import validate_denial_reason
 
 log = get_logger(__name__)
 app = FastAPI(
@@ -270,6 +271,13 @@ async def deny_campaign(request: DenyRequest):
     from services.storage         import save_campaign
     from services.campaign_memory import add_campaign_to_index
 
+    valid, denial_msg = validate_denial_reason(
+        request.user_denial_reason,
+        campaign_prompt=request.prompt,
+    )
+    if not valid:
+        raise HTTPException(status_code=400, detail=denial_msg)
+
     sources_list, articles_list = normalize_research_for_save(
         request.sources,
         request.articles,
@@ -301,57 +309,19 @@ async def deny_campaign(request: DenyRequest):
     return {"status": "denied", "id": saved["id"]}
 
 
-@app.get("/api/gmail-config", response_model=GmailConfigResponse, tags=["Campaigns"])
-def gmail_config():
-    """Expose non-secret Gmail defaults for the frontend test form."""
-    return GmailConfigResponse(
-        configured        = bool(os.getenv("GMAIL_SENDER_EMAIL")),
-        default_recipient = os.getenv("GMAIL_TEST_RECIPIENT", ""),
-        default_subject   = os.getenv("GMAIL_DEFAULT_SUBJECT", "Marketing Update"),
-    )
-
-
-@app.post("/api/post-email", tags=["Campaigns"])
-async def post_email(request: EmailRequest):
-    from services.gmail           import send_email
-    from services.storage         import save_campaign
-    from services.campaign_memory import add_campaign_to_index
-
-    if not os.getenv("GMAIL_SENDER_EMAIL"):
-        raise HTTPException(
-            status_code=503,
-            detail="Gmail not configured — set GMAIL_SENDER_EMAIL in .env",
-        )
-
-    success = await asyncio.to_thread(
-        send_email, request.to, request.subject, request.full_post
-    )
-    if not success:
-        raise HTTPException(status_code=502, detail="Email send failed")
-
-    sources_list, articles_list = normalize_research_for_save(
-        request.sources,
-        request.articles,
-    )
-
-    saved = save_campaign(
-        request.prompt,
-        request.full_post,
-        request.hashtags,
-        status           = "posted",
-        verdict_info     = request.verdict_info,
-        platform         = "email",
-        posted_platforms = ["gmail"],
-        sources          = sources_list,
-        articles         = articles_list,
-        run_id           = request.run_id,
-    )
-    try:
-        add_campaign_to_index(saved["filename"])
-    except Exception as e:
-        log.warning(f"memory index update skipped: {e}")
-
-    return {"status": "posted", "platform": "email", "id": saved["id"]}
+# Gmail/email API temporarily disabled — re-enable with GMAIL_POSTING_ENABLED in platform_parser.py
+# @app.get("/api/gmail-config", response_model=GmailConfigResponse, tags=["Campaigns"])
+# def gmail_config():
+#     return GmailConfigResponse(
+#         configured        = bool(os.getenv("GMAIL_SENDER_EMAIL")),
+#         default_recipient = os.getenv("GMAIL_TEST_RECIPIENT", ""),
+#         default_subject   = os.getenv("GMAIL_DEFAULT_SUBJECT", "Marketing Update"),
+#     )
+#
+#
+# @app.post("/api/post-email", tags=["Campaigns"])
+# async def post_email(request: EmailRequest):
+#     ...
 
 
 @app.get("/api/campaigns", response_model=list[CampaignSummary], tags=["Campaigns"])

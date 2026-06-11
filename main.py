@@ -4,6 +4,7 @@ from services.storage           import save_campaign, normalize_research_for_sav
 from services.verify            import run_verification
 from services.campaign_memory   import load_or_build_index, add_campaign_to_index
 from services.prompt_validation import validate_user_prompt
+from services.denial_reason_validation import validate_denial_reason
 from services.platform_parser   import (
     validate_posting_intent,
     format_platform_plan,
@@ -120,13 +121,7 @@ def run_campaign(*, debug: bool = False) -> None:
         approval = input("\nApprove and post? (y/n): ").strip().lower()
 
         if approval == "y":
-            if "gmail" in intent.platforms and not intent.gmail_to:
-                log.warning(
-                    "Gmail requested but no recipient in prompt — "
-                    "include e.g. 'send to user@example.com via Gmail'"
-                )
-                return
-
+            # Gmail posting disabled — see services/platform_parser.GMAIL_POSTING_ENABLED
             log.info(f"Posting to {', '.join(intent.platforms)}...")
             import asyncio
             posted, failed, errors = asyncio.run(
@@ -168,11 +163,19 @@ def run_campaign(*, debug: bool = False) -> None:
             )
         else:
             print("\nWhy are you denying this post?")
-            user_denial_reason = input("→ ").strip()
-            if not user_denial_reason:
-                log.warning("Denial reason required — campaign not saved")
-                print("⚠️  Please provide a reason so the agent can learn from this.")
-                return
+            print("(Be specific — e.g. too salesy, missing benefits, wrong tone)")
+            while True:
+                user_denial_reason = input("→ ").strip()
+                if not user_denial_reason:
+                    print("⚠️  A reason is required so the agent can learn from this.")
+                    continue
+                ok, msg = validate_denial_reason(
+                    user_denial_reason,
+                    campaign_prompt=user_prompt,
+                )
+                if ok:
+                    break
+                print(f"⚠️  {msg}")
 
             log.info("Saving user-denied campaign...")
             saved = save_campaign(

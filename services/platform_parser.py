@@ -5,19 +5,25 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-SUPPORTED_PLATFORMS = ("discord", "slack", "gmail")
+# Gmail/email posting temporarily disabled — re-enable when service account is ready.
+GMAIL_POSTING_ENABLED = False
+GMAIL_DISABLED_MESSAGE = (
+    "Gmail/email posting is temporarily disabled. Use Discord or Slack for now."
+)
 
-SUPPORTED_LABELS = "Discord / Slack / Gmail"
+SUPPORTED_PLATFORMS = ("discord", "slack")  # add "gmail" when GMAIL_POSTING_ENABLED
+
+SUPPORTED_LABELS = "Discord / Slack"
 
 MISSING_PLATFORMS_MESSAGE = (
-    "Please include platforms to post (Discord / Slack / Gmail)."
+    "Please include platforms to post (Discord / Slack)."
 )
 
 # Platform name -> aliases (for destination detection)
 SUPPORTED_ALIASES: dict[str, list[str]] = {
     "discord": ["discord"],
     "slack": ["slack"],
-    "gmail": ["gmail", "e-mail", "email"],
+    # "gmail": ["gmail", "e-mail", "email"],  # disabled — see GMAIL_POSTING_ENABLED
 }
 
 UNSUPPORTED_ALIASES: dict[str, list[str]] = {
@@ -79,6 +85,20 @@ def _normalize_platform_key(alias: str) -> str | None:
 
 def _find_emails(prompt: str) -> list[str]:
     return EMAIL_RE.findall(prompt)
+
+
+def _gmail_posting_requested(text: str) -> bool:
+    """True when the user asks to send/post via email (even if gmail is disabled)."""
+    lower = text.lower()
+    if not POST_VERB_RE.search(text):
+        return False
+    if re.search(r"\b(?:gmail|e-?mail|email)\b", lower):
+        return True
+    if EMAIL_RE.search(text) and re.search(
+        r"\b(?:send|email|mail)\b", lower
+    ):
+        return True
+    return False
 
 
 def _alias_in_text(alias: str, text: str) -> bool:
@@ -155,11 +175,9 @@ def parse_platform_intent(prompt: str) -> PlatformIntent:
             if key and key not in platforms:
                 platforms.append(key)
 
-    if "gmail" in platforms or (
-        re.search(r"\b(?:gmail|e-?mail|email)\b", lower) and POST_VERB_RE.search(text)
-    ):
-        if "gmail" not in platforms and re.search(r"\b(?:gmail|e-?mail|email)\b", lower):
-            platforms.append("gmail")
+    # Gmail auto-detection disabled while GMAIL_POSTING_ENABLED is False
+    # if GMAIL_POSTING_ENABLED and (...):
+    #     platforms.append("gmail")
 
     intent.platforms = [p for p in SUPPORTED_PLATFORMS if p in platforms]
 
@@ -207,7 +225,7 @@ def format_platform_plan(intent: PlatformIntent) -> str:
         return ""
     labels = [p.capitalize() for p in intent.platforms]
     plan = "Will post to: " + ", ".join(labels)
-    if "gmail" in intent.platforms and intent.gmail_to:
+    if GMAIL_POSTING_ENABLED and "gmail" in intent.platforms and intent.gmail_to:
         plan += f" (email to {intent.gmail_to})"
     return plan
 
@@ -219,13 +237,16 @@ def validate_posting_intent(prompt: str) -> tuple[bool, str, PlatformIntent]:
     """
     intent = parse_platform_intent(prompt)
 
+    if not GMAIL_POSTING_ENABLED and _gmail_posting_requested(prompt):
+        return False, GMAIL_DISABLED_MESSAGE, intent
+
     if intent.unsupported:
         return False, unsupported_platform_message(intent.unsupported), intent
 
     if not intent.platforms:
         return False, MISSING_PLATFORMS_MESSAGE, intent
 
-    if "gmail" in intent.platforms and not intent.gmail_to:
+    if GMAIL_POSTING_ENABLED and "gmail" in intent.platforms and not intent.gmail_to:
         return (
             False,
             "Gmail was requested but no recipient email was found in your prompt. "

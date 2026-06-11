@@ -1,0 +1,98 @@
+# =============================================================================
+# domains/marketing/domain.yaml
+#
+# Domain Pack entry point for the Marketing / B2B Email Nurture domain.
+# This is the ONLY file DomainPack.load("marketing") reads at runtime.
+# It wires up GovernanceLoader, SemanticLayer, FAISSRetriever, and the tool
+# catalog automatically.
+#
+# WHY THIS FILE EXISTS
+# The original project had domain knowledge scattered in three places:
+#   - company_data.json   → brand facts, forbidden phrases, approved claims
+#   - services/ai.py      → hardcoded system prompt strings
+#   - tools/tools.py      → hardcoded tool names
+#
+# Moving everything here means adding a new domain (HR, Legal, Finance) is
+# just a new folder + this yaml file — zero changes to Python code.
+# =============================================================================
+
+name: marketing
+version: "1.0"
+description: >
+  B2B Email Nurture and Marketing Operations domain pack.
+  Covers outbound email sequences, campaign briefs, competitor analysis,
+  trend research, and approval routing for SaaS and professional services.
+  The agent can execute any task type — email generation is simply the task
+  it performs with the strongest domain context.
+
+# ── Training Data ─────────────────────────────────────────────────────────────
+# Paths are relative to this domain folder.
+# approved/ → positive few-shot examples  (FAISS approved_index)
+# rejected/ → labeled negative examples   (FAISS rejected_index)
+training_data:
+  approved: ./training_data/approved/
+  rejected: ./training_data/rejected/
+
+  # Embedding model used to build and query both FAISS indexes.
+  # paraphrase-multilingual-MiniLM-L12-v2 is a PyTorch sentence-transformer:
+  #   - 384-dim output  → fast cosine similarity, small index size
+  #   - Multilingual    → safe for non-English content later
+  #   - No API call     → works fully offline, no OpenAI cost for indexing
+  #
+  # Used by embedder.py (Phase 3a). The existing OpenAIEmbeddings in
+  # services/campaign_memory.py stays as a fallback option.
+  embed_model: "paraphrase-multilingual-MiniLM-L12-v2"
+
+# ── Governance ────────────────────────────────────────────────────────────────
+# Rules evaluated by GovernanceLoader BEFORE every LLM call and AFTER output
+# is generated. Stored in files (not hardcoded) so they can be updated without
+# a code deployment. A compliance officer can review these files directly.
+governance:
+  brand_guidelines: ./governance/brand_guidelines.md   # human-readable rules
+  content_policy:   ./governance/content_policy.yaml   # machine-readable rules
+
+  # Which validator functions to run on generated output.
+  # Each name maps to a method in validator.py (Phase 3c).
+  validators:
+    - brand_voice_check
+    - content_policy_check
+
+# ── Semantic Layer ────────────────────────────────────────────────────────────
+# Maps natural-language terms → precise YAML parameter values.
+# Loaded by SemanticLayer (Phase 2c).
+# Reduces Generator hallucination on domain-specific vocabulary.
+semantic:
+  ontology:   ./semantic/ontology.yaml     # entity relationships
+  vocabulary: ./semantic/vocabulary.json   # NL phrase → YAML value lookup
+
+# ── Tool Catalog ──────────────────────────────────────────────────────────────
+# Only tools listed here are exposed to the agent when this domain is active.
+# Prevents the LLM from selecting irrelevant tools.
+# Each name must match a key in tools/tools.py or an MCP server tool name.
+#
+# These are the same tools already in the existing tools/tools.py —
+# no new tools are needed for the marketing domain.
+tools:
+  - brand_context_tool        # RAG over brand guidelines — always first
+  - generate_content_tool     # writes post / email / brief copy
+  - generate_hashtags_tool    # derives hashtags from topic
+  - news_tool                 # fetches recent news articles
+  - news_sources_tool         # returns formatted source URLs
+  - reddit_tool               # scans Reddit for community trends
+  - check_brand_compliance    # MCP: validates output against brand rules
+
+# ── Model Hints ───────────────────────────────────────────────────────────────
+# Routing weight overrides for the LLM Router (Phase 5).
+# Biases model selection toward the best-performing model per task type
+# without hardcoding a single model for all tasks.
+model_hints:
+  default:             "claude-sonnet-4-20250514"
+  email_generation:    "claude-sonnet-4-20250514"   # strong on tone + structure
+  research_summary:    "claude-haiku-4-5-20251001"  # fast + cheap for retrieval
+  competitor_analysis: "claude-sonnet-4-20250514"
+  campaign_brief:      "claude-sonnet-4-20250514"
+
+# ── Persona Template ──────────────────────────────────────────────────────────
+# Jinja2 template used to build the agent's system prompt.
+# Replaces the hardcoded strings in services/ai.py and agent.py (Phase 1b).
+persona_template: ./templates/persona.j2

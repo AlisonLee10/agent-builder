@@ -1,0 +1,60 @@
+{
+  "run_id": "38c298",
+  "timestamp": "2026-05-29T10:56:05.789115",
+  "status": "posted",
+  "user_prompt": "Collect news articles and recent trends about the prospect of agentic AI in near future and write a marketing post about our company, then post the output to Discord and Slack",
+  "content": "Transform the way you work with FlowAI! As businesses increasingly recognize the power of agentic AI, it’s time to elevate your productivity. Imagine reclaiming 2 hours every day—what would you achieve with that extra time?\n\nFlowAI Core is your intelligent automation partner, learning from your unique workflow to handle repetitive tasks effortlessly. With seamless integration across 50+ tools, you can streamline your operations and focus on what truly matters.\n\nRecent advancements in AI, like Amazon's significant investment in computing chips and Robinhood's introduction of AI chatbots, highlight a growing trend—smart technology is revolutionizing the workplace. Now, you can be a part of this exciting shift.\n\nJoin the movement towards efficiency and innovation. With FlowAI, work less and flow more—start your journey today for just $29 a month!\n\n#AgenticAI #ArtificialIntelligence #MachineLearning #AIInnovation #TechForGood #FutureOfAI #SmartTechnology #AIRevolution",
+  "hashtags": [
+    "#AgenticAI",
+    "#ArtificialIntelligence",
+    "#MachineLearning",
+    "#AIInnovation",
+    "#TechForGood",
+    "#FutureOfAI",
+    "#SmartTechnology",
+    "#AIRevolution"
+  ],
+  "sources": [
+    "• [Amazon Strikes $6 Billion Deal With Snowflake for Agentic Computing Chips - WSJ](https://slashdot.org/firehose.pl?op=view&id=183432758)",
+    "• [Salesforce crushes Wall Street’s targets in its latest results but can’t boost its struggling stock](https://siliconangle.com/2026/05/27/salesforce-crushes-wall-streets-targets-latest-results-cant-boost-struggling-stock/)",
+    "• [Robinhood to let investors use AI chatbots for share trading - Financial Times](https://slashdot.org/firehose.pl?op=view&id=183432578)",
+    "• [Salesforce waves bye-bye to UI in 'headless' embrace](https://www.theregister.com/saas/2026/05/28/salesforce-waves-bye-bye-to-ui-in-headless-embrace/5247587)",
+    "• [75% of Americans say they would trust AI shopping recommendations less if results were sponsored](https://spacedaily.com/n-75-of-americans-say-they-would-trust-ai-shopping-recommendations-less-if-results-were-sponsored-which-means-openai-just-made-a-decision-that-could-structurally-damage-the-thing-that-makes-it/)"
+  ],
+  "articles": [
+    {
+      "title": "Exclusive | Amazon Strikes $6 Billion Deal With Snowflake for Agentic Computing Chips - WSJ",
+      "description": "Exclusive | Amazon Strikes $6 Billion Deal With Snowflake for Agentic Computing ChipsWSJ Snowflake rockets 36% on earnings beat and plan to spend $6 billion on Amazon cloudCNBC Snowflake Raises Sales Outlook, Touts Impact of AI DemandBloomberg.com Snowflake E…",
+      "url": "https://slashdot.org/firehose.pl?op=view&amp;id=183432758"
+    },
+    {
+      "title": "Salesforce crushes Wall Street’s targets in its latest results but can’t boost its struggling stock",
+      "description": "Salesforce Inc. delivered stronger-than-expected financial results today, but the software vendor came up short when it issued its current quarter and full-year revenue forecast, as the stock barely moved in the after-hours trading session. The company report…",
+      "url": "https://siliconangle.com/2026/05/27/salesforce-crushes-wall-streets-targets-latest-results-cant-boost-struggling-stock/"
+    },
+    {
+      "title": "Robinhood to let investors use AI chatbots for share trading - Financial Times",
+      "description": "Robinhood to let investors use AI chatbots for share tradingFinancial Times Robinhood Lets Customers Use AI to Trade Stocks, Make Credit-Card PurchasesWSJ Robinhood launches agentic trading, announces credit card for AI agents with 3% cash backFortune Robinho…",
+      "url": "https://slashdot.org/firehose.pl?op=view&amp;id=183432578"
+    },
+    {
+      "title": "Salesforce waves bye-bye to UI in 'headless' embrace",
+      "description": "Anthropic's use of Sales Cloud increased five-fold as its workers access Salesforce through Claude and Slack",
+      "url": "https://www.theregister.com/saas/2026/05/28/salesforce-waves-bye-bye-to-ui-in-headless-embrace/5247587"
+    },
+    {
+      "title": "75% of Americans say they would trust AI shopping recommendations less if results were sponsored — which means OpenAI just made a decision that could structurally damage the thing that makes it valuable",
+      "description": "Quad/Graphics and The Harris Poll released a survey on 13 April 2026 titled “The New Rules of Retail Trust in the Age of AI.” It is the basis for the headline figure now circulating: 75 per cent of Americans say they would trust an AI shopping agent less if i…",
+      "url": "https://spacedaily.com/n-75-of-americans-say-they-would-trust-ai-shopping-recommendations-less-if-results-were-sponsored-which-means-openai-just-made-a-decision-that-could-structurally-damage-the-thing-that-makes-it/"
+    }
+  ],
+  "verdict": "approved",
+  "issues": [],
+  "denial_reason": "",
+  "platform": "discord,slack",
+  "posted_platforms": [
+    "discord",
+    "slack"
+  ],
+  "full_post": "Transform the way you work with FlowAI! As businesses increasingly recognize the power of agentic AI, it’s time to elevate your productivity. Imagine reclaiming 2 hours every day—what would you achieve with that extra time?\n\nFlowAI Core is your intelligent automation partner, learning from your unique workflow to handle repetitive tasks effortlessly. With seamless integration across 50+ tools, you can streamline your operations and focus on what truly matters.\n\nRecent advancements in AI, like Amazon's significant investment in computing chips and Robinhood's introduction of AI chatbots, highlight a growing trend—smart technology is revolutionizing the workplace. Now, you can be a part of this exciting shift.\n\nJoin the movement towards efficiency and innovation. With FlowAI, work less and flow more—start your journey today for just $29 a month!\n\n#AgenticAI #ArtificialIntelligence #MachineLearning #AIInnovation #TechForGood #FutureOfAI #SmartTechnology #AIRevolution\n\n#AgenticAI #ArtificialIntelligence #MachineLearning #AIInnovation #TechForGood #FutureOfAI #SmartTechnology #AIRevolution"
+}
