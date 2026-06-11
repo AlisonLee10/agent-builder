@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from anthropic import AsyncAnthropic
 from services.logger import get_logger
-from schema import AgentConfig, TaskType, StepConfig
+from shcema import AgentConfig, TaskType, StepConfig
 
 if TYPE_CHECKING:
     from domain_pack import DomainPack

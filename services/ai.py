@@ -232,7 +232,7 @@ def generate_content(
         SystemMessage(content=system),
         HumanMessage(content=user_message),
     ])
-    return response.text.strip()
+    return response.content.strip()
 
 
 # ── Hashtag generation (signature unchanged) ──────────────────────────────────
@@ -254,5 +254,5 @@ def generate_hashtags(user_prompt: str) -> list[str]:
         SystemMessage(content=system),
         HumanMessage(content=f"Generate hashtags for: {user_prompt}"),
     ])
-    raw = response.text.strip()
+    raw = str(response.content).strip()
     return [line.strip() for line in raw.splitlines() if line.strip().startswith("#")]

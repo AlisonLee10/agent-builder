@@ -50,35 +50,195 @@ log = get_logger(__name__)
 
 class GovernanceLoader:
     """
-    Loads content_policy.yaml and brand_guidelines.md.
-    Full implementation in Phase 2b — this stub returns empty strings
-    so DomainPack.load() works end-to-end right now.
+    Parses content_policy.yaml and brand_guidelines.md.
+    Exposes to_prompt() for system prompt injection and check() for
+    runtime output validation.
+
+    TECHNOLOGY
+      PyYAML  — parses content_policy.yaml into rule dicts
+      pathlib — resolves file paths relative to the domain folder
+      re      — used by _check_approved_claims to find numeric patterns
     """
+
     def __init__(self, governance_cfg: dict, domain_folder: Path):
         self._policy_path     = domain_folder / governance_cfg["content_policy"]
         self._guidelines_path = domain_folder / governance_cfg["brand_guidelines"]
-        log.debug(f"GovernanceLoader stub initialised — policy: {self._policy_path}")
+        self._rules: list[dict] = []
+        self._guidelines_text: str = ""
+        self._load()
+
+    def _load(self) -> None:
+        """Parse both files on initialisation so they are ready at runtime."""
+        # brand_guidelines.md — read as plain text for to_prompt()
+        try:
+            self._guidelines_text = self._guidelines_path.read_text(encoding="utf-8")
+        except OSError as e:
+            log.warning(f"GovernanceLoader: could not read brand_guidelines: {e}")
+            self._guidelines_text = ""
+
+        # content_policy.yaml — parsed into rule dicts for check()
+        try:
+            with open(self._policy_path, encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+            self._rules = data.get("rules", [])
+            log.debug(
+                f"GovernanceLoader loaded {len(self._rules)} rules "
+                f"from {self._policy_path.name}"
+            )
+        except (OSError, yaml.YAMLError) as e:
+            log.warning(f"GovernanceLoader: could not parse content_policy.yaml: {e}")
+            self._rules = []
 
     def to_prompt(self) -> str:
         """
-        Returns governance rules as a plain-text block for system prompt
-        injection. Phase 2b will parse content_policy.yaml and render
-        each rule as a human-readable line.
+        Returns a concise governance summary for injection into the
+        Generator and agent system prompts.
+
+        Renders the key rules as a plain-text list rather than the full
+        brand_guidelines.md — keeping the prompt focused and token-efficient.
         """
-        # Stub: read raw brand_guidelines.md as a best-effort fallback
-        # so the system prompt gets *something* even before Phase 2b.
-        try:
-            return self._guidelines_path.read_text(encoding="utf-8")
-        except OSError:
-            return ""
+        if not self._rules:
+            # Fall back to raw guidelines text if no rules were parsed
+            return self._guidelines_text
+
+        error_rules   = [r for r in self._rules if r.get("severity") == "error"]
+        warning_rules = [r for r in self._rules if r.get("severity") == "warning"]
+
+        lines = []
+
+        if error_rules:
+            lines.append("HARD RULES (violations block output):")
+            for rule in error_rules:
+                desc = rule.get("description", "").strip().replace("\n", " ")
+                lines.append(f"  [{rule['id']}] {desc}")
+
+        if warning_rules:
+            lines.append("SOFT RULES (violations logged as warnings):")
+            for rule in warning_rules:
+                desc = rule.get("description", "").strip().replace("\n", " ")
+                lines.append(f"  [{rule['id']}] {desc}")
+
+        return "\n".join(lines)
 
     def check(self, output: str, task_type: str) -> list[dict]:
         """
-        Evaluates output against content_policy.yaml rules.
-        Returns list of violation dicts: [{id, description, severity}].
-        Phase 2b implements the full rule evaluation loop.
+        Evaluate output text against all rules that apply to task_type.
+
+        Parameters
+        ----------
+        output    : the generated text to check (email body, brief, etc.)
+        task_type : e.g. "email_generation" — used to filter applicable rules
+
+        Returns
+        -------
+        List of violation dicts, each with keys:
+            id          — rule id from content_policy.yaml
+            description — human-readable explanation
+            severity    — "error" or "warning"
+        Empty list means the output is compliant.
         """
-        return []  # stub — no violations yet
+        violations = []
+        output_lower = output.lower()
+
+        for rule in self._rules:
+            # Filter by applies_to — ["*"] means all task types
+            applies_to = rule.get("applies_to", ["*"])
+            if "*" not in applies_to and task_type not in applies_to:
+                continue
+
+            rule_type = rule.get("type", "")
+            violation = None
+
+            if rule_type == "forbidden_word":
+                violation = self._check_forbidden_word(rule, output_lower)
+
+            elif rule_type == "forbidden_phrase_start":
+                violation = self._check_forbidden_phrase_start(rule, output_lower)
+
+            elif rule_type == "approved_claims_only":
+                violation = self._check_approved_claims(rule, output_lower)
+
+            elif rule_type == "required_present":
+                violation = self._check_required_present(rule, output)
+
+            elif rule_type == "required_sections":
+                violation = self._check_required_sections(rule, output_lower)
+
+            # Note: max_length, max_count, required_field, conditional_required_field
+            # require structured output fields (not plain text) — these are evaluated
+            # by validator.py against the AgentConfig fields, not the raw output string.
+
+            if violation:
+                violations.append({
+                    "id":          rule["id"],
+                    "description": rule.get("description", "").strip(),
+                    "severity":    rule.get("severity", "error"),
+                })
+
+        return violations
+
+    # ── Rule evaluators ────────────────────────────────────────────────────
+
+    def _check_forbidden_word(self, rule: dict, output_lower: str) -> bool:
+        """Return True (violation) if any forbidden word appears in output."""
+        for word in rule.get("value", []):
+            if word.lower() in output_lower:
+                log.debug(f"Governance violation [{rule['id']}]: forbidden word '{word}'")
+                return True
+        return False
+
+    def _check_forbidden_phrase_start(self, rule: dict, output_lower: str) -> bool:
+        """Return True if output starts with any forbidden phrase."""
+        stripped = output_lower.lstrip()
+        for phrase in rule.get("value", []):
+            if stripped.startswith(phrase.lower()):
+                log.debug(f"Governance violation [{rule['id']}]: forbidden opening '{phrase}'")
+                return True
+        return False
+
+    def _check_approved_claims(self, rule: dict, output_lower: str) -> bool:
+        """
+        Return True if output contains a numeric claim not in the
+        approved_claims list. Matches patterns like '30%', '10,000+', '2 hours'.
+        """
+        import re
+        approved = [c.lower() for c in rule.get("approved_claims", [])]
+        # Find all numeric phrases: digits optionally followed by %, +, 'hours', etc.
+        numeric_pattern = re.compile(
+            r'\d[\d,]*\s*(?:%|\+|hours?|minutes?|days?|times?|x\b|k\b)?'
+        )
+        matches = numeric_pattern.findall(output_lower)
+        for match in matches:
+            match_clean = match.strip()
+            # Check if this numeric appears in any approved claim
+            if not any(match_clean in claim for claim in approved):
+                log.debug(
+                    f"Governance violation [{rule['id']}]: "
+                    f"unapproved numeric claim '{match_clean}'"
+                )
+                return True
+        return False
+
+    def _check_required_present(self, rule: dict, output: str) -> bool:
+        """Return True if none of the required tokens appear in output."""
+        for token in rule.get("value", []):
+            if token in output:
+                return False  # at least one token found — compliant
+        log.debug(f"Governance violation [{rule['id']}]: no required token found")
+        return True
+
+    def _check_required_sections(self, rule: dict, output_lower: str) -> bool:
+        """Return True if any required section heading is missing."""
+        for section in rule.get("value", []):
+            # Match section names with spaces or underscores, case-insensitive
+            normalized = section.replace("_", " ")
+            if normalized not in output_lower and section not in output_lower:
+                log.debug(
+                    f"Governance violation [{rule['id']}]: "
+                    f"missing required section '{section}'"
+                )
+                return True
+        return False
 
 
 class SemanticLayer:
