@@ -1,0 +1,9 @@
+Subject: {{company}}'s month-end close process
+
+Hi {{first_name}},
+
+Finance teams at Series B and C companies typically spend 6–8 days on month-end close. Our platform cuts that to under 3 days by automating reconciliation and flagging exceptions before they become issues.
+
+We work with CFOs at companies like Brex and Ramp who were dealing with the same manual overhead.
+
+Would it make sense to walk you through how it works? I can keep it to 20 minutes.

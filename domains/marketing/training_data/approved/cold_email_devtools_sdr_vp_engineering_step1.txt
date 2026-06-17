@@ -1,0 +1,9 @@
+Subject: {{company}}'s deployment frequency
+
+Hi {{first_name}},
+
+Engineering teams that ship multiple times a day tend to hit the same bottleneck: incident response becomes reactive, and on-call engineers spend more time firefighting than building.
+
+We help VP Engs at companies like Linear and Vercel reduce mean time to resolution by 60% by automatically correlating deployment events with incident signals before the on-call gets paged.
+
+Is this something {{company}}'s team is working on? Happy to share how others have approached it.

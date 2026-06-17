@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'disruptive' and 'paradigm shift' appear in email body. These buzzwords signal low-effort copywriting and reduce reply rates in B2B outreach.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: A disruptive approach to productivity, {{first_name}}\n\nHi {{first_name}},\n\nFlowAI represents a disruptive force in the productivity software space. We're driving a paradigm shift in how professionals manage their time.\n\nThis disruptive technology is already helping 10,000+ users experience a paradigm shift in their daily workflows.\n\nWould you like to be part of this disruptive movement? Book 15 minutes with me this week."
+}

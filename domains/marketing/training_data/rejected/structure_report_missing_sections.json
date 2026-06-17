@@ -1,0 +1,6 @@
+{
+  "task_type": "campaign_brief",
+  "rejection_reason": "structure: report_required_sections — campaign brief is missing required sections 'key_metrics' and 'recommendations'. All campaign briefs must include executive_summary, key_metrics, and recommendations sections.",
+  "specific_violation": "report_required_sections",
+  "text": "Campaign Brief: Q3 FlowAI Brand Awareness Push\n\nExecutive Summary\nThis campaign aims to increase FlowAI brand awareness among VP-level professionals at Series B SaaS companies in North America. The primary channel is LinkedIn sponsored content combined with targeted cold outreach sequences.\n\nTarget Audience\nVP Sales, VP Operations, and VP Marketing at B2B SaaS companies with 50-500 employees that have raised Series A or B funding in the past 18 months.\n\nKey Message\nFlowAI saves busy professionals an average of 2 hours per day, giving them back the time they need to focus on the work that matters.\n\nChannels\nLinkedIn sponsored posts, email nurture sequences, SDR outreach.\n\nTimeline\nCampaign runs July 1 through September 30, 2026."
+}

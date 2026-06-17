@@ -1,0 +1,9 @@
+Subject: {{company}}'s checkout abandonment rate
+
+Hi {{first_name}},
+
+Most e-commerce teams accept a 70% cart abandonment rate as a given. The ones that reduce it meaningfully do it by recovering high-intent sessions in the first 30 minutes — not with generic email blasts 24 hours later.
+
+We help revenue teams at D2C brands recover 15–25% of abandoned sessions through personalized, behavior-triggered sequences that fire within minutes of abandonment.
+
+Worth a quick call to see what the numbers could look like for {{company}}?

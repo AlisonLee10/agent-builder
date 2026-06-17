@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "structure: email_single_cta — follow-up email contains four CTAs (book a call, watch a video, download a guide, reply). Only one CTA is permitted per email. Choose the most appropriate ask for this sequence step.",
+  "specific_violation": "email_single_cta",
+  "text": "Subject: Re: {{company}}'s productivity\n\nHey {{first_name}},\n\nFollowing up on my last note about FlowAI.\n\nHere are a few ways to learn more and take the next step:\n\n1. Book a 15-minute call: [calendar link]\n2. Watch a 3-minute product video: [video link]\n3. Download our ROI calculator: [guide link]\n4. Or just reply here and let me know what's most useful\n\nWhatever works best for you — I'm flexible!\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

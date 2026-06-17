@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_require_personalization — follow-up email uses 'Hi there' with no personalization token. The recipient name or company name must appear in the email body. Generic greetings are not permitted even in follow-up sequences.",
+  "specific_violation": "email_require_personalization",
+  "text": "Subject: Re: Saving time on onboarding\n\nHi there,\n\nFollowing up on my previous email about streamlining your onboarding process.\n\nI noticed your company is hiring aggressively, which means onboarding new team members efficiently is probably top of mind.\n\nFlowAI helps teams save an average of 2 hours per day. Would a 15-minute call be worth it?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

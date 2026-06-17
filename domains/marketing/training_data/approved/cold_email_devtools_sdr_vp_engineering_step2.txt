@@ -1,0 +1,9 @@
+Subject: Re: {{company}}'s incident response
+
+Hi {{first_name}},
+
+Quick follow-up from last week.
+
+I noticed {{company}} recently posted a postmortem on your engineering blog — the kind of transparency that takes real culture to pull off. The teams that do this well are usually also the ones most interested in reducing the frequency of those incidents in the first place.
+
+We help with exactly that. Worth a 15-minute call to compare notes?

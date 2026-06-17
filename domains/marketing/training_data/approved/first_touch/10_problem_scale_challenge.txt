@@ -1,0 +1,23 @@
+Subject: [Specific process] breaking at your scale?
+
+Hi [Name],
+
+At [Company]'s current size (~[employee count/revenue/customer base]), [specific process] typically breaks.
+
+The symptoms:
+
+- [Specific symptom 1 they're likely experiencing]
+- [Specific symptom 2]
+- [Specific symptom 3]
+
+Sound familiar?
+
+[Similar company] hit this exact wall at [similar metric]. Their band-aid fixes made it worse.
+
+We rebuilt their [process] to handle [X times] current volume. Took [timeframe]. Now they're at [impressive current scale] with the same system.
+
+The key wasn't adding more tools or people. It was [counterintuitive solution].
+
+Want to discuss before it gets critical?
+
+[Signature]

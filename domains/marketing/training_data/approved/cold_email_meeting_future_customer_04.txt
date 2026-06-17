@@ -1,0 +1,13 @@
+Subject: Server debugging in Scala at <CompanyName>
+
+Hi <FirstName>,
+
+I'm a co-founder at Takipi, we're a startup developing a new technology to debug large scale production environments. We've decided to put our initial focus on Scala. 'Takipi for Scala' automatically detects and shows developers which variables values, threads and functions led to an exception or code latency in staging and production - www.takipi.com/scala.html
+
+When we designed Takipi we had companies like <BigCompanyName> in mind (yep, I'm sure we're not the first ones) - large scale 24/7 production and lots of data. We're in Beta these days and working with <SeveralOtherCompanyNames> and others.
+
+I ran into some of your Play projects on Github and thought you might be a good contact point at <CompanyName> and will find Takipi interesting.
+
+I'll be visiting the Bay area this month (from the week of the 22nd) and will be very happy to meet up and see if you'd like to take Takipi for a test drive.
+
+Thanks,

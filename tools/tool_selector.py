@@ -37,11 +37,27 @@ _CORE = ["brand_context_tool", "generate_content_tool", "generate_hashtags_tool"
 _selector_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
-def select_tools(prompt: str) -> list:
+def select_tools(prompt: str, domain_tools: list[str] | None = None) -> list:
     """
     Pick only the tools this prompt needs.
     Core tools always included. Optional tools decided by a fast LLM call.
+
+    Parameters
+    ----------
+    domain_tools : if provided, only tools in this list are eligible.
+                   Comes from DomainPack.tools (domain.yaml tools: list).
+                   If None, all tools in _ALL_TOOLS are eligible (original behaviour).
     """
+    # ── Filter _ALL_TOOLS to domain catalog if provided ───────────────────
+    # This is the only change from the original function.
+    # Everything below this block is identical to the original.
+    eligible = (
+        {k: v for k, v in _ALL_TOOLS.items() if k in domain_tools}
+        if domain_tools
+        else _ALL_TOOLS
+    )
+    # ── End change ────────────────────────────────────────────────────────
+
     response = _selector_llm.invoke([
         SystemMessage(content=(
             "You select optional tools for a marketing agent.\n\n"
@@ -78,24 +94,23 @@ def select_tools(prompt: str) -> list:
     if "trends" in needed:
         names.append("reddit_tool")
 
-    # deduplicate, preserve order
+    # deduplicate, preserve order, filter to eligible only
     seen, unique = set(), []
     for n in names:
-        if n not in seen:
+        if n not in seen and n in eligible:   # ← added: `and n in eligible`
             seen.add(n)
             unique.append(n)
 
-    selected = [_ALL_TOOLS[n] for n in unique]
-
-    not_used = [n for n in _ALL_TOOLS if n not in unique]
+    selected  = [eligible[n] for n in unique]
+    not_used  = [n for n in eligible if n not in unique]
 
     if TIKTOKEN_AVAILABLE:
-        all_tokens  = sum(_count_tokens(t.description) for t in _ALL_TOOLS.values())
+        all_tokens  = sum(_count_tokens(t.description) for t in eligible.values())
         used_tokens = sum(_count_tokens(t.description) for t in selected)
         saved       = all_tokens - used_tokens
-        log.debug(f"Tools {len(selected)}/6 selected · saved {saved} description tokens")
+        log.debug(f"Tools {len(selected)}/{len(eligible)} selected · saved {saved} description tokens")
     else:
-        log.debug(f"Tools {len(selected)}/6 selected")
+        log.debug(f"Tools {len(selected)}/{len(eligible)} selected")
 
     log.debug(f"Using: {', '.join(unique)}")
     log.debug(f"Skipped: {', '.join(not_used) if not_used else 'none'}")

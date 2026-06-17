@@ -1,0 +1,9 @@
+Subject: {{company}}'s data pipeline reliability
+
+Hi {{first_name}},
+
+Data teams at high-growth companies tend to spend 40–50% of their time on pipeline maintenance rather than analytics. The root cause is usually the same: no observability layer, so failures surface downstream when a stakeholder notices a broken dashboard.
+
+We help VP Data teams at companies like dbt Labs and Monte Carlo implement data observability that catches failures at the source, before they reach reporting.
+
+Is this a pain point for {{company}}'s data team right now? Happy to share how others have approached it.

@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_spam_triggers — email contains spam trigger words 'FREE', 'LIMITED TIME', and 'ACT FAST' in subject and body. These words activate spam filters and reduce deliverability.",
+  "specific_violation": "email_spam_triggers",
+  "text": "Subject: FREE demo — LIMITED TIME offer for {{company}}\n\nHey {{first_name}},\n\nACT FAST — we're offering a FREE 30-day trial of FlowAI for a limited time only.\n\nThis LIMITED TIME offer gives {{company}} FREE access to all premium features, saving your team an average of 2 hours per day.\n\nDon't miss out — claim your FREE trial before this offer expires.\n\nBook your FREE demo today!\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

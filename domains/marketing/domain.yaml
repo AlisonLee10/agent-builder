@@ -86,11 +86,11 @@ tools:
 # Biases model selection toward the best-performing model per task type
 # without hardcoding a single model for all tasks.
 model_hints:
-  default:             "claude-sonnet-4-20250514"
-  email_generation:    "claude-sonnet-4-20250514"   # strong on tone + structure
-  research_summary:    "claude-haiku-4-5-20251001"  # fast + cheap for retrieval
-  competitor_analysis: "claude-sonnet-4-20250514"
-  campaign_brief:      "claude-sonnet-4-20250514"
+  default:             "gpt-4o"
+  email_generation:    "gpt-4o"        # strong on tone + structure
+  research_summary:    "gpt-4o-mini"   # fast + cheap for retrieval
+  competitor_analysis: "gpt-4o"
+  campaign_brief:      "gpt-4o"
 
 # ── Persona Template ──────────────────────────────────────────────────────────
 # Jinja2 template used to build the agent's system prompt.

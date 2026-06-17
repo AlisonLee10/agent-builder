@@ -1,0 +1,9 @@
+Subject: {{company}}'s patient scheduling efficiency
+
+Hi {{first_name}},
+
+Clinic operations teams typically lose 15–20% of available appointment slots to no-shows and late cancellations — slots that could be filled with a short waitlist if the workflow was in place.
+
+We help VP Ops teams at healthcare groups automate waitlist management and same-day fill, recovering an average of 12 appointments per provider per week without adding front desk staff.
+
+Would it be worth a 20-minute call to see if the numbers translate to {{company}}'s setup?

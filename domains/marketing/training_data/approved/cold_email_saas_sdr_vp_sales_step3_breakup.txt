@@ -1,0 +1,9 @@
+Subject: Closing the loop, {{first_name}}
+
+Hey {{first_name}},
+
+I'll keep this short — I've reached out a couple of times and haven't heard back, so I'll assume the timing isn't right.
+
+If {{company}}'s sales team ever needs to reduce ramp time or improve pipeline consistency, feel free to reach back out.
+
+Wishing you a strong Q4.

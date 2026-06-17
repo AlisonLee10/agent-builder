@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
-from shcema import AgentConfig
+from schema import AgentConfig
 from services.logger import get_logger
 from services.verify import run_verification
 

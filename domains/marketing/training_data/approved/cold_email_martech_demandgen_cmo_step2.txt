@@ -1,0 +1,9 @@
+Subject: Re: {{company}}'s pipeline contribution
+
+Hi {{first_name}},
+
+Following up from last week.
+
+I came across {{company}}'s recent blog post on demand generation — solid thinking on attribution. That's actually one of the areas where our customers see the biggest lift: connecting intent data back to pipeline so attribution becomes clearer.
+
+Would it help to see how one of your peers in the {{company}} space structured their setup? I can walk you through it in 15 minutes.

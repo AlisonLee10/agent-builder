@@ -1,0 +1,9 @@
+Subject: {{company}}'s contract review turnaround
+
+Hi {{first_name}},
+
+In-house legal teams at Series C and D companies typically spend 60–70% of their time on contract review — NDAs, vendor agreements, and MSAs that rarely require legal judgment but still land on a lawyer's desk.
+
+We help General Counsel teams reduce routine contract review time by 80% using AI-assisted redlining that flags non-standard clauses and surfaces fallback positions automatically.
+
+Would it be worth 20 minutes to see how it works for a team at {{company}}'s stage?

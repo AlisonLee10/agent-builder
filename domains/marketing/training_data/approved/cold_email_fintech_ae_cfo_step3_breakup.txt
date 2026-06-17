@@ -1,0 +1,7 @@
+Subject: Last note from me, {{first_name}}
+
+Hi {{first_name}},
+
+I've sent a couple of notes about reducing {{company}}'s month-end close time and haven't heard back — I'll take that as a sign the timing isn't right.
+
+If that changes, I'm easy to find. I'll leave the door open.

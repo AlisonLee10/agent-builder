@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_phrase_start — email opens with 'I wanted to reach out', one of the most overused openers in B2B sales. It signals a generic template and gives the reader no reason to continue. Replace with a specific observation about the recipient.",
+  "specific_violation": "email_forbidden_openings",
+  "text": "Subject: FlowAI for {{company}}\n\nHi {{first_name}},\n\nI wanted to reach out to introduce FlowAI, a platform that helps busy professionals like you save an average of 2 hours per day through intelligent automation.\n\nI believe FlowAI could be a great fit for {{company}} based on your industry.\n\nI'd love to schedule a 15-minute call to discuss how we might be able to help. Does next week work?"
+}

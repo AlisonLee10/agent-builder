@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_spam_triggers — subject line contains 'URGENT' and 'FREE' which are known spam trigger words. These activate spam filters before the email reaches the inbox. Remove both words entirely.",
+  "specific_violation": "email_spam_triggers",
+  "text": "Subject: URGENT — FREE productivity audit for {{company}}, {{first_name}}\n\nHey {{first_name}},\n\nI noticed {{company}} recently scaled the operations team, which usually creates workflow bottlenecks that cost hours every week.\n\nFlowAI saves teams an average of 2 hours per day. We're currently offering a FREE productivity audit to identify where {{company}} is losing the most time.\n\nThis is a time-sensitive opportunity — book your FREE session before spots fill up.\n\nWorth a 15-minute call to get started?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

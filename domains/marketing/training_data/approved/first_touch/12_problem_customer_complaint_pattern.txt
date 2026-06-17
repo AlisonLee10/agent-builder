@@ -1,0 +1,17 @@
+Subject: Your reviews mention [issue] a lot
+
+Hi [Name],
+
+Analyzed [Company]'s recent reviews. [Specific complaint] came up in [X]% of them.
+
+This pattern usually points to [root cause]. It's fixable, but not obvious.
+
+[Similar company] had identical feedback patterns. The issue wasn't where they thought - it was [unexpected root cause].
+
+We fixed it by [solution approach]. Their [metric - NPS/reviews/CSAT] improved by [specific amount] in [timeframe].
+
+The fix required [brief description of approach], not a complete overhaul.
+
+Want to know exactly what we did?
+
+[Signature]

@@ -1,0 +1,9 @@
+Subject: {{company}}'s endpoint coverage
+
+Hi {{first_name}},
+
+Most CISOs I speak with say their biggest blind spot isn't the perimeter — it's lateral movement after an initial compromise. By the time it's detected, the attacker has been in the environment for weeks.
+
+We help security teams at companies like Cloudflare and HashiCorp detect lateral movement in real time without adding analyst workload. Average detection time drops from 21 days to under 4 hours.
+
+Would it be useful to see how it works for a company at {{company}}'s scale? I can keep it to 20 minutes.

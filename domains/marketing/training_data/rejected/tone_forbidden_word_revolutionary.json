@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'revolutionary' appears in body copy. This word signals hype and cannot be substantiated. Replace with a specific, provable claim.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: {{first_name}}, a revolutionary way to close more deals\n\nHey {{first_name}},\n\nFlowAI is a revolutionary platform that is completely changing the way sales teams work. Our revolutionary AI automates the tasks that slow reps down so they can focus on closing.\n\nCompanies using FlowAI are seeing revolutionary results across their pipelines.\n\nWorth a 15-minute call to see what we can do for {{company}}?"
+}

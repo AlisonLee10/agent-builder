@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'game-changer' and 'game changer' appear in subject and body. These phrases signal hype without substance. Use specific outcomes instead.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: FlowAI is a total game-changer for your team, {{first_name}}\n\nHey {{first_name}},\n\nI wanted to reach out because FlowAI is honestly a game changer for teams like {{company}}'s.\n\nIt's a game-changer because it saves time, improves results, and transforms how you work.\n\nWould love to show you why it's such a game-changer — 15 minutes?"
+}

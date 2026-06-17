@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_phrase_start — email opens with 'My name is', making the sender the subject of the first sentence. Cold emails must open with something relevant to the recipient, not an introduction about the sender.",
+  "specific_violation": "email_forbidden_openings",
+  "text": "Subject: Helping {{company}} save time\n\nHi {{first_name}},\n\nMy name is Alex and I work at FlowAI. I wanted to reach out because I think our platform could really help {{company}}.\n\nFlowAI is a productivity tool that helps busy professionals save 2 hours per day by automating repetitive tasks.\n\nWould you be interested in a quick demo?"
+}

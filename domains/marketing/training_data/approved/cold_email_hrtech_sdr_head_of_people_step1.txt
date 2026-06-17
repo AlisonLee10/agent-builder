@@ -1,0 +1,9 @@
+Subject: {{first_name}}, how {{company}} handles onboarding at scale
+
+Hi {{first_name}},
+
+Scaling a people team past 200 usually exposes gaps in onboarding — new hires fall through the cracks, managers get inconsistent tooling, and HR ends up manually chasing paperwork.
+
+We help People teams at high-growth companies automate the first 90 days so nothing slips. Companies like Figma and Notion use us to run structured onboarding without adding headcount to HR.
+
+Would a 15-minute call be worth it to see if we can help {{company}}?

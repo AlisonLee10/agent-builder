@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance + structure: email_require_legal_footer + email_require_personalization — email is missing both the required CAN-SPAM legal footer AND any personalization token. Two separate violations must both be fixed before this email can be sent.",
+  "specific_violation": "email_require_legal_footer, email_require_personalization",
+  "text": "Subject: A faster way to onboard your team\n\nHi there,\n\nI came across your company and thought FlowAI could be a great fit for your team.\n\nFlowAI saves professionals an average of 2 hours per day by automating the repetitive workflows that slow teams down.\n\nWe work with fast-growing companies in SaaS, fintech, and professional services.\n\nWould a quick 15-minute call be worth it to explore whether FlowAI could help?"
+}

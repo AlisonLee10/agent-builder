@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_phrase_start — email opens with 'I hope you're doing well'. Generic pleasantry that adds no value and signals the email was not personalized for this recipient.",
+  "specific_violation": "email_forbidden_openings",
+  "text": "Subject: A quick idea for {{company}}\n\nHey {{first_name}},\n\nI hope you're doing well! I came across {{company}} and thought FlowAI could be a great fit for your team.\n\nFlowAI saves professionals an average of 2 hours per day by automating repetitive tasks and integrating with 50+ tools.\n\nWould love to chat. Are you free for 15 minutes this week?"
+}

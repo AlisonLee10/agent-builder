@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_require_legal_footer — break-up email is missing required CAN-SPAM footer. Even final outreach emails are commercial communications and must include a physical address and unsubscribe mechanism.",
+  "specific_violation": "email_require_legal_footer",
+  "text": "Subject: Closing the loop, {{first_name}}\n\nHey {{first_name}},\n\nI've reached out a couple of times and haven't heard back, so I'll assume the timing isn't right.\n\nIf {{company}}'s team ever needs to reduce onboarding time or improve pipeline consistency, feel free to reach back out.\n\nWishing you a strong Q4."
+}

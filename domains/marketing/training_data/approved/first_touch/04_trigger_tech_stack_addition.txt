@@ -1,0 +1,19 @@
+Subject: Saw you added [Technology] - integration insight
+
+Hi [Name],
+
+Noticed [Company] just implemented [Technology] (saw the [where you saw it - job posting, technographic data, etc.]).
+
+Three things most [Technology] users discover too late:
+
+- [Specific integration challenge with your category]
+- [Hidden cost or complexity]
+- [Missed opportunity for optimization]
+
+We work with 40+ [Technology] customers and developed workarounds for all three. [Similar company] said our integration saved them [specific metric - time/money/resources].
+
+Since you're early in the implementation, you can avoid these pitfalls entirely.
+
+Want the integration playbook we've developed?
+
+[Signature]

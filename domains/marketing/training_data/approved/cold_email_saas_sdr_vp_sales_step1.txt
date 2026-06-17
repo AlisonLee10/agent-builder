@@ -1,0 +1,9 @@
+Subject: {{first_name}}, quick question about {{company}}'s sales pipeline
+
+Hey {{first_name}},
+
+I noticed {{company}} just expanded into the enterprise segment — congrats on the growth.
+
+We help SDR teams at companies like Gong and Outreach cut rep ramp time by 30% using AI-assisted call coaching. Most teams see the first improvement within the first two weeks.
+
+Worth a 15-minute call to see if it's relevant for {{company}}?

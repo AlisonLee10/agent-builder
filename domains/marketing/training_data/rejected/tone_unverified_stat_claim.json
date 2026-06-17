@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: approved_claims_only — email contains unapproved numeric claims ('saves 6 hours', '500% ROI', '25,000 users'). Only approved statistics may appear: 'saves an average of 2 hours per day', 'used by 10,000+ professionals', 'integrates with 50+ popular tools'.",
+  "specific_violation": "no_unverified_stats",
+  "text": "Subject: {{first_name}}, save 6 hours every day with FlowAI\n\nHey {{first_name}},\n\nFlowAI users save an average of 6 hours per day and report a 500% ROI within their first month.\n\nWith over 25,000 professionals already on the platform and integrations with 200+ tools, FlowAI is the fastest-growing productivity platform on the market.\n\nWould you like to see how {{company}} could achieve similar results? Happy to jump on a 15-minute call."
+}

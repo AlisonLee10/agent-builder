@@ -1,0 +1,9 @@
+Subject: Closing the loop, {{first_name}}
+
+Hi {{first_name}},
+
+I've reached out a few times about {{company}}'s cart abandonment recovery and haven't heard back — I'll assume the timing or fit isn't right.
+
+If that changes, feel free to reach out. I'll keep an eye on {{company}}'s growth and check back in a few months.
+
+Best of luck with the upcoming season.

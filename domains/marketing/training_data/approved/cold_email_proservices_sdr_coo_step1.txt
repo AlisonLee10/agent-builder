@@ -1,0 +1,11 @@
+Subject: {{company}}'s project margin visibility
+
+Hi {{first_name}},
+
+Professional services firms at the 50–150 headcount stage usually hit the same wall: project margins look fine at kickoff and then erode by 10–15% by the time the project closes. By the time the team notices, it's too late to recover the hours.
+
+We give COOs real-time margin visibility at the project level so you can course-correct while the work is still in flight, not after invoicing.
+
+Companies like {{company}} typically recover 8–12% in billable utilization within the first two quarters.
+
+Would a 20-minute call make sense?

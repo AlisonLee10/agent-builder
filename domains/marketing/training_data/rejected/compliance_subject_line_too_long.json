@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_subject_max_chars — subject line is 74 characters, exceeding the 50-character maximum. Long subject lines are clipped in most email clients and reduce open rates. Trim to under 50 characters.",
+  "specific_violation": "email_subject_max_chars",
+  "text": "Subject: {{first_name}}, a quick thought on how FlowAI can help {{company}} save time and close more deals this quarter\n\nHey {{first_name}},\n\nI noticed {{company}} recently scaled the sales team — that usually means rep ramp time becomes a real challenge.\n\nFlowAI saves sales reps an average of 2 hours per day by automating the admin work that slows them down.\n\nWorth a 15-minute call?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

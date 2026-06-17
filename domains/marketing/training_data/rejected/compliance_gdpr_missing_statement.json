@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: gdpr_lawful_basis — email is flagged for EU recipient list (gdpr_mode: true) but is missing the required GDPR Article 13 lawful basis statement. All emails sent to EU contacts must include a lawful basis for processing personal data.",
+  "specific_violation": "gdpr_lawful_basis",
+  "text": "Subject: {{company}}'s workflow automation, {{first_name}}\n\nHi {{first_name}},\n\nI noticed {{company}} recently expanded into the European market — congratulations on the growth.\n\nWe help operations teams at scaling SaaS companies save an average of 2 hours per day through intelligent workflow automation.\n\nWould it be worth a 20-minute call to see if FlowAI fits {{company}}'s current setup?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

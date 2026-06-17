@@ -1,0 +1,9 @@
+Subject: Re: {{company}}'s endpoint coverage
+
+Hi {{first_name}},
+
+Following up on my previous note about lateral movement detection.
+
+I noticed {{company}} recently completed a SOC 2 Type II audit — that's a strong signal your team takes detection and response seriously. The teams that get the most from our platform are usually at exactly that stage: compliance is handled, and the focus shifts to reducing actual dwell time.
+
+Happy to share a quick case study from a similar company. Interested?

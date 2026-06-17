@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'world-class' appears in email body. Superlatives without evidence damage credibility. Replace with a specific customer result.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: World-class automation for {{company}}\n\nHi {{first_name}},\n\nAt FlowAI we provide world-class AI automation to busy professionals who want to get more done.\n\nOur world-class platform integrates with your existing tools and our world-class support team is available around the clock.\n\nWould {{company}} benefit from a world-class solution like ours? Happy to walk you through it."
+}

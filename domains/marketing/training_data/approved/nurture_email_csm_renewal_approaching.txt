@@ -1,0 +1,9 @@
+Subject: {{company}}'s renewal — a few things to cover
+
+Hi {{first_name}},
+
+With your renewal coming up in 60 days, I wanted to get ahead of it and make sure we're set up for a smooth process.
+
+I've pulled together a quick summary of {{company}}'s usage, key outcomes, and a few areas where I think we can get more value out of the platform in the next contract term.
+
+Would a 30-minute review call work this month? I can send the summary in advance so we're not starting from scratch.

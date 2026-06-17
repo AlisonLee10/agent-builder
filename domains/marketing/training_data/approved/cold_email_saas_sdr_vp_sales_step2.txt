@@ -1,0 +1,11 @@
+Subject: Re: {{company}}'s sales pipeline
+
+Hey {{first_name}},
+
+Wanted to follow up on my last note.
+
+I came across {{company}}'s recent job postings — looks like you're scaling the sales team fast. That's exactly when onboarding inefficiency tends to hurt the most.
+
+We helped a team of similar size reduce their average ramp time from 4 months to 6 weeks. Happy to share how they did it.
+
+Does Thursday or Friday work for a quick call?

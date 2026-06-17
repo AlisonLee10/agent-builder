@@ -80,7 +80,7 @@ class GovernanceLoader:
         try:
             with open(self._policy_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
-            self._rules = data.get("rules", [])
+            self._rules = data.get("rules", []) if isinstance(data, dict) else []
             log.debug(
                 f"GovernanceLoader loaded {len(self._rules)} rules "
                 f"from {self._policy_path.name}"
@@ -243,52 +243,146 @@ class GovernanceLoader:
 
 class SemanticLayer:
     """
-    Loads ontology.yaml and vocabulary.json.
-    Full implementation in Phase 2c — this stub returns empty string.
+    Loads ontology.yaml and vocabulary.json and resolves NL terms to
+    exact YAML parameter values.
+
+    TECHNOLOGY
+      json / yaml (stdlib + PyYAML) — parses vocabulary.json and ontology.yaml
+      str.lower()                   — case-insensitive substring matching
+                                      No ML needed — pure dict lookup is fast
+                                      and deterministic.
+
+    WHY NO ML HERE
+      SemanticLayer does not use embeddings. The vocabulary.json mappings
+      are explicit and curated — "every tuesday" should always map to
+      "0 9 * * 2", not a probabilistic approximation of it.
+      FAISSRetriever handles semantic similarity. SemanticLayer handles
+      deterministic term resolution.
     """
+
     def __init__(self, semantic_cfg: dict, domain_folder: Path):
         self._vocab_path    = domain_folder / semantic_cfg["vocabulary"]
         self._ontology_path = domain_folder / semantic_cfg["ontology"]
-        log.debug(f"SemanticLayer stub initialised — vocab: {self._vocab_path}")
+        self._vocab:    dict = {}
+        self._ontology: dict = {}
+        self._load()
+
+    def _load(self) -> None:
+        import json as _json
+        try:
+            with open(self._vocab_path, encoding="utf-8") as f:
+                self._vocab = _json.load(f)
+            log.debug(
+                f"SemanticLayer loaded vocabulary — "
+                f"{sum(len(v) for k,v in self._vocab.items() if not k.startswith('_'))} terms"
+            )
+        except (OSError, ValueError) as e:
+            log.warning(f"SemanticLayer: could not load vocabulary.json: {e}")
+
+        try:
+            with open(self._ontology_path, encoding="utf-8") as f:
+                _loaded = yaml.safe_load(f)
+                self._ontology = _loaded if isinstance(_loaded, dict) else {}
+            log.debug(
+                f"SemanticLayer loaded ontology — "
+                f"{len(self._ontology.get('entities', []))} entities"
+            )
+        except (OSError, yaml.YAMLError) as e:
+            log.warning(f"SemanticLayer: could not load ontology.yaml: {e}")
 
     def resolve_terms(self, nl_input: str) -> str:
         """
-        Maps domain vocabulary in nl_input to YAML parameter values.
-        Phase 2c implements the full dict lookup against vocabulary.json.
+        Scan nl_input for known domain vocabulary and return a plain-text
+        block of resolved mappings for injection into the Generator prompt.
+
+        Example output:
+            task_type     → email_generation
+            email_type    → cold_outreach
+            target_persona → vp_sales
+            schedule.cron → 0 9 * * 2
+
+        Returns empty string if no terms match (prompt is not enriched).
         """
-        return ""  # stub — no term resolution yet
+        if not self._vocab or not nl_input:
+            return ""
+
+        lower      = nl_input.lower()
+        resolved   = {}
+
+        # Map groups in vocabulary.json to AgentConfig field names
+        group_to_field = {
+            "task_type_mappings":      "task_type",
+            "schedule_mappings":       "schedule.cron",
+            "email_type_mappings":     "email_type",
+            "sequence_step_mappings":  "sequence_step",
+            "sender_persona_mappings": "sender_persona",
+            "target_persona_mappings": "target_persona",
+            "lead_stage_mappings":     "lead_stage",
+            "cta_type_mappings":       "cta_type",
+        }
+
+        for group_key, field_name in group_to_field.items():
+            group = self._vocab.get(group_key, {})
+            for phrase, value in group.items():
+                if phrase.lower() in lower:
+                    # First match wins per field — most specific match is
+                    # preferred because longer phrases appear earlier in
+                    # vocabulary.json (ordered by specificity)
+                    if field_name not in resolved:
+                        resolved[field_name] = value
+
+        if not resolved:
+            return ""
+
+        lines = []
+        for field, value in resolved.items():
+            lines.append(f"  {field} → {value}")
+
+        return "Resolved domain terms:\n" + "\n".join(lines)
+
+    def infer_task_type(self, nl_input: str) -> str | None:
+        """
+        Return the most likely task_type for nl_input based on vocabulary
+        mappings, or None if no match is found.
+
+        Used by DomainPack.load() in Phase 2a when task_type is not
+        explicitly provided by the caller.
+        """
+        if not self._vocab:
+            return None
+
+        lower    = nl_input.lower()
+        mappings = self._vocab.get("task_type_mappings", {})
+
+        # Sort by phrase length descending so longer, more specific phrases
+        # match before shorter ones ("email sequence" before "email")
+        for phrase in sorted(mappings, key=len, reverse=True):
+            if phrase.lower() in lower:
+                return mappings[phrase]
+
+        return None
 
 
 class FAISSRetriever:
     """
-    Wraps the existing campaign_memory FAISS index with task_type filtering.
-    Full implementation in Phase 3a — this stub delegates directly to the
-    existing get_few_shot_examples() and get_denial_lessons_for_agent().
+    Full implementation — delegates to embedder.FAISSRetriever.
+    See embedder.py for full documentation.
     """
     def __init__(self, training_data_cfg: dict, domain_folder: Path):
-        self._approved_path = domain_folder / training_data_cfg["approved"]
-        self._rejected_path = domain_folder / training_data_cfg["rejected"]
-        self._embed_model   = training_data_cfg.get(
-            "embed_model", "paraphrase-multilingual-MiniLM-L12-v2"
-        )
-        log.debug(f"FAISSRetriever stub initialised — model: {self._embed_model}")
+        from embedder import FAISSRetriever as _Retriever
+        self._impl = _Retriever(training_data_cfg, domain_folder)
 
     def get_top_k(self, nl_input: str, k: int = 3, task_type: str | None = None) -> str:
-        """
-        Returns k approved examples as a formatted string for few-shot
-        injection. Phase 3a adds task_type-filtered FAISS index lookup.
-        """
-        # Stub: delegate to the existing function unchanged
-        from services.campaign_memory import get_few_shot_examples
-        return get_few_shot_examples(nl_input, k=k)
+        return self._impl.get_top_k(nl_input, k=k, task_type=task_type)
 
-    def get_denial_lessons(self, nl_input: str, k: int = 2) -> str:
-        """
-        Returns k rejected examples and their reasons.
-        Phase 3a adds task_type-filtered lookup.
-        """
-        from services.campaign_memory import get_denial_lessons_for_agent
-        return get_denial_lessons_for_agent(nl_input, k=k)
+    def get_denial_lessons(self, nl_input: str, k: int = 2, task_type: str | None = None) -> str:
+        return self._impl.get_denial_lessons(nl_input, k=k, task_type=task_type)
+
+    def add_rejection(self, text: str, task_type: str, rejection_reason: str, source_file: str = "") -> None:
+        self._impl.add_rejection(text, task_type, rejection_reason, source_file)
+
+    def rebuild(self) -> None:
+        self._impl.rebuild()
 
 
 # ── DomainPack ────────────────────────────────────────────────────────────────
@@ -363,6 +457,10 @@ class DomainPack:
         # PyYAML: safe_load never executes arbitrary Python, safe for untrusted files
         with open(domain_yaml_path, encoding="utf-8") as f:
             cfg = yaml.safe_load(f)
+        if not isinstance(cfg, dict):
+            raise ValueError(
+                f"domain.yaml must be a YAML mapping, got {type(cfg).__name__}"
+            )
 
         log.debug(
             f"Loading domain '{domain_name}' | task_type: '{task_type}' | "
@@ -375,9 +473,15 @@ class DomainPack:
         retriever  = FAISSRetriever(cfg["training_data"],   domain_folder)
 
         # ── Resolve task_type from NL if not explicitly provided ───────────
-        # Phase 2c will implement full resolution via SemanticLayer.
-        # For now: use the provided task_type or fall back to "email_generation"
-        resolved_task_type = task_type or "email_generation"
+        # SemanticLayer.infer_task_type() scans nl_input for vocabulary.json
+        # keywords and returns the most likely task_type.
+        # Explicit task_type arg always wins; inference is the fallback.
+        if task_type:
+            resolved_task_type = task_type
+        elif nl_input:
+            resolved_task_type = semantic.infer_task_type(nl_input) or "email_generation"
+        else:
+            resolved_task_type = "email_generation"
 
         # ── Build the DomainPack instance ──────────────────────────────────
         pack = cls(
@@ -424,7 +528,7 @@ class DomainPack:
         return (
             self.model_hints.get(key)
             or self.model_hints.get("default")
-            or "claude-sonnet-4-20250514"
+            or "gpt-4o"
         )
 
     def __repr__(self) -> str:

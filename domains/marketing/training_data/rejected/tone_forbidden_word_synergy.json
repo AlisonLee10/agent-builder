@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'synergy' and 'cutting-edge' appear in body. Both are banned as meaningless filler language. Replace with concrete, specific descriptions.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: Creating synergy between your teams, {{first_name}}\n\nHi {{first_name}},\n\nFlowAI creates powerful synergy between your sales, marketing, and operations teams through cutting-edge AI technology.\n\nThe synergy we create results in cutting-edge workflows that scale with your business.\n\nLet's set up time to explore the synergy we could create at {{company}}."
+}

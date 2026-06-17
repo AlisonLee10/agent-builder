@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "tone: forbidden_word — 'best-in-class' and 'next-generation' appear in body copy. Both are banned as unsubstantiated superlatives. Replace with a specific, verifiable customer outcome.",
+  "specific_violation": "forbidden_brand_phrases",
+  "text": "Subject: {{company}}'s productivity stack, {{first_name}}\n\nHey {{first_name}},\n\nI noticed {{company}} recently expanded the team — a great signal of growth.\n\nFlowAI offers best-in-class AI automation powered by next-generation workflow technology. Our best-in-class integrations connect with the tools your team already uses, and our next-generation AI learns your team's patterns over time.\n\nWould it be worth a 15-minute call to see {{company}}'s best-in-class setup?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

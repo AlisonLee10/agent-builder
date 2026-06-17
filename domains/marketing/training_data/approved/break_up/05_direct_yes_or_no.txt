@@ -1,0 +1,11 @@
+Subject: Yes or no?
+
+Hi [Name],
+
+Simple question: Are you still interested in solving [specific problem]?
+
+- Reply "Yes" = I'll send over next steps
+- Reply "No" = I'll close your file
+- No reply = I'll assume no and stop reaching out
+
+[Signature]

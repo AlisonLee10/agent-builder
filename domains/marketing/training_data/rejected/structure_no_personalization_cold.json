@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "structure: email_require_personalization — cold email opens with 'Hi there' and contains no {{first_name}} or {{company}} token. Every cold outreach email must reference the recipient by name or company name in the body.",
+  "specific_violation": "email_require_personalization",
+  "text": "Subject: Saving 2 hours a day with FlowAI\n\nHi there,\n\nI wanted to reach out about FlowAI, a productivity platform that helps busy professionals save an average of 2 hours per day.\n\nWe integrate with 50+ popular tools and are trusted by 10,000+ professionals across industries.\n\nWould you be open to a quick 15-minute call to see how FlowAI could help your team?\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

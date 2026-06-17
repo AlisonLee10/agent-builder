@@ -4,9 +4,9 @@ import json
 import asyncio
 from typing import TYPE_CHECKING
 
-from anthropic import AsyncAnthropic
+from openai import AsyncOpenAI
 from services.logger import get_logger
-from shcema import AgentConfig, TaskType
+from schema import AgentConfig, TaskType
 
 if TYPE_CHECKING:
     from domain_pack import DomainPack
@@ -52,7 +52,7 @@ log = get_logger(__name__)
 #   domain_pack    — provides all four context sources above
 # =============================================================================
 
-_client = AsyncAnthropic()  # reads ANTHROPIC_API_KEY from env automatically
+_client = AsyncOpenAI()  # reads OPENAI_API_KEY from env automatically
 
 
 # ── Prompt assembly ────────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ async def generate_config(
     )
 
     # ── First attempt ──────────────────────────────────────────────────────
-    raw_json = await _call_claude(
+    raw_json = await _call_openai(
         system  = system_prompt,
         user    = nl_input,
         model   = model,
@@ -203,7 +203,7 @@ async def generate_config(
     log.warning(f"Generator first attempt failed: {error} — retrying once")
 
     retry_prompt = _build_retry_prompt(nl_input, raw_json, error)
-    raw_json_2   = await _call_claude(
+    raw_json_2   = await _call_openai(
         system  = system_prompt,
         user    = retry_prompt,
         model   = model,
@@ -238,24 +238,25 @@ def generate_config_sync(nl_input: str, domain: "DomainPack") -> AgentConfig:
 
 # ── Internal helpers ──────────────────────────────────────────────────────────
 
-async def _call_claude(system: str, user: str, model: str) -> str:
+async def _call_openai(system: str, user: str, model: str) -> str:
     """
-    Make one Claude API call and return the raw response text.
-    Uses the Anthropic AsyncAnthropic client (non-blocking).
+    Make one OpenAI chat completion call and return the raw response text.
+    Uses the AsyncOpenAI client (non-blocking).
 
     max_tokens is set to 1000 per the project spec.
     temperature is 0 — we want deterministic, schema-conformant JSON,
     not creative variation.
     """
-    response = await _client.messages.create(
+    response = await _client.chat.completions.create(
         model      = model,
         max_tokens = 1000,
         temperature= 0,
-        system     = system,
-        messages   = [{"role": "user", "content": user}],
+        messages   = [
+            {"role": "system", "content": system},
+            {"role": "user",   "content": user},
+        ],
     )
-    # response.content is a union of block types; only TextBlock has .text
-    return next(block.text for block in response.content if block.type == "text").strip()
+    return (response.choices[0].message.content or "").strip()
 
 
 def _parse_config(raw: str) -> tuple[AgentConfig | None, str]:

@@ -1,0 +1,15 @@
+Subject: Still manually [specific process]?
+
+Hi [Name],
+
+Noticed your team [specific indicator of manual process - e.g., "posts updates in spreadsheet", "sends individual confirmations", etc.].
+
+Quick math: At your volume, that's ~[hours] per week of manual work. Which means [cost implication or opportunity cost].
+
+We automated this exact workflow for [similar company]. Went from [time] to [reduced time] per [unit].
+
+The automation paid for itself in [timeframe].
+
+Want to see the before/after workflow?
+
+[Signature]

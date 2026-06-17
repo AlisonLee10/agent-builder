@@ -232,7 +232,7 @@ def generate_content(
         SystemMessage(content=system),
         HumanMessage(content=user_message),
     ])
-    return response.content.strip()
+    return str(response.content).strip()
 
 
 # ── Hashtag generation (signature unchanged) ──────────────────────────────────

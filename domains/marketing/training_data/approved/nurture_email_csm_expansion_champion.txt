@@ -1,0 +1,11 @@
+Subject: {{first_name}} — one thing I noticed in your account
+
+Hi {{first_name}},
+
+I was reviewing {{company}}'s usage data this week and noticed your team has been hitting the seat limit on collaborative workflows pretty consistently over the last 30 days.
+
+That's usually a good signal that adoption is strong — but it also means some teammates might be working around the tool rather than in it.
+
+I'd love to chat for 20 minutes about whether expanding access to the broader team makes sense. I can also walk you through how other customers at your stage have structured rollouts.
+
+Would next week work?

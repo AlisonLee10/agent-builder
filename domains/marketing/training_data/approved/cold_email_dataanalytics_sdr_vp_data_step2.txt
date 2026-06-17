@@ -1,0 +1,9 @@
+Subject: Re: {{company}}'s pipeline reliability
+
+Hi {{first_name}},
+
+Quick follow-up from last week.
+
+I saw {{company}} recently migrated to Snowflake — that kind of infrastructure investment usually surfaces new observability gaps as data volumes grow and more teams start relying on the warehouse.
+
+We've helped several teams navigate that exact transition without slowing down their analytics roadmap. Worth a 15-minute call to compare notes?

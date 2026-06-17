@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_require_legal_footer — email is missing the required CAN-SPAM legal footer containing a physical address and unsubscribe link. All commercial emails must include this regardless of tone or length.",
+  "specific_violation": "email_require_legal_footer",
+  "text": "Subject: {{company}}'s onboarding bottleneck, {{first_name}}\n\nHey {{first_name}},\n\nI noticed {{company}} just posted three new ops roles — that usually means onboarding volume is picking up faster than the process can handle.\n\nWe help operations teams at SaaS companies cut onboarding time by 40% without adding headcount.\n\nWorth a 15-minute call to see if we can help {{company}}?"
+}

@@ -1,0 +1,9 @@
+Subject: Re: Onboarding at {{company}}
+
+Hi {{first_name}},
+
+Quick follow-up on my last email.
+
+I noticed {{company}} has 15 open roles right now — that's a lot of new hires to onboard in a short window. The teams we work with typically see a 40% drop in time-to-productivity when onboarding is structured and automated from day one.
+
+Happy to share a few examples. Does next week work for a brief call?

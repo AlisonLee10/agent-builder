@@ -1,0 +1,11 @@
+Subject: {{company}}'s MQL-to-opportunity conversion
+
+Hi {{first_name}},
+
+Most B2B marketing teams generate enough MQLs — the problem is that fewer than 20% convert to a sales opportunity. The gap usually comes down to timing and routing, not lead quality.
+
+We help CMOs at SaaS companies increase MQL-to-opportunity conversion by automatically prioritizing and routing leads based on intent signals, not just form fills.
+
+Teams using us see an average 35% improvement in pipeline contribution within the first quarter.
+
+Worth 20 minutes to explore whether this fits {{company}}'s current setup?

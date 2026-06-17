@@ -1,0 +1,11 @@
+Subject: Re: {{company}}'s appointment utilization
+
+Hi {{first_name}},
+
+Following up from last week.
+
+I came across {{company}}'s recent expansion to two new clinic locations — growth like that usually puts real pressure on scheduling consistency across sites.
+
+We've helped operations teams in similar situations standardize their waitlist process across multiple locations without creating more work for site managers. Happy to share how.
+
+Does next Tuesday or Wednesday work for a brief call?

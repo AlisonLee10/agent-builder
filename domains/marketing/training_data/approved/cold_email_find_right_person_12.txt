@@ -1,0 +1,10 @@
+Subject (Option A): Introduction {your name/company}<>{their name/company}
+Subject (Option B): quick request
+Subject (Option C): Trying to connect
+Subject (Option D): {name of their company}
+
+Hi <FirstName>,
+
+I hope I'm not bothering you. Could you please refer me to the person in charge of <Something that's relevant to my product>?
+
+Thanks for your time,

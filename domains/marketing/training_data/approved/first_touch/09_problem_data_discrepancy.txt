@@ -1,0 +1,15 @@
+Subject: [Company]'s numbers don't add up?
+
+Hi [Name],
+
+Noticed something interesting: Your website shows [metric A], but [source] reports [metric B].
+
+This gap usually indicates [specific problem - tracking issues, system disconnect, process breakdown].
+
+We see this a lot with [industry/size] companies. The fix isn't complicated, but finding the root cause is tricky.
+
+[Similar company] had the same issue. We traced it to [specific cause] and fixed it in [timeframe].
+
+Want to know how we diagnosed it?
+
+[Signature]

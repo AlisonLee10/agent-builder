@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_require_legal_footer — nurture email is missing required CAN-SPAM footer. Physical address and unsubscribe link are mandatory on all commercial email regardless of sequence step.",
+  "specific_violation": "email_require_legal_footer",
+  "text": "Subject: Re: {{company}}'s onboarding process\n\nHey {{first_name}},\n\nFollowing up on my last note about FlowAI.\n\nI came across {{company}}'s recent job postings — it looks like you're scaling the team fast. That's exactly when onboarding inefficiency tends to hurt the most.\n\nWe helped a team of similar size reduce their average ramp time from 4 months to 6 weeks. Happy to share how they did it.\n\nDoes Thursday or Friday work for a quick call?"
+}

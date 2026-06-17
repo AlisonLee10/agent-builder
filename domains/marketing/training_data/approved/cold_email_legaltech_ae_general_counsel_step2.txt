@@ -1,0 +1,9 @@
+Subject: Re: {{company}}'s contract review process
+
+Hi {{first_name}},
+
+Following up on my last note.
+
+I saw that {{company}} is hiring a second in-house counsel — that usually means contract volume is growing faster than the team can absorb. That's exactly the problem our platform was built to solve before you need to add another headcount.
+
+I can show you a 10-minute walkthrough of how it works. Would that be useful?

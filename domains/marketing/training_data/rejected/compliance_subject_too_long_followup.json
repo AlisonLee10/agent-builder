@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "compliance: email_subject_max_chars — subject line is 68 characters, exceeding the 50-character limit. Long subject lines are truncated in Gmail, Outlook, and mobile clients. This subject will display as 'Re: A quick follow-up thought about how FlowAI...' cutting off the key message.",
+  "specific_violation": "email_subject_max_chars",
+  "text": "Subject: Re: A quick follow-up thought about how FlowAI could help {{company}} this quarter\n\nHey {{first_name}},\n\nFollowing up on my last note.\n\nI came across {{company}}'s recent blog post on scaling operations — solid thinking on process efficiency. That's exactly the problem FlowAI was built to solve.\n\nWould it help to see a quick walkthrough? I can keep it to 15 minutes.\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}

@@ -1,0 +1,6 @@
+{
+  "task_type": "email_generation",
+  "rejection_reason": "structure: email_single_cta — email contains three separate calls to action (book a demo, reply to this email, visit the website). Each email must contain exactly one CTA. Multiple CTAs reduce reply rates and create decision paralysis.",
+  "specific_violation": "email_single_cta",
+  "text": "Subject: {{first_name}}, quick question about {{company}}'s workflow\n\nHey {{first_name}},\n\nI noticed {{company}} recently expanded the ops team — that usually means workflow automation becomes a higher priority.\n\nFlowAI saves teams an average of 2 hours per day by automating the repetitive tasks that slow people down.\n\nYou can book a 15-minute demo here: [link]\n\nOr just reply to this email and we can find a time that works.\n\nOr feel free to visit our website at flowai.com to learn more before we chat.\n\nLooking forward to connecting!\n\n[Signature]\n\nFlowAI · 123 Main St, San Francisco CA 94105 · Unsubscribe"
+}
