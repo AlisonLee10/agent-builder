@@ -521,7 +521,7 @@ class DomainPack:
     def preferred_model(self, task_type: str | None = None) -> str:
         """
         Return the preferred LLM model identifier for the given task type.
-        Falls back to the domain default, then to claude-sonnet-4-20250514.
+        Falls back to the domain default, then to gpt-4o.
         Used by the LLM Router in Phase 5.
         """
         key = task_type or self.task_type

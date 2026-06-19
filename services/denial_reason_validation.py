@@ -10,7 +10,6 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
 from services.prompt_validation import (
-    _STRONG_MARKETING_RE,
     _extract_words,
     _has_hangul,
     _looks_like_gibberish,
@@ -97,11 +96,7 @@ def _is_denial_vague(normalized: str) -> bool:
 
 
 def _is_prompt_like_reason(text: str) -> bool:
-    if _STRONG_MARKETING_RE.search(text):
-        return True
-    if _CAMPAIGN_BRIEF_RE.search(text):
-        return True
-    return False
+    return bool(_CAMPAIGN_BRIEF_RE.search(text))
 
 
 def _too_similar_to_campaign(reason: str, campaign_prompt: str) -> bool:

@@ -4,9 +4,12 @@ import json
 import asyncio
 from typing import TYPE_CHECKING
 
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from services.logger import get_logger
 from schema import AgentConfig, TaskType
+
+load_dotenv()
 
 if TYPE_CHECKING:
     from domain_pack import DomainPack
@@ -38,18 +41,18 @@ log = get_logger(__name__)
 #   4. If parsing fails, retries once with the validation error fed back
 #      to Claude so it can self-correct
 #
-# WHY CLAUDE API DIRECTLY (not via LangChain)
-#   The existing marketing platform uses LangChain's init_chat_model for
-#   the agent LLM. The Generator uses the Anthropic SDK directly because:
+# WHY OPENAI SDK DIRECTLY (not via LangChain)
+#   The existing platform uses LangChain's init_chat_model for the agent LLM.
+#   The Generator uses the OpenAI SDK directly because:
 #     - The Generator needs precise JSON mode control
-#     - It uses a different model (claude-sonnet) from the agent (gpt-4o)
+#     - It uses a different model from the agent (configurable via domain.yaml)
 #     - Keeping it decoupled means swapping models in domain.yaml model_hints
 #       requires no code change
 #
 # TECHNOLOGY
-#   anthropic SDK  — AsyncAnthropic for non-blocking Claude API calls
-#   Pydantic v2    — AgentConfig.model_validate_json() validates the response
-#   domain_pack    — provides all four context sources above
+#   openai SDK  — AsyncOpenAI for non-blocking API calls
+#   Pydantic v2 — AgentConfig.model_validate_json() validates the response
+#   domain_pack — provides all four context sources above
 # =============================================================================
 
 _client = AsyncOpenAI()  # reads OPENAI_API_KEY from env automatically

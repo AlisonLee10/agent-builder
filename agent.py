@@ -173,11 +173,11 @@ async def run_agent_async(user_prompt: str, *, debug: bool = False) -> dict:
     set_campaign_memory(approved_examples=approved, denial_lessons=lessons)
 
     if approved:
-        log.debug("Similar approved campaigns found — using as style examples")
+        log.debug("Similar approved examples found — using as style reference")
     if lessons:
-        log.debug("Similar user-denied campaigns found — applying rejection lessons")
+        log.debug("Similar denied examples found — applying rejection lessons")
     if not approved and not lessons:
-        log.debug("No similar campaigns yet — writing from scratch")
+        log.debug("No similar examples yet — running from scratch")
 
     all_tools = await _build_all_tools(user_prompt)
 
@@ -199,7 +199,7 @@ async def run_agent_async(user_prompt: str, *, debug: bool = False) -> dict:
             {"input": user_prompt},
             config={
                 "metadata": {"run_id": get_run_id()},
-                "tags":     ["marketing-agent"],
+                "tags":     ["ai-agent-builder"],
             },
         )
 

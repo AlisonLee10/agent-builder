@@ -59,6 +59,10 @@ def load_governance(domain_folder: str | Path) -> GovernanceLoader:
     import yaml
     with open(domain_yaml_path, encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
+    if not isinstance(cfg, dict):
+        raise ValueError(
+            f"domain.yaml must be a YAML mapping, got {type(cfg).__name__}"
+        )
 
     return GovernanceLoader(cfg["governance"], folder)
 

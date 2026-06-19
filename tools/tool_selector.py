@@ -32,7 +32,7 @@ _ALL_TOOLS = {
     "generate_hashtags_tool":generate_hashtags_tool,
 }
 
-_CORE = ["brand_context_tool", "generate_content_tool", "generate_hashtags_tool"]
+_CORE = ["generate_content_tool"]
 
 _selector_llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
@@ -60,7 +60,7 @@ def select_tools(prompt: str, domain_tools: list[str] | None = None) -> list:
 
     response = _selector_llm.invoke([
         SystemMessage(content=(
-            "You select optional tools for a marketing agent.\n\n"
+            "You select optional tools for a general-purpose AI agent.\n\n"
             "Optional tools:\n"
             "- news    → fetch real news articles "
               "(use when prompt asks for news, recent events, facts, or sources)\n"

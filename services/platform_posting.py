@@ -67,15 +67,14 @@ async def _post_one(
         ok = await asyncio.to_thread(post_to_slack, body)
         return ok, None if ok else "Slack post failed"
 
-    # Gmail posting temporarily disabled — see platform_parser.GMAIL_POSTING_ENABLED
     if platform == "gmail":
-        from services.platform_parser import GMAIL_DISABLED_MESSAGE
-        return False, GMAIL_DISABLED_MESSAGE
+        from services.gmail import send_email
 
-    # if platform == "gmail":
-    #     from services.gmail import send_email
-    #     ...
-    #     ok, err = await asyncio.to_thread(send_email, intent.gmail_to, subject, body)
-    #     return ok, err
+        recipient = intent.gmail_to
+        if not recipient:
+            return False, "No recipient email address found in your prompt."
+        subject = intent.gmail_subject or "Message from Agent"
+        ok, err = await asyncio.to_thread(send_email, recipient, subject, body)
+        return ok, err
 
     return False, f"Unknown platform: {platform}"

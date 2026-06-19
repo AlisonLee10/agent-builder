@@ -147,18 +147,17 @@ def _fallback_prompt(template_name: str) -> str:
     if template_name == "persona.j2":
         # Original string from generate_content() — unchanged
         return (
-            "You are a social media copywriter. "
-            "Write an engaging marketing post under 200 words. "
+            "You are a helpful AI assistant. "
+            "Complete the user's request clearly and concisely. "
             "If approved style examples are provided, match their tone and quality. "
-            "If rejection lessons are provided, avoid the mistakes users cited. "
+            "If rejection lessons are provided, avoid the mistakes noted. "
             "If news or trend context is provided, reference real facts naturally. "
-            "Do not invent statistics. No hashtags."
+            "Do not invent statistics."
         )
     if template_name == "hashtags.j2":
-        # Original string from generate_hashtags() — unchanged
         return (
-            "Generate relevant hashtags for a social media post. "
-            "Consider industry, niche, brand type, and region if mentioned. "
+            "Generate relevant hashtags for the given topic. "
+            "Consider industry, niche, and context if mentioned. "
             "Return ONLY hashtags, one per line, minimum 3, maximum 8. "
             "Each must start with #."
         )

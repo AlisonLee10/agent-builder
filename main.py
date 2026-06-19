@@ -162,7 +162,7 @@ def run_campaign(*, debug: bool = False) -> None:
     log.info(f"Campaign started - run ID: {run_id}")
 
     try:
-        user_prompt = input("\nWhat do you want to post about?\n→ ").strip()
+        user_prompt = input("\nWhat do you want to do today?\n→ ").strip()
         if not user_prompt:
             log.warning("empty prompt — skipping")
             return
@@ -645,7 +645,7 @@ if __name__ == "__main__":
         mode = "baseline (no domain pack)" if args.no_domain_pack else f"domain: {args.domain}"
         print(f"       AI Agent Builder — {mode}")
     else:
-        print("       Marketing Agent — AI Powered")
+        print("       AI Agent Builder")
     print("=" * 50)
 
     cleanup_old_logs()

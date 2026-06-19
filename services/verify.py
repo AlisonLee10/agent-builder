@@ -37,7 +37,7 @@ def verify_node(state: VerificationState) -> dict:
         SystemMessage(content=(
             "You are a content safety reviewer."
             f"{denied_section}"
-            "\nEvaluate the social media post for:\n"
+            "\nEvaluate the generated content for:\n"
             "- Harmful, offensive, or inappropriate content\n"
             "- False or unverified statistics\n"
             "- Misleading claims\n"
@@ -49,7 +49,7 @@ def verify_node(state: VerificationState) -> dict:
             '  "summary": "one sentence explanation"\n'
             "}"
         )),
-        HumanMessage(content=f"Review this post:\n\n{state['content']}"),
+        HumanMessage(content=f"Review this content:\n\n{state['content']}"),
     ])
 
     text = response.content if isinstance(response.content, str) else str(response.content)

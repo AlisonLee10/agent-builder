@@ -5,25 +5,24 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-# Gmail/email posting temporarily disabled — re-enable when service account is ready.
-GMAIL_POSTING_ENABLED = False
+GMAIL_POSTING_ENABLED = True
 GMAIL_DISABLED_MESSAGE = (
     "Gmail/email posting is temporarily disabled. Use Discord or Slack for now."
 )
 
-SUPPORTED_PLATFORMS = ("discord", "slack")  # add "gmail" when GMAIL_POSTING_ENABLED
+SUPPORTED_PLATFORMS = ("discord", "slack", "gmail")
 
-SUPPORTED_LABELS = "Discord / Slack"
+SUPPORTED_LABELS = "Discord / Slack / Gmail"
 
 MISSING_PLATFORMS_MESSAGE = (
-    "Please include platforms to post (Discord / Slack)."
+    "Please include platforms to post (Discord / Slack / Gmail)."
 )
 
 # Platform name -> aliases (for destination detection)
 SUPPORTED_ALIASES: dict[str, list[str]] = {
     "discord": ["discord"],
     "slack": ["slack"],
-    # "gmail": ["gmail", "e-mail", "email"],  # disabled — see GMAIL_POSTING_ENABLED
+    "gmail": ["gmail", "e-mail", "email"],
 }
 
 UNSUPPORTED_ALIASES: dict[str, list[str]] = {
@@ -175,9 +174,10 @@ def parse_platform_intent(prompt: str) -> PlatformIntent:
             if key and key not in platforms:
                 platforms.append(key)
 
-    # Gmail auto-detection disabled while GMAIL_POSTING_ENABLED is False
-    # if GMAIL_POSTING_ENABLED and (...):
-    #     platforms.append("gmail")
+    if GMAIL_POSTING_ENABLED:
+        emails = _find_emails(text)
+        if emails and POST_VERB_RE.search(text) and "gmail" not in platforms:
+            platforms.append("gmail")
 
     intent.platforms = [p for p in SUPPORTED_PLATFORMS if p in platforms]
 
