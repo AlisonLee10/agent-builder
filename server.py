@@ -14,6 +14,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 
+from api.routes      import router as builder_router
 from agent           import run_agent
 from services.verify import run_verification
 from services.storage import sources_to_list, normalize_research_for_save
@@ -76,6 +77,9 @@ app.add_middleware(
 )
 
 app.mount("/frontend", StaticFiles(directory="frontend"), name="frontend")
+
+# ── Agent Builder API (workflow engine, tool registry) ────────────────────────
+app.include_router(builder_router)
 
 
 # ── Request / Response models ─────────────────────────────────────────────────

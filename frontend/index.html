@@ -3,472 +3,718 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Marketing Agent</title>
+  <title>Agent Builder</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.css">
   <style>
-    body        { font-family: sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; }
-    h1          { font-size: 22px; margin-bottom: 24px; }
-    h2          { font-size: 17px; margin: 0 0 16px; }
-    label       { font-weight: 600; font-size: 14px; }
-    textarea    { width: 100%; height: 80px; padding: 8px; font-size: 14px;
-                  border: 1px solid #ccc; border-radius: 4px; margin-top: 8px;
-                  box-sizing: border-box; resize: vertical; }
-    button      { padding: 9px 22px; font-size: 14px; cursor: pointer;
-                  border: none; border-radius: 4px; margin-top: 10px; margin-right: 8px; }
-    #run-btn    { background: #2563eb; color: white; }
-    #run-btn:disabled { background: #93c5fd; cursor: not-allowed; }
-    #loading    { color: #6b7280; font-style: italic; margin-top: 16px; display: none; }
-    #result     { margin-top: 28px; display: none; }
-    hr          { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
-    .lbl        { font-size: 12px; font-weight: 600; text-transform: uppercase;
-                  letter-spacing: .05em; color: #6b7280; margin-bottom: 4px; }
-    pre         { background: #f8f8f8; border: 1px solid #e5e7eb; border-radius: 6px;
-                  padding: 16px; white-space: pre-wrap; font-size: 13px; line-height: 1.6; }
-    .verdict    { font-weight: 700; font-size: 15px; }
-    .approved   { color: #16a34a; }
-    .rejected   { color: #dc2626; }
-    .needs_revision { color: #d97706; }
-    #post-area  { margin-top: 20px; display: none; }
-    #approve-btn { background: #16a34a; color: white; }
-    #deny-btn    { background: #dc2626; color: white; }
-    #denial-box  { display: none; margin-top: 16px; padding: 14px;
-                    border: 1px solid #fecaca; border-radius: 8px;
-                    background: #fef2f2; }
-    #denial-box label { display: block; font-size: 13px; font-weight: 600;
-                         color: #991b1b; margin-bottom: 8px; }
-    #denial-reason { width: 100%; min-height: 72px; padding: 8px; font-size: 14px;
-                      border: 1px solid #fca5a5; border-radius: 4px;
-                      box-sizing: border-box; resize: vertical; }
-    #confirm-deny-btn { background: #dc2626; color: white; margin-top: 8px; }
-    #cancel-deny-btn  { background: #f3f4f6; color: #374151; margin-top: 8px; }
-    #status-msg  { margin-top: 12px; font-weight: 600; display: none; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Campaign history ───────────────────────────────────── */
-    #history         { margin-top: 8px; }
-    .campaign-card   { border: 1px solid #e5e7eb; border-radius: 8px;
-                       padding: 14px 16px; margin-bottom: 10px; }
-    .card-top        { display: flex; align-items: flex-start;
-                       justify-content: space-between; gap: 12px; }
-    .card-left       { flex: 1; min-width: 0; }
-    .card-prompt     { font-size: 14px; font-weight: 500;
-                       white-space: nowrap; overflow: hidden;
-                       text-overflow: ellipsis; }
-    .card-meta       { font-size: 12px; color: #6b7280; margin-top: 4px; }
-    .card-hashtags   { font-size: 12px; color: #2563eb; margin-top: 6px; }
-    .badge           { font-size: 11px; font-weight: 600; padding: 3px 9px;
-                       border-radius: 10px; white-space: nowrap; flex-shrink: 0; }
-    .badge-posted    { background: #dcfce7; color: #15803d; }
-    .badge-denied    { background: #fee2e2; color: #b91c1c; }
-    .view-btn        { font-size: 12px; padding: 4px 12px; margin-top: 0;
-                       background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-    .card-detail     { display: none; margin-top: 14px; }
-    .card-detail pre { margin-top: 6px; }
-    #history-empty   { color: #9ca3af; font-size: 14px; font-style: italic; }
-    #refresh-btn     { font-size: 12px; padding: 5px 12px; background: #f3f4f6;
-                       color: #374151; border: 1px solid #d1d5db; margin-top: 0; }
-    .examples-label  { font-size: 13px; font-weight: 600; color: #374151;
-                       margin: 14px 0 8px; display: block; }
-    .example-chips   { display: flex; flex-direction: column; gap: 8px; }
-    .example-chip    { text-align: left; padding: 10px 12px; font-size: 13px;
-                       line-height: 1.45; cursor: pointer; border-radius: 6px;
-                       border: 1px solid #d1d5db; background: #f9fafb; color: #1f2937; }
-    .example-chip:hover { border-color: #2563eb; background: #eff6ff; }
-    .email-block       { margin-top: 18px; padding-top: 16px;
-                         border-top: 1px solid #e5e7eb; }
-    .email-block .lbl   { margin-bottom: 8px; }
-    .email-fields       { display: flex; flex-wrap: wrap; gap: 10px;
-                         align-items: flex-end; margin-bottom: 8px; }
-    .email-field        { flex: 1; min-width: 200px; }
-    .email-field label  { display: block; font-size: 12px; font-weight: 600;
-                          color: #374151; margin-bottom: 4px; }
-    .email-field input  { width: 100%; padding: 8px; font-size: 14px;
-                          border: 1px solid #ccc; border-radius: 4px;
-                          box-sizing: border-box; }
-    #platform-plan      { font-size: 13px; color: #1d4ed8; margin: 12px 0 4px;
-                          padding: 10px 12px; background: #eff6ff;
-                          border-radius: 6px; border: 1px solid #bfdbfe; }
-    #platform-plan.empty { color: #92400e; background: #fffbeb; border-color: #fde68a; }
-    .card-platforms     { font-size: 12px; color: #15803d; margin-top: 4px; }
-    .card-denial-reason { font-size: 12px; color: #b91c1c; margin-top: 4px; }
+    :root {
+      --bg:       #faf7f2;
+      --panel:    #ede8df;
+      --surface:  #f5f0e8;
+      --border:   #c8bfb3;
+      --text:     #2d2520;
+      --muted:    #7a6f64;
+      --accent:   #6366f1;
+      --accent-h: #4f46e5;
+      --danger:   #ef4444;
+      --success:  #10b981;
+    }
+
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Top bar ── */
+    #topbar { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 50px; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #topbar h1 { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; margin-right: 6px; }
+    #topbar h1 span { color: var(--accent); }
+    #wf-name { flex: 1; max-width: 220px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 10px; font-size: 13px; }
+    #wf-name:focus { outline: none; border-color: var(--accent); }
+    select#wf-load { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 8px; font-size: 13px; }
+    .btn { padding: 6px 14px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity .15s; }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost   { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-danger  { background: var(--danger); color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    #topbar .sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+
+    /* ── Main layout ── */
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Left palette ── */
+    #palette { width: 160px; background: var(--panel); border-right: 1px solid var(--border); padding: 12px 8px; flex-shrink: 0; overflow-y: auto; }
+    #palette h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 0 4px 8px; }
+    .palette-node { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; cursor: grab; font-size: 13px; font-weight: 600; border: 1px solid transparent; transition: border-color .15s, background .15s; user-select: none; }
+    .palette-node:active { cursor: grabbing; }
+    .palette-node:hover { border-color: var(--border); background: var(--surface); }
+    .palette-node .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Canvas ── */
+    #canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+    #drawflow { width: 100%; height: 100%; }
+    #canvas-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; color: var(--muted); pointer-events: none; font-size: 14px; line-height: 1.8; }
+    #canvas-hint.hidden { display: none; }
+
+    /* ── Right panel ── */
+    #right-panel { width: 280px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+    #panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; transition: color .15s; }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px; }
+    .tab-content.active { display: block; }
+
+    /* Config panel */
+    #config-empty { color: var(--muted); font-size: 13px; text-align: center; margin-top: 40px; line-height: 1.8; }
+    #config-form h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
+    .field-group { margin-bottom: 12px; }
+    .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
+    .field-group input, .field-group select, .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 9px; font-size: 13px; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--accent); }
+    .field-group textarea { resize: vertical; min-height: 70px; font-family: inherit; }
+    #config-form .action-row { display: flex; gap: 8px; margin-top: 16px; }
+    #config-form .action-row .btn { flex: 1; }
+
+    /* Tools panel */
+    #tools-panel h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
+    .registry-item { background: var(--surface); border-radius: 8px; padding: 9px 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+    .registry-item-info { font-size: 12px; }
+    .registry-item-name { font-weight: 700; color: var(--text); }
+    .registry-item-type { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .registry-item button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 4px; }
+    .registry-item button:hover { color: var(--danger); background: rgba(239,68,68,.1); }
+    .add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 8px 10px; background: var(--surface); border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; margin-bottom: 12px; }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    /* ── Modal ── */
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .modal-backdrop.hidden { display: none; }
+    .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 420px; max-width: 95vw; }
+    .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
+    .modal .field-group { margin-bottom: 12px; }
+    .modal .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
+    .modal .field-group input, .modal .field-group select, .modal .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
+    .modal .field-group input:focus, .modal .field-group select:focus { outline: none; border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-actions .btn { flex: 1; }
+
+    /* Run result */
+    #run-modal .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; max-height: 340px; overflow-y: auto; margin-bottom: 14px; }
+    #run-modal .trace-toggle { font-size: 11px; color: var(--muted); cursor: pointer; text-decoration: underline; display: block; margin-bottom: 8px; }
+    #run-modal .trace-box { background: var(--bg); border-radius: 8px; padding: 10px; font-size: 11px; font-family: monospace; max-height: 180px; overflow-y: auto; white-space: pre; display: none; }
+
+    /* Drawflow overrides for dark theme */
+    .drawflow { background: #faf7f2; background-image: radial-gradient(circle, #d6cfc4 1px, transparent 1px); background-size: 24px 24px; }
+    .drawflow .drawflow-node { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0; min-width: 160px; box-shadow: 0 2px 8px rgba(0,0,0,.10); transition: background .15s; }
+    .drawflow .drawflow-node.selected { background: #e8e3dc; border-color: #b0a898; box-shadow: 0 2px 10px rgba(0,0,0,.13); }
+    .drawflow .drawflow-node .input,
+    .drawflow .drawflow-node .output { background: var(--border) !important; border: 2px solid #ffffff; border-radius: 50%; width: 12px; height: 12px; }
+    .drawflow .drawflow-node .input:hover,
+    .drawflow .drawflow-node .output:hover { background: var(--accent) !important; }
+    .drawflow .connection .main-path { stroke: var(--accent); stroke-width: 2.5; }
+    .df-node-wrap { padding: 0; }
+    .df-node-head { display: flex; align-items: center; gap: 7px; padding: 9px 12px 7px; font-size: 13px; font-weight: 700; border-radius: 9px 9px 0 0; }
+    .df-node-body { padding: 8px 12px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
 
-  <h1>Marketing Agent</h1>
+<!-- Top bar -->
+<div id="topbar">
+  <h1>Agent <span>Builder</span></h1>
+  <div class="sep"></div>
+  <select id="wf-load" title="Load workflow"><option value="">Load workflow…</option></select>
+  <input id="wf-name" type="text" placeholder="Workflow name" value="My Workflow">
+  <button class="btn btn-ghost" onclick="newWorkflow()">New</button>
+  <button class="btn btn-ghost" onclick="saveWorkflow()">Save</button>
+  <div class="sep"></div>
+  <button class="btn btn-success" onclick="openRunModal()">▶ Run</button>
+</div>
 
-  <!-- ── INPUT ─────────────────────────────────────────────── -->
-  <label for="prompt">What do you want to post about?</label>
-  <textarea
-    id          = "prompt"
-    placeholder = "e.g. Write a FlowAI post for busy professionals and post it to Discord and Slack"
-  ></textarea>
+<!-- Main layout -->
+<div id="main">
 
-  <span class="examples-label">Try an example:</span>
-  <div class="example-chips" id="example-chips"></div>
+  <!-- Left: node palette -->
+  <div id="palette">
+    <h2>Nodes</h2>
+    <!-- filled by JS -->
+  </div>
 
-  <br>
-  <button id="run-btn" onclick="runAgent()">Generate</button>
+  <!-- Center: canvas -->
+  <div id="canvas-wrap" ondragover="allowDrop(event)" ondrop="drop(event)">
+    <div id="drawflow"></div>
+    <div id="canvas-hint">
+      <div style="font-size:28px;margin-bottom:8px">⬡</div>
+      Drag nodes from the left panel<br>onto the canvas to build your workflow.<br>
+      <span style="font-size:12px">Connect nodes by dragging from output ● to input ●</span>
+    </div>
+  </div>
 
-  <div id="loading">Agent is researching and writing — this takes 10–30 seconds...</div>
+  <!-- Right: config + tools -->
+  <div id="right-panel">
+    <div id="panel-tabs">
+      <button class="tab-btn active" onclick="switchTab('config')">Config</button>
+      <button class="tab-btn" onclick="switchTab('tools')">Tools & MCPs</button>
+    </div>
 
-  <!-- ── RESULT ─────────────────────────────────────────────── -->
-  <div id="result">
-    <hr>
-    <h2>Generated Post</h2>
+    <!-- Config tab -->
+    <div id="tab-config" class="tab-content active">
+      <div id="config-empty">Select a node to<br>configure it here.</div>
+      <div id="config-form" style="display:none"></div>
+    </div>
 
-    <div class="lbl">Verdict</div>
-    <div class="verdict" id="verdict"></div>
-    <div style="color:#6b7280; font-size:13px; margin-top:4px" id="summary"></div>
+    <!-- Tools tab -->
+    <div id="tab-tools" class="tab-content">
+      <h3>API Tools</h3>
+      <button class="add-btn" onclick="openAddTool()">＋ Add Tool</button>
+      <div id="tools-list"></div>
 
-    <br>
-    <div class="lbl">Full Post</div>
-    <pre id="full-post"></pre>
+      <div class="divider"></div>
 
-    <div class="lbl">Hashtags</div>
-    <div id="hashtags" style="font-size:13px; color:#2563eb;"></div>
+      <h3>MCP Servers</h3>
+      <button class="add-btn" onclick="openAddMcp()">＋ Add MCP Server</button>
+      <div id="mcps-list"></div>
+    </div>
+  </div>
+</div>
 
-    <div id="platform-plan" class="empty" style="display:none"></div>
-
-    <div id="post-area">
-        <br>
-        <button id="approve-btn" onclick="approve()">✅ Approve</button>
-        <button id="deny-btn" onclick="showDenialForm()">🚫 Deny</button>
-        <div id="denial-box">
-          <label for="denial-reason">Why are you denying this post? (required)</label>
-          <textarea id="denial-reason" placeholder="Be specific: e.g. Too salesy, missing agentic-AI details, opening feels generic…"></textarea>
-          <button type="button" id="confirm-deny-btn" onclick="confirmDeny()">Confirm deny</button>
-          <button type="button" id="cancel-deny-btn" onclick="cancelDeny()">Cancel</button>
-        </div>
+<!-- Add Tool modal -->
+<div id="tool-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Add Tool</h2>
+    <div class="field-group"><label>Name</label><input id="t-name" placeholder="Web Search"></div>
+    <div class="field-group">
+      <label>Type</label>
+      <select id="t-kind" onchange="updateToolFields()">
+        <option value="http">HTTP API</option>
+        <option value="tavily">Tavily Search</option>
+        <option value="serpapi">SerpAPI</option>
+      </select>
+    </div>
+    <div id="t-http-fields">
+      <div class="field-group"><label>URL</label><input id="t-url" placeholder="https://api.example.com/query"></div>
+      <div class="field-group"><label>Method</label>
+        <select id="t-method"><option>POST</option><option>GET</option></select>
       </div>
-
-    <div id="status-msg"></div>
+    </div>
+    <div id="t-key-field" class="field-group" style="display:none"><label>API Key</label><input id="t-apikey" type="password" placeholder="sk-…"></div>
+    <div class="field-group"><label>Description (optional)</label><input id="t-desc" placeholder="Searches the web"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeTool()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTool()">Add Tool</button>
+    </div>
   </div>
+</div>
 
-  <!-- ── CAMPAIGN HISTORY ───────────────────────────────────── -->
-  <hr>
-  <div style="display:flex; align-items:center; justify-content:space-between;">
-    <h2 style="margin:0">Campaign History</h2>
-    <button id="refresh-btn" onclick="loadCampaigns()">↻ Refresh</button>
+<!-- Add MCP modal -->
+<div id="mcp-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Add MCP Server</h2>
+    <div class="field-group"><label>Name</label><input id="m-name" placeholder="My MCP"></div>
+    <div class="field-group"><label>Command</label><input id="m-cmd" placeholder="npx"></div>
+    <div class="field-group"><label>Args (space-separated)</label><input id="m-args" placeholder="-y @modelcontextprotocol/server-fetch"></div>
+    <div class="field-group"><label>Description (optional)</label><input id="m-desc" placeholder="Fetches web pages"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeMcp()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMcp()">Add MCP</button>
+    </div>
   </div>
+</div>
 
-  <div id="history">
-    <div id="history-empty">No campaigns yet.</div>
+<!-- Run modal -->
+<div id="run-modal" class="modal-backdrop hidden">
+  <div class="modal" style="width:520px">
+    <h2>▶ Run Workflow</h2>
+    <div id="run-input-section">
+      <div class="field-group"><label>Override Prompt <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional — leave blank to use the Input node's prompt)</span></label>
+        <textarea id="run-prompt" rows="3" placeholder="Leave blank to use the prompt typed in the Input node…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeRun()">Cancel</button>
+        <button class="btn btn-success" id="run-go-btn" onclick="runWorkflow()">Run</button>
+      </div>
+    </div>
+    <div id="run-result-section" style="display:none">
+      <div class="field-group"><label>Result</label></div>
+      <div class="result-box" id="run-result-text"></div>
+      <a class="trace-toggle" onclick="toggleTrace()">Show execution trace</a>
+      <div class="trace-box" id="run-trace-box"></div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeRun()">Close</button>
+        <button class="btn btn-ghost" onclick="runAgain()">Run Again</button>
+      </div>
+    </div>
   </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.js"></script>
+<script>
+// ── State ──────────────────────────────────────────────────────────────────────
+let editor, nodeTypes = [], toolsList = [], mcpsList = [];
+let selectedNodeId = null, currentWfId = null;
 
-  <script>
-    const API = ""
-    let currentRun = null
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  initDrawflow();
+  await Promise.all([loadNodeTypes(), loadWorkflowList(), loadRegistry()]);
+});
 
-    const EXAMPLE_PROMPTS = [
-      "Marketing post: FlowAI productivity app for busy professionals, post to Discord",
-      "Scan trends on crypto and AI, write a FlowAI marketing post, then post to Discord and Slack",
-      "Write a FlowAI post about our productivity app for remote teams, post to Discord",
-      "Collect news articles about the prospect of agentic AI in near future and write a marketing post about our company, then post the output to Discord and Slack",
-    ]
+function initDrawflow() {
+  const container = document.getElementById('drawflow');
+  editor = new Drawflow(container);
+  editor.reroute = true;
+  editor.start();
 
-    function useExamplePrompt(index) {
-      const textarea = document.getElementById("prompt")
-      textarea.value = EXAMPLE_PROMPTS[index]
-      textarea.focus()
-    }
-
-    function renderExampleChips() {
-      const container = document.getElementById("example-chips")
-      container.innerHTML = ""
-      EXAMPLE_PROMPTS.forEach((text, index) => {
-        const btn = document.createElement("button")
-        btn.type = "button"
-        btn.className = "example-chip"
-        btn.textContent = text
-        btn.onclick = () => useExamplePrompt(index)
-        container.appendChild(btn)
-      })
-    }
-
-    // ── Agent run ─────────────────────────────────────────────
-    async function runAgent() {
-      const prompt = document.getElementById("prompt").value.trim()
-      if (!prompt) { alert("Please enter a prompt"); return }
-
-      document.getElementById("result").style.display      = "none"
-      document.getElementById("loading").style.display     = "block"
-      document.getElementById("run-btn").disabled          = true
-      document.getElementById("status-msg").style.display  = "none"
-
-      try {
-        const res = await fetch(`${API}/api/run`, {
-          method:  "POST",
-          headers: {"Content-Type": "application/json"},
-          body:    JSON.stringify({prompt}),
-        })
-        if (!res.ok) {
-          const err = await res.json()
-          const detail = typeof err.detail === "string"
-            ? err.detail
-            : JSON.stringify(err.detail)
-          alert(detail)
-          return
-        }
-        const data = await res.json()
-        currentRun = data
-        displayResult(data)
-      } catch (e) {
-        alert("Could not reach server. Is it running?\n" + e.message)
-      } finally {
-        document.getElementById("loading").style.display = "none"
-        document.getElementById("run-btn").disabled      = false
-      }
-    }
-
-    function displayResult(data) {
-      const verdictEl       = document.getElementById("verdict")
-      verdictEl.textContent = data.verdict
-      verdictEl.className   = "verdict " + data.verdict
-
-      document.getElementById("summary").textContent   = data.summary
-      document.getElementById("full-post").textContent = data.full_post
-      document.getElementById("hashtags").textContent  = data.hashtags.join("  ")
-      document.getElementById("result").style.display  = "block"
-
-      const showPost = data.verdict !== "rejected"
-      document.getElementById("post-area").style.display = showPost ? "block" : "none"
-
-      const planEl = document.getElementById("platform-plan")
-      if (showPost && data.platform_plan) {
-        planEl.style.display = "block"
-        planEl.textContent   = data.platform_plan
-        planEl.className     = ""
-      } else {
-        planEl.style.display = "none"
-      }
-    }
-
-    async function approve() {
-      if (!currentRun) return
-
-      const btn = document.getElementById("approve-btn")
-      btn.disabled    = true
-      btn.textContent = "Posting…"
-
-      try {
-        const res = await fetch(`${API}/api/approve`, {
-          method:  "POST",
-          headers: {"Content-Type": "application/json"},
-          body:    JSON.stringify({
-            run_id:       currentRun.run_id,
-            full_post:    currentRun.full_post,
-            content:      currentRun.content,
-            prompt:       document.getElementById("prompt").value.trim(),
-            hashtags:     currentRun.hashtags,
-            verdict_info: {verdict: currentRun.verdict, summary: currentRun.summary},
-            sources:      currentRun.sources  || [],
-            articles:     currentRun.articles || [],
-          }),
-        })
-
-        if (res.ok) {
-          const data = await res.json()
-          const labels = (data.posted_platforms || [])
-            .map(p => p.charAt(0).toUpperCase() + p.slice(1))
-            .join(", ")
-          btn.textContent = "✅ Approved"
-          setStatus(`✅ Posted to ${labels}`, "#16a34a")
-          loadCampaigns()
-        } else {
-          const err = await res.json().catch(() => ({}))
-          const detail = typeof err.detail === "string"
-            ? err.detail
-            : JSON.stringify(err.detail || res.statusText)
-          btn.disabled    = false
-          btn.textContent = "✅ Approve"
-          setStatus(`❌ ${detail}`, "#dc2626")
-        }
-      } catch (e) {
-        btn.disabled    = false
-        btn.textContent = "✅ Approve"
-        setStatus(`❌ ${e.message}`, "#dc2626")
-      }
-    }
-
-function showDenialForm() {
-  if (!currentRun) return
-  document.getElementById("denial-box").style.display = "block"
-  document.getElementById("denial-reason").focus()
+  editor.on('nodeSelected', id => { selectedNodeId = id; renderConfigPanel(); });
+  editor.on('nodeUnselected', () => { selectedNodeId = null; clearConfigPanel(); });
+  editor.on('nodeRemoved', () => updateCanvasHint());
+  editor.on('nodeCreated', () => updateCanvasHint());
 }
 
-function cancelDeny() {
-  document.getElementById("denial-box").style.display = "none"
-  document.getElementById("denial-reason").value = ""
+// ── Node types & palette ───────────────────────────────────────────────────────
+async function loadNodeTypes() {
+  const res = await fetch('/api/node-types');
+  nodeTypes = await res.json();
+  renderPalette();
 }
 
-async function confirmDeny() {
-  if (!currentRun) return
+function renderPalette() {
+  const pal = document.getElementById('palette');
+  // keep the h2
+  const h2 = pal.querySelector('h2');
+  pal.innerHTML = '';
+  pal.appendChild(h2);
+  for (const nt of nodeTypes) {
+    const el = document.createElement('div');
+    el.className = 'palette-node';
+    el.draggable = true;
+    el.dataset.type = nt.type;
+    el.innerHTML = `<div class="dot" style="background:${nt.color}"></div>${nt.icon} ${nt.label}`;
+    el.addEventListener('dragstart', e => e.dataTransfer.setData('nodeType', nt.type));
+    pal.appendChild(el);
+  }
+}
 
-  const reason = document.getElementById("denial-reason").value.trim()
-  if (!reason) {
-    alert("Please explain why you are denying this post.")
-    return
+// ── Drag & drop ───────────────────────────────────────────────────────────────
+function allowDrop(e) { e.preventDefault(); }
+
+function drop(e) {
+  e.preventDefault();
+  const type = e.dataTransfer.getData('nodeType');
+  if (!type) return;
+  addNode(type, e.clientX, e.clientY);
+}
+
+function addNode(type, clientX, clientY) {
+  const nt = nodeTypes.find(n => n.type === type);
+  if (!nt) return;
+
+  const canvas = document.getElementById('drawflow');
+  const rect = canvas.getBoundingClientRect();
+  // Account for canvas pan and zoom
+  const zoom = editor.zoom;
+  const pos_x = (clientX - rect.left) * (1 / zoom) - editor.canvas_x * (1 / zoom);
+  const pos_y = (clientY - rect.top)  * (1 / zoom) - editor.canvas_y * (1 / zoom);
+
+  const defaultData = {};
+  for (const f of nt.fields || []) {
+    defaultData[f.key] = f.default !== undefined ? f.default : '';
   }
 
-  const res = await fetch(`${API}/api/deny`, {
-    method:  "POST",
-    headers: {"Content-Type": "application/json"},
-    body:    JSON.stringify({
-      run_id:             currentRun.run_id,
-      full_post:          currentRun.full_post,
-      content:            currentRun.content,
-      prompt:             document.getElementById("prompt").value.trim(),
-      hashtags:           currentRun.hashtags,
-      sources:            currentRun.sources  || [],
-      articles:           currentRun.articles || [],
-      user_denial_reason: reason,
-    }),
-  })
+  const html = buildNodeHtml(nt, defaultData);
+  editor.addNode(type, nt.inputs, nt.outputs, pos_x, pos_y, type, defaultData, html);
+}
 
-  if (res.ok) {
-    setStatus("🚫 Denied and saved with your feedback", "#d97706")
-    reset()
-    loadCampaigns()
+function buildNodeHtml(nt, data) {
+  if (nt.type === 'input') {
+    return `<div class="df-node-wrap">
+      <div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
+        <span>${nt.icon}</span><span>${nt.label}</span>
+      </div>
+      <div class="df-node-body" style="padding:8px 10px 10px">
+        <textarea df-prompt rows="3" placeholder="Type your prompt here…" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5">${data.prompt || ''}</textarea>
+      </div>
+    </div>`;
+  }
+  const preview = getPreview(nt.type, data);
+  return `<div class="df-node-wrap">
+    <div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
+      <span>${nt.icon}</span><span>${nt.label}</span>
+    </div>
+    <div class="df-node-body">${preview}</div>
+  </div>`;
+}
+
+function getPreview(type, data) {
+  if (type === 'input')     return 'User prompt →';
+  if (type === 'output')    return '→ Final output';
+  if (type === 'llm')       return data.model || 'gpt-4o-mini';
+  if (type === 'condition') return data.condition ? data.condition.slice(0,30) + '…' : 'Set a condition';
+  if (type === 'tool') {
+    const t = toolsList.find(x => x.id === data.tool_id);
+    return t ? t.name : 'Select a tool';
+  }
+  return '';
+}
+
+function refreshNodeHtml(nodeId) {
+  const node = editor.drawflow.drawflow.Home.data[nodeId];
+  if (!node) return;
+  const nt = nodeTypes.find(n => n.type === node.name);
+  if (!nt) return;
+  // Drawflow doesn't expose a direct HTML-update API; we patch the DOM directly.
+  const el = document.querySelector(`.drawflow-node[id="node-${nodeId}"] .df-node-body`);
+  if (el) el.textContent = getPreview(nt.type, node.data);
+}
+
+// ── Config panel ──────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['config','tools'][i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+function clearConfigPanel() {
+  document.getElementById('config-empty').style.display = '';
+  document.getElementById('config-form').style.display = 'none';
+}
+
+function renderConfigPanel() {
+  if (!selectedNodeId) return clearConfigPanel();
+  const node = editor.drawflow.drawflow.Home.data[selectedNodeId];
+  if (!node) return;
+  const nt = nodeTypes.find(n => n.type === node.name);
+  if (!nt) return;
+
+  document.getElementById('config-empty').style.display = 'none';
+  const form = document.getElementById('config-form');
+  form.style.display = '';
+
+  let html = `<h3>${nt.icon} ${nt.label}</h3>`;
+  for (const f of nt.fields || []) {
+    html += `<div class="field-group"><label>${f.label}</label>`;
+    if (f.type === 'select') {
+      html += `<select id="cf-${f.key}">`;
+      for (const o of f.options) html += `<option${node.data[f.key]===o?' selected':''}>${o}</option>`;
+      html += '</select>';
+    } else if (f.type === 'textarea') {
+      html += `<textarea id="cf-${f.key}" rows="4">${node.data[f.key]||f.default||''}</textarea>`;
+    } else if (f.type === 'tool_select') {
+      html += `<select id="cf-${f.key}"><option value="">— select —</option>`;
+      for (const t of toolsList) html += `<option value="${t.id}"${node.data[f.key]===t.id?' selected':''}>${t.name} (${t.kind})</option>`;
+      html += '</select>';
+    } else if (f.type === 'number') {
+      html += `<input id="cf-${f.key}" type="number" min="${f.min||0}" max="${f.max||10}" step="${f.step||1}" value="${node.data[f.key]!==undefined?node.data[f.key]:f.default}">`;
+    } else {
+      html += `<input id="cf-${f.key}" type="text" value="${node.data[f.key]||''}">`;
+    }
+    html += '</div>';
+  }
+  html += `<div class="action-row">
+    <button class="btn btn-primary" onclick="applyConfig()">Apply</button>
+    <button class="btn btn-danger" onclick="deleteNode()">Delete</button>
+  </div>`;
+  form.innerHTML = html;
+}
+
+function applyConfig() {
+  if (!selectedNodeId) return;
+  const node = editor.drawflow.drawflow.Home.data[selectedNodeId];
+  if (!node) return;
+  const nt = nodeTypes.find(n => n.type === node.name);
+  for (const f of nt.fields || []) {
+    const el = document.getElementById(`cf-${f.key}`);
+    if (el) node.data[f.key] = el.value;
+  }
+  refreshNodeHtml(selectedNodeId);
+}
+
+function deleteNode() {
+  if (!selectedNodeId) return;
+  editor.removeNodeId(`node-${selectedNodeId}`);
+  selectedNodeId = null;
+  clearConfigPanel();
+}
+
+function updateCanvasHint() {
+  const data = editor.drawflow.drawflow.Home.data;
+  const hasNodes = Object.keys(data).length > 0;
+  document.getElementById('canvas-hint').classList.toggle('hidden', hasNodes);
+}
+
+// ── Workflow save / load ──────────────────────────────────────────────────────
+async function loadWorkflowList() {
+  const res = await fetch('/api/workflows');
+  const list = await res.json();
+  const sel = document.getElementById('wf-load');
+  sel.innerHTML = '<option value="">Load workflow…</option>';
+  for (const w of list) {
+    const opt = document.createElement('option');
+    opt.value = w.id; opt.textContent = w.name;
+    sel.appendChild(opt);
+  }
+  sel.onchange = () => { if (sel.value) loadWorkflow(sel.value); };
+}
+
+async function loadWorkflow(id) {
+  const res = await fetch(`/api/workflows/${id}`);
+  if (!res.ok) return alert('Could not load workflow.');
+  const wf = await res.json();
+  currentWfId = wf.id;
+  document.getElementById('wf-name').value = wf.name;
+
+  if (wf.drawflow) {
+    editor.import(wf.drawflow);
   } else {
-    const err = await res.json().catch(() => ({}))
-    const detail = typeof err.detail === "string"
-      ? err.detail
-      : JSON.stringify(err.detail || res.statusText)
-    alert(detail)
+    editor.clearModuleSelected();
+    importEngineFormat(wf);
   }
+  updateCanvasHint();
+  clearConfigPanel();
 }
 
-function reset() {
-  currentRun = null
-  document.getElementById("post-area").style.display = "none"
-  document.getElementById("platform-plan").style.display = "none"
-  cancelDeny()
-
-  const btn = document.getElementById("approve-btn")
-  btn.disabled    = false
-  btn.textContent = "✅ Approve"
+function importEngineFormat(wf) {
+  const df = { drawflow: { Home: { data: {} } } };
+  const cols = 3, spacing = { x: 220, y: 160 }, start = { x: 80, y: 80 };
+  wf.nodes.forEach((n, i) => {
+    const nt = nodeTypes.find(t => t.type === n.type) || { inputs: 1, outputs: 1 };
+    const numId = i + 1;
+    df.drawflow.Home.data[numId] = {
+      id: numId, name: n.type, data: n.config || {},
+      class: n.type,
+      html: buildNodeHtml(nt, n.config || {}),
+      typenode: false,
+      inputs:  buildPorts('input',  nt.inputs),
+      outputs: buildPorts('output', nt.outputs),
+      pos_x: start.x + (i % cols) * spacing.x,
+      pos_y: start.y + Math.floor(i / cols) * spacing.y,
+    };
+    n._numId = numId;
+  });
+  // Wire edges
+  for (const e of (wf.edges || [])) {
+    const src = wf.nodes.find(n => n.id === e.source);
+    const tgt = wf.nodes.find(n => n.id === e.target);
+    if (!src || !tgt) continue;
+    const srcData = df.drawflow.Home.data[src._numId];
+    const tgtData = df.drawflow.Home.data[tgt._numId];
+    if (!srcData || !tgtData) continue;
+    srcData.outputs.output_1.connections.push({ node: String(tgt._numId), output: 'input_1' });
+    tgtData.inputs.input_1.connections.push({ node: String(src._numId), input: 'output_1' });
+  }
+  editor.import(df);
 }
 
-    // ── Campaign history ──────────────────────────────────────
-    async function loadCampaigns() {
-      try {
-        const res  = await fetch(`${API}/api/campaigns`)
-        const list = await res.json()
+function buildPorts(kind, count) {
+  const result = {};
+  for (let i = 1; i <= count; i++) {
+    result[`${kind}_${i}`] = { connections: [] };
+  }
+  return result;
+}
 
-        const container = document.getElementById("history")
-        const empty     = document.getElementById("history-empty")
+async function saveWorkflow() {
+  const name = document.getElementById('wf-name').value.trim() || 'Untitled';
+  const dfExport = editor.export();
+  const { nodes, edges } = toEngineFormat(dfExport);
 
-        if (!list.length) {
-          empty.style.display = "block"
-          return
-        }
+  const body = { name, nodes, edges, drawflow: dfExport };
+  const url  = currentWfId ? `/api/workflows/${currentWfId}` : '/api/workflows';
+  const method = currentWfId ? 'PUT' : 'POST';
 
-        empty.style.display = "none"
+  const res = await fetch(url, {
+    method, headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) return alert('Save failed: ' + await res.text());
+  const saved = await res.json();
+  currentWfId = saved.id;
+  await loadWorkflowList();
+  document.getElementById('wf-load').value = currentWfId;
+  showToast('Saved ✓');
+}
 
-        // Remove old cards, keep the empty notice element
-        container.querySelectorAll(".campaign-card").forEach(el => el.remove())
+function newWorkflow() {
+  currentWfId = null;
+  document.getElementById('wf-name').value = 'My Workflow';
+  document.getElementById('wf-load').value = '';
+  editor.clearModuleSelected();
+  clearConfigPanel();
+  updateCanvasHint();
+}
 
-        list.forEach(c => {
-          const card = buildCard(c)
-          container.appendChild(card)
-        })
-
-      } catch (e) {
-        console.error("Could not load campaigns:", e)
+function toEngineFormat(dfExport) {
+  const dfData = dfExport.drawflow.Home.data;
+  const nodes = [], edges = [];
+  for (const [id, node] of Object.entries(dfData)) {
+    nodes.push({ id: String(id), type: node.name, config: { ...node.data } });
+    for (const portData of Object.values(node.outputs || {})) {
+      for (const conn of portData.connections || []) {
+        edges.push({ source: String(id), target: String(conn.node) });
       }
     }
+  }
+  return { nodes, edges };
+}
 
-    function buildCard(c) {
-      const card = document.createElement("div")
-      card.className = "campaign-card"
-      card.id        = "card-" + c.filename
+// ── Run workflow ──────────────────────────────────────────────────────────────
+function openRunModal() {
+  document.getElementById('run-input-section').style.display = '';
+  document.getElementById('run-result-section').style.display = 'none';
+  document.getElementById('run-prompt').value = '';
+  document.getElementById('run-modal').classList.remove('hidden');
+}
+function closeRun() { document.getElementById('run-modal').classList.add('hidden'); }
+function runAgain() {
+  document.getElementById('run-input-section').style.display = '';
+  document.getElementById('run-result-section').style.display = 'none';
+}
 
-      const time      = formatTime(c.timestamp)
-      const hashText  = c.hashtags.length ? c.hashtags.join(" ") : "—"
-      const badgeCls  = c.status === "posted" ? "badge-posted" : "badge-denied"
-      const badgeTxt  = c.status === "posted" ? "✅ posted" : "🚫 denied"
-      const promptShort = c.user_prompt.length > 80
-        ? c.user_prompt.slice(0, 80) + "…"
-        : c.user_prompt
-      const platforms = (c.posted_platforms || []).length
-        ? "Posted to: " + c.posted_platforms.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(", ")
-        : ""
-      const denialNote = c.status === "denied" && c.denial_reason
-        ? `<div class="card-denial-reason">Why denied: ${esc(c.denial_reason)}</div>`
-        : ""
+async function runWorkflow() {
+  const prompt = document.getElementById('run-prompt').value.trim();
 
-      card.innerHTML = `
-        <div class="card-top">
-          <div class="card-left">
-            <div class="card-prompt" title="${esc(c.user_prompt)}">${esc(promptShort)}</div>
-            <div class="card-meta">${time} · run ${c.run_id || "—"}</div>
-            <div class="card-hashtags">${esc(hashText)}</div>
-            ${platforms ? `<div class="card-platforms">${esc(platforms)}</div>` : ""}
-            ${denialNote}
-          </div>
-          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px">
-            <span class="badge ${badgeCls}">${badgeTxt}</span>
-            <button class="view-btn" onclick="toggleDetail('${c.filename}')">View ▾</button>
-          </div>
-        </div>
-        <div class="card-detail" id="detail-${c.filename}">
-          <div class="lbl">Full Post</div>
-          <pre id="post-${c.filename}">Loading...</pre>
-        </div>
-      `
-      return card
-    }
+  // Auto-save first if unsaved
+  if (!currentWfId) await saveWorkflow();
+  if (!currentWfId) return;
 
-    async function toggleDetail(filename) {
-      const detail = document.getElementById("detail-" + filename)
-      const isOpen = detail.style.display === "block"
+  const btn = document.getElementById('run-go-btn');
+  btn.textContent = 'Running…'; btn.disabled = true;
 
-      if (isOpen) {
-        detail.style.display = "none"
-        return
-      }
+  const res = await fetch(`/api/workflows/${currentWfId}/run`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt }),
+  });
 
-      detail.style.display = "block"
+  btn.textContent = 'Run'; btn.disabled = false;
 
-      // Only fetch if not already loaded
-      const pre = document.getElementById("post-" + filename)
-      if (pre.textContent === "Loading...") {
-        try {
-          const res  = await fetch(`${API}/api/campaigns/${filename}`)
-          const data = await res.json()
-          pre.textContent = data.full_post || data.content || "No content saved."
-        } catch (e) {
-          pre.textContent = "Could not load."
-        }
-      }
-    }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    return alert('Error: ' + (err.detail || res.statusText));
+  }
 
-    // ── Helpers ───────────────────────────────────────────────
-    function formatTime(iso) {
-      if (!iso) return "—"
-      const d = new Date(iso)
-      return d.toLocaleDateString() + " " +
-             d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"})
-    }
+  const data = await res.json();
+  document.getElementById('run-input-section').style.display = 'none';
+  document.getElementById('run-result-section').style.display = '';
+  document.getElementById('run-result-text').textContent = data.result || '(no output)';
+  document.getElementById('run-trace-box').textContent = JSON.stringify(data.trace, null, 2);
+  document.getElementById('run-trace-box').style.display = 'none';
+}
 
-    function esc(str) {
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-    }
+function toggleTrace() {
+  const box = document.getElementById('run-trace-box');
+  box.style.display = box.style.display === 'none' ? '' : 'none';
+}
 
-    function setStatus(msg, color) {
-      const el         = document.getElementById("status-msg")
-      el.textContent   = msg
-      el.style.color   = color
-      el.style.display = "block"
-    }
+// ── Tool registry ─────────────────────────────────────────────────────────────
+async function loadRegistry() {
+  const [tRes, mRes] = await Promise.all([fetch('/api/tools'), fetch('/api/mcps')]);
+  toolsList = await tRes.json();
+  mcpsList  = await mRes.json();
+  renderRegistry();
+}
 
-    renderExampleChips()
-    loadCampaigns()
-  </script>
+function renderRegistry() {
+  const tl = document.getElementById('tools-list');
+  tl.innerHTML = toolsList.map(t => `
+    <div class="registry-item">
+      <div class="registry-item-info">
+        <div class="registry-item-name">${t.name}</div>
+        <div class="registry-item-type">${t.kind}${t.description ? ' · ' + t.description : ''}</div>
+      </div>
+      <button onclick="removeTool('${t.id}')">✕</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px">No tools added yet.</div>';
 
+  const ml = document.getElementById('mcps-list');
+  ml.innerHTML = mcpsList.map(m => `
+    <div class="registry-item">
+      <div class="registry-item-info">
+        <div class="registry-item-name">${m.name}</div>
+        <div class="registry-item-type">${m.command}${m.description ? ' · ' + m.description : ''}</div>
+      </div>
+      <button onclick="removeMcp('${m.id}')">✕</button>
+    </div>`).join('') || '<div style="color:var(--muted);font-size:12px">No MCP servers added yet.</div>';
+}
+
+function openAddTool() { updateToolFields(); document.getElementById('tool-modal').classList.remove('hidden'); }
+function closeTool()   { document.getElementById('tool-modal').classList.add('hidden'); }
+
+function updateToolFields() {
+  const kind = document.getElementById('t-kind').value;
+  document.getElementById('t-http-fields').style.display = kind === 'http' ? '' : 'none';
+  document.getElementById('t-key-field').style.display   = kind !== 'http' ? '' : 'none';
+}
+
+async function saveTool() {
+  const body = {
+    name:        document.getElementById('t-name').value.trim(),
+    kind:        document.getElementById('t-kind').value,
+    url:         document.getElementById('t-url').value.trim(),
+    method:      document.getElementById('t-method').value,
+    api_key:     document.getElementById('t-apikey').value.trim(),
+    description: document.getElementById('t-desc').value.trim(),
+    headers: {},
+  };
+  if (!body.name) return alert('Tool name is required.');
+  const res = await fetch('/api/tools', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) return alert('Failed: ' + await res.text());
+  closeTool();
+  await loadRegistry();
+}
+
+async function removeTool(id) {
+  if (!confirm('Remove this tool?')) return;
+  await fetch(`/api/tools/${id}`, { method: 'DELETE' });
+  await loadRegistry();
+  if (selectedNodeId) renderConfigPanel(); // refresh tool_select dropdown
+}
+
+function openAddMcp() { document.getElementById('mcp-modal').classList.remove('hidden'); }
+function closeMcp()   { document.getElementById('mcp-modal').classList.add('hidden'); }
+
+async function saveMcp() {
+  const body = {
+    name:        document.getElementById('m-name').value.trim(),
+    command:     document.getElementById('m-cmd').value.trim(),
+    args:        document.getElementById('m-args').value.trim().split(/\s+/).filter(Boolean),
+    description: document.getElementById('m-desc').value.trim(),
+    env: {},
+  };
+  if (!body.name || !body.command) return alert('Name and command are required.');
+  const res = await fetch('/api/mcps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  if (!res.ok) return alert('Failed: ' + await res.text());
+  closeMcp();
+  await loadRegistry();
+}
+
+async function removeMcp(id) {
+  if (!confirm('Remove this MCP server?')) return;
+  await fetch(`/api/mcps/${id}`, { method: 'DELETE' });
+  await loadRegistry();
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:999;transition:opacity .4s';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 1800);
+}
+
+// Close modals on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+});
+
+// Delete selected node with Backspace/Delete key
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement.tagName;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && !['INPUT','TEXTAREA','SELECT'].includes(tag)) {
+    if (selectedNodeId) deleteNode();
+  }
+});
+</script>
 </body>
 </html>
