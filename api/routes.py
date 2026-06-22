@@ -1,4 +1,4 @@
-"""Agent Builder API — workflow CRUD, tool/MCP registry, and execution."""
+"""Agent Builder API — workflow CRUD, tool/MCP registry, execution, domains, templates."""
 from __future__ import annotations
 
 import json
@@ -10,12 +10,52 @@ from pydantic import BaseModel
 
 from engine.executor import execute_workflow
 from engine.nodes import NODE_TYPE_SCHEMA
+from engine.builtin_tools import BUILTIN_TOOLS, is_available
+from engine.builtin_mcps import PRESET_MCPS
 from engine.registry import (
     add_mcp, add_tool, list_mcps, list_tools, remove_mcp, remove_tool,
 )
 
-WORKFLOWS_DIR = Path(__file__).parent.parent / "data" / "workflows"
+DATA_DIR      = Path(__file__).parent.parent / "data"
+WORKFLOWS_DIR = DATA_DIR / "workflows"
+TEMPLATES_DIR = DATA_DIR / "templates"
+DOMAINS_PATH  = DATA_DIR / "domains_config.json"
+RAG_PATH      = DATA_DIR / "rag_docs.json"
+
 WORKFLOWS_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── RAG example templates (shown in sidebar, not stored in rag_docs.json) ──────
+RAG_EXAMPLES = [
+    {
+        "id": "example_flowai",
+        "name": "FlowAI",
+        "icon": "🏢",
+        "type": "company",
+        "description": "B2B productivity SaaS — brand identity, approved claims, target audience",
+        "content": (
+            "## Company: FlowAI\n\n"
+            "**Tagline:** Work less. Flow more.\n"
+            "**Mission:** Give professionals back 2 hours every day through intelligent automation.\n"
+            "**Category:** AI productivity software\n"
+            "**Website:** https://flowai.com\n\n"
+            "### Approved Statistics\n"
+            "Only use these verified figures — do not invent or round differently:\n"
+            "- \"Saves an average of 2 hours per day\"\n"
+            "- \"Used by 10,000+ professionals\"\n"
+            "- \"Integrates with 50+ popular tools\"\n\n"
+            "### Target Audience\n"
+            "**Primary:** Busy professionals aged 25–40\n"
+            "**Industries:** Tech, Marketing, Finance, Consulting\n"
+            "**Pain points:** Repetitive tasks · Context switching · Email overload\n\n"
+            "When writing for this audience, assume they:\n"
+            "- Are already familiar with productivity tools (Notion, Slack, Zapier).\n"
+            "- Are skeptical of AI hype — prove value with specifics, not superlatives.\n"
+            "- Make purchasing decisions based on ROI and time savings, not feature lists.\n\n"
+            "### Brand Voice\n"
+            "Inspirational, direct, empowering. Peer-to-peer tone."
+        ),
+    }
+]
 
 router = APIRouter(prefix="/api")
 
@@ -26,7 +66,7 @@ class WorkflowBody(BaseModel):
     name: str
     nodes: list[dict]
     edges: list[dict]
-    drawflow: dict | None = None  # raw Drawflow export stored alongside engine format
+    drawflow: dict | None = None
 
 
 @router.get("/workflows")
@@ -77,7 +117,7 @@ def delete_workflow(wf_id: str):
 
 
 class RunBody(BaseModel):
-    prompt: str
+    prompt: str = ""
 
 
 @router.post("/workflows/{wf_id}/run")
@@ -96,11 +136,11 @@ async def run_workflow(wf_id: str, body: RunBody):
         raise HTTPException(500, str(e))
 
 
-# ── Tool Registry ──────────────────────────────────────────────────────────────
+# ── User Tool Registry ─────────────────────────────────────────────────────────
 
 class ToolBody(BaseModel):
     name: str
-    kind: str           # "http" | "tavily" | "serpapi"
+    kind: str
     description: str = ""
     url: str = ""
     api_key: str = ""
@@ -125,7 +165,7 @@ def delete_tool(tool_id: str):
     return {"deleted": tool_id}
 
 
-# ── MCP Registry ───────────────────────────────────────────────────────────────
+# ── User MCP Registry ──────────────────────────────────────────────────────────
 
 class MCPBody(BaseModel):
     name: str
@@ -152,8 +192,147 @@ def delete_mcp(mcp_id: str):
     return {"deleted": mcp_id}
 
 
+# ── Built-in tools catalog ─────────────────────────────────────────────────────
+
+@router.get("/builtin-tools")
+def get_builtin_tools():
+    return [
+        {**t, "available": is_available(t["id"])}
+        for t in BUILTIN_TOOLS
+    ]
+
+
+# ── Preset MCP catalog ─────────────────────────────────────────────────────────
+
+@router.get("/preset-mcps")
+def get_preset_mcps():
+    return PRESET_MCPS
+
+
 # ── Node Type Catalog ──────────────────────────────────────────────────────────
 
 @router.get("/node-types")
 def node_types():
     return NODE_TYPE_SCHEMA
+
+
+# ── Domain Packages ────────────────────────────────────────────────────────────
+
+def _load_domains() -> dict:
+    if not DOMAINS_PATH.exists():
+        return {"builtin": [], "user": []}
+    try:
+        return json.loads(DOMAINS_PATH.read_text())
+    except Exception:
+        return {"builtin": [], "user": []}
+
+
+def _save_domains(data: dict) -> None:
+    DOMAINS_PATH.write_text(json.dumps(data, indent=2))
+
+
+@router.get("/domains")
+def get_domains():
+    data = _load_domains()
+    return {"builtin": data.get("builtin", []), "user": data.get("user", [])}
+
+
+class DomainBody(BaseModel):
+    name: str
+    icon: str = "📦"
+    description: str = ""
+    context: str = ""
+
+
+@router.post("/domains", status_code=201)
+def create_domain(body: DomainBody):
+    data = _load_domains()
+    domain = {"id": str(uuid.uuid4()), **body.model_dump()}
+    data.setdefault("user", []).append(domain)
+    _save_domains(data)
+    return domain
+
+
+@router.delete("/domains/{domain_id}")
+def delete_domain(domain_id: str):
+    data = _load_domains()
+    before = len(data.get("user", []))
+    data["user"] = [d for d in data.get("user", []) if d["id"] != domain_id]
+    if len(data["user"]) == before:
+        raise HTTPException(404, "Domain not found (built-in domains cannot be deleted)")
+    _save_domains(data)
+    return {"deleted": domain_id}
+
+
+# ── Templates ──────────────────────────────────────────────────────────────────
+
+@router.get("/templates")
+def get_templates():
+    if not TEMPLATES_DIR.exists():
+        return []
+    result = []
+    for f in sorted(TEMPLATES_DIR.glob("*.json")):
+        try:
+            data = json.loads(f.read_text())
+            result.append({"id": data["id"], "name": data["name"], "description": data.get("description", "")})
+        except Exception:
+            continue
+    return result
+
+
+@router.get("/templates/{template_id}")
+def get_template(template_id: str):
+    path = TEMPLATES_DIR / f"{template_id}.json"
+    if not path.exists():
+        raise HTTPException(404, "Template not found")
+    return json.loads(path.read_text())
+
+
+# ── RAG Documents ──────────────────────────────────────────────────────────────
+
+def _load_rag() -> dict:
+    if not RAG_PATH.exists():
+        return {"docs": []}
+    try:
+        return json.loads(RAG_PATH.read_text())
+    except Exception:
+        return {"docs": []}
+
+
+def _save_rag(data: dict) -> None:
+    RAG_PATH.write_text(json.dumps(data, indent=2))
+
+
+@router.get("/rag")
+def get_rag():
+    """Return user docs and the static example templates."""
+    data = _load_rag()
+    return {"docs": data.get("docs", []), "examples": RAG_EXAMPLES}
+
+
+class RagDocBody(BaseModel):
+    name: str
+    icon: str = "📄"
+    type: str = "company"
+    description: str = ""
+    content: str
+
+
+@router.post("/rag", status_code=201)
+def create_rag_doc(body: RagDocBody):
+    data = _load_rag()
+    doc = {"id": str(uuid.uuid4()), **body.model_dump()}
+    data.setdefault("docs", []).append(doc)
+    _save_rag(data)
+    return doc
+
+
+@router.delete("/rag/{doc_id}")
+def delete_rag_doc(doc_id: str):
+    data = _load_rag()
+    before = len(data.get("docs", []))
+    data["docs"] = [d for d in data.get("docs", []) if d["id"] != doc_id]
+    if len(data["docs"]) == before:
+        raise HTTPException(404, "RAG document not found")
+    _save_rag(data)
+    return {"deleted": doc_id}

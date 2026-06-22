@@ -1,0 +1,48 @@
+{
+  "builtin": [
+    {
+      "id": "email",
+      "name": "Email",
+      "icon": "📧",
+      "description": "Professional email writing, tone, templates",
+      "folder": "domains/marketing",
+      "context": "Email best practices: use a clear subject line, greet by name, state the purpose in the first sentence, keep body concise (under 200 words), include a single clear CTA, end with a professional sign-off. Avoid: passive-aggressive tone, vague requests, walls of text, excessive exclamation marks. Common templates: follow-up, cold outreach, support reply, meeting request, status update."
+    },
+    {
+      "id": "software",
+      "name": "Software Engineering",
+      "icon": "💻",
+      "description": "Code quality, architecture, review best practices",
+      "context": "Follow SOLID principles. Prefer composition over inheritance. Write self-documenting code with meaningful names. Add comments only for non-obvious WHY, not WHAT. Tests should cover edge cases, not just happy paths. Prefer immutability. Handle errors explicitly. Performance: measure before optimising. Security: validate inputs at boundaries, never trust user data, parameterise queries."
+    },
+    {
+      "id": "finance",
+      "name": "Finance",
+      "icon": "💰",
+      "description": "Financial analysis, reporting, terminology",
+      "context": "Key metrics: Revenue, Gross Margin, EBITDA, Net Income, FCF, ROI, ROE, P/E, EV/EBITDA. Analysis frameworks: DCF valuation, comparable company analysis, LBO modelling. Report structure: Executive Summary → Key Metrics → Trend Analysis → Risks → Recommendations. Always cite data sources. Distinguish between YoY and QoQ changes. Flag seasonality."
+    },
+    {
+      "id": "healthcare",
+      "name": "Healthcare",
+      "icon": "🏥",
+      "description": "Clinical documentation, medical terminology",
+      "context": "HIPAA compliance is mandatory — never include real PII in outputs. Clinical documentation follows SOAP format: Subjective (patient report), Objective (measurements/observations), Assessment (clinical interpretation), Plan (next steps). Use ICD-10 codes for diagnoses. Avoid definitive diagnoses without full clinical context. Drug interactions must be verified. Recommend professional review for all clinical guidance."
+    },
+    {
+      "id": "legal",
+      "name": "Legal",
+      "icon": "⚖️",
+      "description": "Contract review, legal writing, compliance",
+      "context": "Legal writing must be precise and unambiguous. Define all key terms on first use. Standard contract clauses: definitions, representations & warranties, indemnification, limitation of liability, governing law, dispute resolution, termination. Flag missing clauses. Identify jurisdiction-specific requirements. Always recommend qualified legal counsel review before execution. Do not provide legal advice."
+    },
+    {
+      "id": "marketing",
+      "name": "Marketing",
+      "icon": "📣",
+      "description": "Campaign copy, brand voice, social media",
+      "context": "Brand voice principles: consistent tone, audience-first language, clear value proposition. Every piece needs a single CTA. Copy hierarchy: headline → sub-headline → body → CTA. A/B testing mindset: test one variable at a time. Channel norms — Email: personalisation + segmentation; Social: short + visual + hashtags; Paid: urgency + specificity. Key metrics: CTR, CVR, CAC, LTV, ROAS."
+    }
+  ],
+  "user": []
+}

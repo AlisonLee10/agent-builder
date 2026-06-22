@@ -1,0 +1,34 @@
+{
+  "id": "customer_support",
+  "name": "Customer Support Reply",
+  "description": "Reads a customer complaint and drafts an empathetic, professional reply",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "Customer email: 'I placed an order 3 weeks ago and still haven't received it. The tracking hasn't updated in 10 days. This is completely unacceptable — I need this resolved immediately or I want a full refund.'"
+      }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Support Agent",
+        "instructions": "You are a professional customer support agent for an e-commerce company. Write empathetic, solution-focused email replies. Acknowledge the issue, sincerely apologise, and offer a concrete resolution (refund or re-ship). Keep replies under 150 words. Use a warm but professional tone.",
+        "model": "gpt-4o-mini",
+        "tool_ids": "",
+        "domain_id": "email"
+      }
+    },
+    {
+      "id": "3",
+      "type": "output",
+      "config": {}
+    }
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3"}
+  ]
+}

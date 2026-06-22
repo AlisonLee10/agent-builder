@@ -59,7 +59,9 @@ async def execute_workflow(
         node = NodeClass(node_id, node_def.get("config", {}))
 
         if node_def["type"] == "input":
-            node_inputs = {"prompt": user_input, "input": user_input}
+            # If caller sent empty string, fall back to the node's pre-filled prompt
+            effective = user_input or node_def.get("config", {}).get("prompt", "")
+            node_inputs = {"prompt": effective, "input": effective}
         else:
             src_ids = sources.get(node_id, [])
             if src_ids:

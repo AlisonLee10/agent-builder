@@ -9,112 +9,160 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:       #faf7f2;
-      --panel:    #ede8df;
-      --surface:  #f5f0e8;
-      --border:   #c8bfb3;
-      --text:     #2d2520;
-      --muted:    #7a6f64;
-      --accent:   #6366f1;
-      --accent-h: #4f46e5;
-      --danger:   #ef4444;
-      --success:  #10b981;
+      --bg:      #faf7f2;
+      --panel:   #ede8df;
+      --surface: #f5f0e8;
+      --border:  #c8bfb3;
+      --text:    #2d2520;
+      --muted:   #7a6f64;
+      --accent:  #6366f1;
+      --danger:  #ef4444;
+      --success: #10b981;
     }
 
     body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* ── Top bar ── */
-    #topbar { display: flex; align-items: center; gap: 10px; padding: 0 14px; height: 50px; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    #topbar h1 { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; margin-right: 6px; }
+    #topbar { display: flex; align-items: center; gap: 8px; padding: 0 12px; height: 48px; background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    #topbar h1 { font-size: 14px; font-weight: 800; white-space: nowrap; letter-spacing: -.02em; }
     #topbar h1 span { color: var(--accent); }
-    #wf-name { flex: 1; max-width: 220px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 10px; font-size: 13px; }
+    .sep { width: 1px; height: 22px; background: var(--border); margin: 0 2px; }
+    #wf-name  { flex: 1; max-width: 200px; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 9px; font-size: 13px; }
     #wf-name:focus { outline: none; border-color: var(--accent); }
-    select#wf-load { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 8px; font-size: 13px; }
-    .btn { padding: 6px 14px; border-radius: 6px; border: none; font-size: 13px; cursor: pointer; font-weight: 600; transition: opacity .15s; }
-    .btn:hover { opacity: .85; }
+    select#wf-load { background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 5px 8px; font-size: 13px; max-width: 160px; }
+    .btn { padding: 5px 13px; border-radius: 6px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; transition: opacity .15s; white-space: nowrap; }
+    .btn:hover { opacity: .82; }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-ghost   { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
-    .btn-danger  { background: var(--danger); color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
-    #topbar .sep { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
 
     /* ── Main layout ── */
     #main { display: flex; flex: 1; overflow: hidden; }
 
-    /* ── Left palette ── */
-    #palette { width: 160px; background: var(--panel); border-right: 1px solid var(--border); padding: 12px 8px; flex-shrink: 0; overflow-y: auto; }
-    #palette h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 0 4px 8px; }
-    .palette-node { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px; margin-bottom: 6px; cursor: grab; font-size: 13px; font-weight: 600; border: 1px solid transparent; transition: border-color .15s, background .15s; user-select: none; }
+    /* ── Left sidebar ── */
+    #left-panel { width: 165px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    #left-tabs  { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .ltab { flex: 1; padding: 8px 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; }
+    .ltab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .ltab-content { display: none; flex: 1; overflow-y: auto; padding: 10px 7px; }
+    .ltab-content.active { display: block; }
+
+    /* Node palette */
+    .palette-section { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); padding: 2px 4px 6px; }
+    .palette-node { display: flex; align-items: center; gap: 7px; padding: 8px 9px; border-radius: 7px; margin-bottom: 4px; cursor: grab; font-size: 12px; font-weight: 600; border: 1px solid transparent; transition: border-color .12s, background .12s; user-select: none; }
     .palette-node:active { cursor: grabbing; }
     .palette-node:hover { border-color: var(--border); background: var(--surface); }
-    .palette-node .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .node-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Templates */
+    .tpl-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 9px 10px; margin-bottom: 7px; cursor: pointer; transition: border-color .15s; }
+    .tpl-card:hover { border-color: var(--accent); }
+    .tpl-card-name { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+    .tpl-card-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
 
     /* ── Canvas ── */
     #canvas-wrap { flex: 1; position: relative; overflow: hidden; }
     #drawflow { width: 100%; height: 100%; }
-    #canvas-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; color: var(--muted); pointer-events: none; font-size: 14px; line-height: 1.8; }
+    #canvas-hint { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; color: var(--muted); pointer-events: none; font-size: 13px; line-height: 2; }
     #canvas-hint.hidden { display: none; }
 
     /* ── Right panel ── */
-    #right-panel { width: 280px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
-    #panel-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .tab-btn { flex: 1; padding: 10px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; transition: color .15s; }
-    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .tab-content { display: none; flex: 1; overflow-y: auto; padding: 14px; }
-    .tab-content.active { display: block; }
+    #right-panel { width: 412px; background: var(--panel); border-left: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+    #right-tabs  { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .rtab { flex: 1; padding: 9px 2px; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; cursor: pointer; background: none; border: none; color: var(--muted); border-bottom: 2px solid transparent; }
+    .rtab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .rtab-content { display: none; flex: 1; overflow-y: auto; padding: 12px 11px; }
+    .rtab-content.active { display: block; }
+
+    /* ── Shared form styles ── */
+    .section-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 7px; }
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .field-group { margin-bottom: 10px; }
+    .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .field-group input, .field-group select, .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 8px; font-size: 12px; }
+    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--accent); }
+    .field-group textarea { resize: vertical; min-height: 60px; font-family: inherit; line-height: 1.5; }
+    .action-row { display: flex; gap: 7px; margin-top: 12px; }
+    .action-row .btn { flex: 1; }
 
     /* Config panel */
-    #config-empty { color: var(--muted); font-size: 13px; text-align: center; margin-top: 40px; line-height: 1.8; }
-    #config-form h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
-    .field-group { margin-bottom: 12px; }
-    .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
-    .field-group input, .field-group select, .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 9px; font-size: 13px; }
-    .field-group input:focus, .field-group select:focus, .field-group textarea:focus { outline: none; border-color: var(--accent); }
-    .field-group textarea { resize: vertical; min-height: 70px; font-family: inherit; }
-    #config-form .action-row { display: flex; gap: 8px; margin-top: 16px; }
-    #config-form .action-row .btn { flex: 1; }
+    #config-empty { color: var(--muted); font-size: 12px; text-align: center; margin-top: 36px; line-height: 1.9; }
+    #config-form h3 { font-size: 13px; font-weight: 700; margin-bottom: 13px; display: flex; align-items: center; gap: 5px; }
 
-    /* Tools panel */
-    #tools-panel h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 10px; }
-    .registry-item { background: var(--surface); border-radius: 8px; padding: 9px 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
-    .registry-item-info { font-size: 12px; }
-    .registry-item-name { font-weight: 700; color: var(--text); }
-    .registry-item-type { color: var(--muted); font-size: 11px; margin-top: 2px; }
-    .registry-item button { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 15px; padding: 2px 5px; border-radius: 4px; }
-    .registry-item button:hover { color: var(--danger); background: rgba(239,68,68,.1); }
-    .add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 8px 10px; background: var(--surface); border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); font-size: 12px; cursor: pointer; margin-bottom: 12px; }
+    /* Tool multiselect in config */
+    .tool-check-list { display: flex; flex-direction: column; gap: 4px; }
+    .tool-check { display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer; padding: 5px 7px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); }
+    .tool-check input[type=checkbox] { accent-color: var(--accent); flex-shrink: 0; }
+    .tool-check-tag { font-size: 8px; color: #b0a898; margin-left: 6px; letter-spacing: .04em; }
+
+    /* Registry items */
+    .reg-item { background: var(--surface); border-radius: 7px; padding: 7px 9px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    .reg-item-icon { font-size: 16px; flex-shrink: 0; }
+    .reg-item-info { flex: 1; min-width: 0; }
+    .reg-item-name { font-size: 12px; font-weight: 700; }
+    .reg-item-sub  { font-size: 10px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
+    .reg-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 3px 5px; border-radius: 4px; }
+    .icon-btn:hover { background: var(--border); color: var(--text); }
+    .icon-btn.danger:hover { color: var(--danger); background: rgba(239,68,68,.1); }
+
+    /* Preset MCP available tag */
+    .tag { display: inline-block; font-size: 9px; font-weight: 800; text-transform: uppercase; padding: 2px 6px; border-radius: 20px; letter-spacing: .05em; }
+    .tag-on  { background: #d1fae5; color: #065f46; }
+    .tag-off { background: #fce7e7; color: #991b1b; }
+    .tag-cfg { background: #e0e7ff; color: #3730a3; }
+
+    /* Add button */
+    .add-btn { display: flex; align-items: center; gap: 6px; width: 100%; padding: 7px 9px; background: var(--surface); border: 1px dashed var(--border); border-radius: 7px; color: var(--muted); font-size: 11px; font-weight: 700; cursor: pointer; margin-bottom: 9px; }
     .add-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+    /* Domain cards */
+    .domain-card { background: var(--surface); border-radius: 7px; padding: 8px 10px; margin-bottom: 5px; display: flex; align-items: center; gap: 9px; }
+    .domain-icon { font-size: 18px; flex-shrink: 0; }
+    .domain-info { flex: 1; min-width: 0; }
+    .domain-name { font-size: 12px; font-weight: 700; }
+    .domain-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
 
     /* ── Modal ── */
-    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); z-index: 100; display: flex; align-items: center; justify-content: center; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.3); z-index: 200; display: flex; align-items: center; justify-content: center; }
     .modal-backdrop.hidden { display: none; }
-    .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px; width: 420px; max-width: 95vw; }
-    .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 18px; }
-    .modal .field-group { margin-bottom: 12px; }
-    .modal .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px; }
-    .modal .field-group input, .modal .field-group select, .modal .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 8px 10px; font-size: 13px; }
-    .modal .field-group input:focus, .modal .field-group select:focus { outline: none; border-color: var(--accent); }
-    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .modal-actions .btn { flex: 1; }
+    .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 22px; width: 420px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-size: 15px; font-weight: 800; margin-bottom: 16px; }
+    .modal .field-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 4px; }
+    .modal .field-group input, .modal .field-group select, .modal .field-group textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 7px 9px; font-size: 13px; }
+    .modal .field-group input:focus, .modal .field-group select:focus, .modal .field-group textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 9px; margin-top: 18px; }
+    .modal-actions .btn { flex: 1; padding: 8px; }
+
+    /* MCP env vars form */
+    .env-var-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .env-var-row label { font-size: 11px; font-weight: 600; min-width: 130px; color: var(--muted); }
+    .env-var-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 5px; padding: 5px 7px; font-size: 12px; }
+    .req-star { color: var(--danger); margin-left: 2px; }
 
     /* Run result */
-    #run-modal .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; max-height: 340px; overflow-y: auto; margin-bottom: 14px; }
-    #run-modal .trace-toggle { font-size: 11px; color: var(--muted); cursor: pointer; text-decoration: underline; display: block; margin-bottom: 8px; }
-    #run-modal .trace-box { background: var(--bg); border-radius: 8px; padding: 10px; font-size: 11px; font-family: monospace; max-height: 180px; overflow-y: auto; white-space: pre; display: none; }
+    #run-modal .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow-y: auto; margin-bottom: 12px; }
+    #run-modal .trace-toggle { font-size: 11px; color: var(--muted); cursor: pointer; text-decoration: underline; display: block; margin-bottom: 7px; }
+    #run-modal .trace-box { background: var(--bg); border-radius: 7px; padding: 9px; font-size: 11px; font-family: monospace; max-height: 160px; overflow-y: auto; white-space: pre; display: none; }
 
-    /* Drawflow overrides for dark theme */
+    /* Drag-select */
+    #sel-box { position: absolute; border: 2px dashed var(--accent); background: rgba(99,102,241,.12); pointer-events: none; z-index: 999; display: none; border-radius: 4px; }
+    .drawflow .drawflow-node.multi-selected { background: #e8e7fa !important; border-color: var(--accent) !important; box-shadow: 0 0 0 2px rgba(99,102,241,.22) !important; }
+    #multi-delete-btn { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; display: none; background: var(--danger); color: #fff; border: none; border-radius: 7px; padding: 7px 18px; font-size: 12px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.18); white-space: nowrap; letter-spacing: .01em; }
+    #multi-delete-btn:hover { opacity: .86; }
+
+    /* Drawflow */
     .drawflow { background: #faf7f2; background-image: radial-gradient(circle, #d6cfc4 1px, transparent 1px); background-size: 24px 24px; }
-    .drawflow .drawflow-node { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0; min-width: 160px; box-shadow: 0 2px 8px rgba(0,0,0,.10); transition: background .15s; }
+    .drawflow .drawflow-node { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0; min-width: 165px; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: background .13s; }
     .drawflow .drawflow-node.selected { background: #e8e3dc; border-color: #b0a898; box-shadow: 0 2px 10px rgba(0,0,0,.13); }
     .drawflow .drawflow-node .input,
-    .drawflow .drawflow-node .output { background: var(--border) !important; border: 2px solid #ffffff; border-radius: 50%; width: 12px; height: 12px; }
+    .drawflow .drawflow-node .output { background: var(--border) !important; border: 2px solid #fff; border-radius: 50%; width: 12px; height: 12px; }
     .drawflow .drawflow-node .input:hover,
     .drawflow .drawflow-node .output:hover { background: var(--accent) !important; }
     .drawflow .connection .main-path { stroke: var(--accent); stroke-width: 2.5; }
-    .df-node-wrap { padding: 0; }
-    .df-node-head { display: flex; align-items: center; gap: 7px; padding: 9px 12px 7px; font-size: 13px; font-weight: 700; border-radius: 9px 9px 0 0; }
-    .df-node-body { padding: 8px 12px 10px; font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); }
+    .df-node-head { display: flex; align-items: center; gap: 6px; padding: 8px 11px 6px; font-size: 12px; font-weight: 700; border-radius: 9px 9px 0 0; }
+    .df-node-body { padding: 7px 11px 9px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
   </style>
 </head>
 <body>
@@ -123,7 +171,7 @@
 <div id="topbar">
   <h1>Agent <span>Builder</span></h1>
   <div class="sep"></div>
-  <select id="wf-load" title="Load workflow"><option value="">Load workflow…</option></select>
+  <select id="wf-load" title="Load workflow"><option value="">Load…</option></select>
   <input id="wf-name" type="text" placeholder="Workflow name" value="My Workflow">
   <button class="btn btn-ghost" onclick="newWorkflow()">New</button>
   <button class="btn btn-ghost" onclick="saveWorkflow()">Save</button>
@@ -131,60 +179,108 @@
   <button class="btn btn-success" onclick="openRunModal()">▶ Run</button>
 </div>
 
-<!-- Main layout -->
+<!-- Main -->
 <div id="main">
 
-  <!-- Left: node palette -->
-  <div id="palette">
-    <h2>Nodes</h2>
-    <!-- filled by JS -->
+  <!-- Left sidebar -->
+  <div id="left-panel">
+    <div id="left-tabs">
+      <button class="ltab active" onclick="switchLeftTab('nodes')">Nodes</button>
+      <button class="ltab" onclick="switchLeftTab('templates')">Templates</button>
+    </div>
+
+    <div id="ltab-nodes" class="ltab-content active">
+      <div class="palette-section">Node Palette</div>
+      <!-- filled by JS -->
+    </div>
+
+    <div id="ltab-templates" class="ltab-content">
+      <div class="palette-section" style="margin-bottom:8px">Starter Templates</div>
+      <div id="template-list"><!-- filled by JS --></div>
+    </div>
   </div>
 
-  <!-- Center: canvas -->
+  <!-- Canvas -->
   <div id="canvas-wrap" ondragover="allowDrop(event)" ondrop="drop(event)">
     <div id="drawflow"></div>
+    <div id="sel-box"></div>
+    <button id="multi-delete-btn" onclick="deleteMultiSelected()"></button>
     <div id="canvas-hint">
-      <div style="font-size:28px;margin-bottom:8px">⬡</div>
-      Drag nodes from the left panel<br>onto the canvas to build your workflow.<br>
-      <span style="font-size:12px">Connect nodes by dragging from output ● to input ●</span>
+      <div style="font-size:26px;margin-bottom:6px">⬡</div>
+      Drag nodes onto the canvas<br>and connect them to build a workflow.<br>
+      <span style="font-size:11px">Or load a template from the left panel.</span>
     </div>
   </div>
 
-  <!-- Right: config + tools -->
+  <!-- Right panel -->
   <div id="right-panel">
-    <div id="panel-tabs">
-      <button class="tab-btn active" onclick="switchTab('config')">Config</button>
-      <button class="tab-btn" onclick="switchTab('tools')">Tools & MCPs</button>
+    <div id="right-tabs">
+      <button class="rtab active" onclick="switchRightTab('config')">Config</button>
+      <button class="rtab" onclick="switchRightTab('tools')">Tools</button>
+      <button class="rtab" onclick="switchRightTab('mcps')">MCPs</button>
+      <button class="rtab" onclick="switchRightTab('domains')">Domains</button>
+      <button class="rtab" onclick="switchRightTab('rag')">RAG</button>
     </div>
 
-    <!-- Config tab -->
-    <div id="tab-config" class="tab-content active">
+    <!-- Config -->
+    <div id="rtab-config" class="rtab-content active">
       <div id="config-empty">Select a node to<br>configure it here.</div>
       <div id="config-form" style="display:none"></div>
     </div>
 
-    <!-- Tools tab -->
-    <div id="tab-tools" class="tab-content">
-      <h3>API Tools</h3>
-      <button class="add-btn" onclick="openAddTool()">＋ Add Tool</button>
-      <div id="tools-list"></div>
-
+    <!-- Tools -->
+    <div id="rtab-tools" class="rtab-content">
+      <div class="section-label">Built-in Tools</div>
+      <div id="builtin-tools-list"></div>
       <div class="divider"></div>
+      <div class="section-label">My Tools</div>
+      <button class="add-btn" onclick="openAddTool()">＋ Add Custom Tool</button>
+      <div id="user-tools-list"></div>
+    </div>
 
-      <h3>MCP Servers</h3>
-      <button class="add-btn" onclick="openAddMcp()">＋ Add MCP Server</button>
-      <div id="mcps-list"></div>
+    <!-- MCPs -->
+    <div id="rtab-mcps" class="rtab-content">
+      <div class="section-label">Pre-set MCP Servers</div>
+      <div id="preset-mcps-list"></div>
+      <div class="divider"></div>
+      <div class="section-label">My MCP Servers</div>
+      <button class="add-btn" onclick="openAddMcp()">＋ Add Custom MCP</button>
+      <div id="user-mcps-list"></div>
+    </div>
+
+    <!-- Domains -->
+    <div id="rtab-domains" class="rtab-content">
+      <div class="section-label">Built-in Domains</div>
+      <div id="builtin-domains-list"></div>
+      <div class="divider"></div>
+      <div class="section-label">My Domains</div>
+      <button class="add-btn" onclick="openAddDomain()">＋ Add Domain</button>
+      <div id="user-domains-list"></div>
+    </div>
+
+    <!-- RAG -->
+    <div id="rtab-rag" class="rtab-content">
+      <div class="section-label">My Documents</div>
+      <button class="add-btn" onclick="openAddRag()">＋ Add Company Data</button>
+      <div id="rag-docs-list"></div>
+      <div class="divider"></div>
+      <div class="section-label" style="margin-bottom:8px">Example Templates</div>
+      <p style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.5">
+        Click <strong>+</strong> to copy an example into your workspace.
+      </p>
+      <div id="rag-examples-list"></div>
     </div>
   </div>
 </div>
 
-<!-- Add Tool modal -->
+<!-- ── Modals ── -->
+
+<!-- Add custom tool -->
 <div id="tool-modal" class="modal-backdrop hidden">
   <div class="modal">
-    <h2>Add Tool</h2>
-    <div class="field-group"><label>Name</label><input id="t-name" placeholder="Web Search"></div>
-    <div class="field-group">
-      <label>Type</label>
+    <h2>Add Custom Tool</h2>
+    <div class="field-group"><label>Name</label><input id="t-name" placeholder="My API"></div>
+    <div class="field-group"><label>Type</label>
       <select id="t-kind" onchange="updateToolFields()">
         <option value="http">HTTP API</option>
         <option value="tavily">Tavily Search</option>
@@ -193,40 +289,98 @@
     </div>
     <div id="t-http-fields">
       <div class="field-group"><label>URL</label><input id="t-url" placeholder="https://api.example.com/query"></div>
-      <div class="field-group"><label>Method</label>
-        <select id="t-method"><option>POST</option><option>GET</option></select>
-      </div>
+      <div class="field-group"><label>Method</label><select id="t-method"><option>POST</option><option>GET</option></select></div>
     </div>
-    <div id="t-key-field" class="field-group" style="display:none"><label>API Key</label><input id="t-apikey" type="password" placeholder="sk-…"></div>
-    <div class="field-group"><label>Description (optional)</label><input id="t-desc" placeholder="Searches the web"></div>
+    <div id="t-key-field" class="field-group" style="display:none"><label>API Key</label><input id="t-apikey" type="password"></div>
+    <div class="field-group"><label>Description</label><input id="t-desc" placeholder="What this tool does"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeTool()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveTool()">Add Tool</button>
+      <button class="btn btn-primary" onclick="saveTool()">Add</button>
     </div>
   </div>
 </div>
 
-<!-- Add MCP modal -->
+<!-- Configure preset MCP -->
+<div id="preset-mcp-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2 id="pmcp-title">Configure MCP</h2>
+    <p id="pmcp-desc" style="font-size:12px;color:var(--muted);margin-bottom:14px"></p>
+    <div id="pmcp-env-fields"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closePresetMcp()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePresetMcp()">Add Server</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add custom MCP -->
 <div id="mcp-modal" class="modal-backdrop hidden">
   <div class="modal">
-    <h2>Add MCP Server</h2>
+    <h2>Add Custom MCP</h2>
     <div class="field-group"><label>Name</label><input id="m-name" placeholder="My MCP"></div>
     <div class="field-group"><label>Command</label><input id="m-cmd" placeholder="npx"></div>
     <div class="field-group"><label>Args (space-separated)</label><input id="m-args" placeholder="-y @modelcontextprotocol/server-fetch"></div>
-    <div class="field-group"><label>Description (optional)</label><input id="m-desc" placeholder="Fetches web pages"></div>
+    <div class="field-group"><label>Description</label><input id="m-desc"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeMcp()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveMcp()">Add MCP</button>
+      <button class="btn btn-primary" onclick="saveMcp()">Add</button>
     </div>
   </div>
 </div>
 
-<!-- Run modal -->
+<!-- Add domain -->
+<div id="domain-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Add Domain Package</h2>
+    <div class="field-group"><label>Name</label><input id="d-name" placeholder="e.g. Real Estate"></div>
+    <div class="field-group"><label>Icon (emoji)</label><input id="d-icon" placeholder="🏠" style="max-width:80px"></div>
+    <div class="field-group"><label>Description</label><input id="d-desc" placeholder="Short description"></div>
+    <div class="field-group"><label>Knowledge / Context <span style="font-weight:400;text-transform:none;color:var(--muted)">— paste your JSON, text, or ontology</span></label>
+      <textarea id="d-context" rows="6" placeholder="Paste domain knowledge, terminology, rules, or structured JSON here…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeDomain()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDomain()">Add Domain</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add RAG document -->
+<div id="rag-modal" class="modal-backdrop hidden">
+  <div class="modal">
+    <h2>Add Company Data</h2>
+    <div class="field-group"><label>Name</label><input id="rag-name" placeholder="e.g. Acme Corp"></div>
+    <div style="display:flex;gap:8px">
+      <div class="field-group" style="flex:0 0 72px"><label>Icon</label><input id="rag-icon" placeholder="🏢" style="max-width:72px"></div>
+      <div class="field-group" style="flex:1"><label>Type</label>
+        <select id="rag-type">
+          <option value="company">Company</option>
+          <option value="product">Product</option>
+          <option value="policy">Policy</option>
+          <option value="persona">Persona</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-group"><label>Description <span style="font-weight:400;text-transform:none;color:var(--muted)">— one line</span></label>
+      <input id="rag-desc" placeholder="Brand voice, approved claims, audience…">
+    </div>
+    <div class="field-group"><label>Content <span style="font-weight:400;text-transform:none;color:var(--muted)">— paste brand guidelines, FAQs, facts, policies…</span></label>
+      <textarea id="rag-content" rows="8" placeholder="Paste your company data, brand guidelines, approved statistics, target audience description, product specs, or any context you want injected into agent prompts…"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRag()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveRag()">Add Document</button>
+    </div>
+  </div>
+</div>
+
+<!-- Run workflow -->
 <div id="run-modal" class="modal-backdrop hidden">
-  <div class="modal" style="width:520px">
+  <div class="modal" style="width:500px">
     <h2>▶ Run Workflow</h2>
     <div id="run-input-section">
-      <div class="field-group"><label>Override Prompt <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional — leave blank to use the Input node's prompt)</span></label>
+      <div class="field-group"><label>Override Prompt <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional — uses Input node prompt if blank)</span></label>
         <textarea id="run-prompt" rows="3" placeholder="Leave blank to use the prompt typed in the Input node…"></textarea>
       </div>
       <div class="modal-actions">
@@ -250,13 +404,53 @@
 <script src="https://cdn.jsdelivr.net/npm/drawflow@0.0.59/dist/drawflow.min.js"></script>
 <script>
 // ── State ──────────────────────────────────────────────────────────────────────
-let editor, nodeTypes = [], toolsList = [], mcpsList = [];
-let selectedNodeId = null, currentWfId = null;
+let editor, selectedNodeId = null, currentWfId = null;
+let nodeTypes = [], toolsList = [], mcpsList = [];
+let builtinTools = [], presetMcps = [], allDomains = { builtin: [], user: [] };
+let configuredPresetMcpId = null;
+
+// ── History (undo / redo) ─────────────────────────────────────────────────────
+const _hist = [];
+let   _histIdx = -1;
+let   _histLock = false; // prevent re-entrant pushes during import
+const MAX_HIST = 60;
+
+function _pushHistory() {
+  if (_histLock) return;
+  _hist.splice(_histIdx + 1);          // drop any redo states
+  _hist.push(JSON.stringify(editor.export()));
+  if (_hist.length > MAX_HIST) _hist.shift(); else _histIdx++;
+}
+
+function _applyHistory(snapshot) {
+  _histLock = true;
+  editor.import(JSON.parse(snapshot));
+  _histLock = false;
+  updateCanvasHint(); clearConfigPanel(); clearMultiSelect();
+}
+
+function undo() {
+  if (_histIdx <= 0) return;
+  _histIdx--;
+  _applyHistory(_hist[_histIdx]);
+  showToast('Undo');
+}
+
+function redo() {
+  if (_histIdx >= _hist.length - 1) return;
+  _histIdx++;
+  _applyHistory(_hist[_histIdx]);
+  showToast('Redo');
+}
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', async () => {
   initDrawflow();
-  await Promise.all([loadNodeTypes(), loadWorkflowList(), loadRegistry()]);
+  await Promise.all([
+    loadNodeTypes(), loadWorkflowList(),
+    loadRegistry(), loadBuiltins(), loadDomains(), loadRag(),
+  ]);
+  loadTemplates();
 });
 
 function initDrawflow() {
@@ -264,34 +458,50 @@ function initDrawflow() {
   editor = new Drawflow(container);
   editor.reroute = true;
   editor.start();
+  editor.on('nodeSelected',      id => { selectedNodeId = id;   renderConfigPanel(); });
+  editor.on('nodeUnselected',    ()  => { selectedNodeId = null; clearConfigPanel(); });
+  editor.on('nodeCreated',       ()  => { updateCanvasHint(); _pushHistory(); });
+  editor.on('nodeRemoved',       ()  => { updateCanvasHint(); _pushHistory(); });
+  editor.on('connectionCreated', ()  => _pushHistory());
+  editor.on('connectionRemoved', ()  => _pushHistory());
+  // Push the blank-canvas baseline so the first undo lands on an empty canvas
+  setTimeout(() => _pushHistory(), 0);
+}
 
-  editor.on('nodeSelected', id => { selectedNodeId = id; renderConfigPanel(); });
-  editor.on('nodeUnselected', () => { selectedNodeId = null; clearConfigPanel(); });
-  editor.on('nodeRemoved', () => updateCanvasHint());
-  editor.on('nodeCreated', () => updateCanvasHint());
+// ── Left tabs ─────────────────────────────────────────────────────────────────
+function switchLeftTab(name) {
+  document.querySelectorAll('.ltab').forEach((b, i) => b.classList.toggle('active', ['nodes','templates'][i] === name));
+  document.querySelectorAll('.ltab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(`ltab-${name}`).classList.add('active');
+}
+
+// ── Right tabs ────────────────────────────────────────────────────────────────
+const RIGHT_TABS = ['config','tools','mcps','domains','rag'];
+function switchRightTab(name) {
+  document.querySelectorAll('.rtab').forEach((b, i) => b.classList.toggle('active', RIGHT_TABS[i] === name));
+  document.querySelectorAll('.rtab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(`rtab-${name}`).classList.add('active');
 }
 
 // ── Node types & palette ───────────────────────────────────────────────────────
 async function loadNodeTypes() {
-  const res = await fetch('/api/node-types');
-  nodeTypes = await res.json();
+  nodeTypes = await fetch('/api/node-types').then(r => r.json());
   renderPalette();
 }
 
 function renderPalette() {
-  const pal = document.getElementById('palette');
-  // keep the h2
-  const h2 = pal.querySelector('h2');
-  pal.innerHTML = '';
-  pal.appendChild(h2);
+  const container = document.getElementById('ltab-nodes');
+  const header = container.querySelector('.palette-section');
+  container.innerHTML = '';
+  container.appendChild(header);
   for (const nt of nodeTypes) {
     const el = document.createElement('div');
     el.className = 'palette-node';
     el.draggable = true;
     el.dataset.type = nt.type;
-    el.innerHTML = `<div class="dot" style="background:${nt.color}"></div>${nt.icon} ${nt.label}`;
+    el.innerHTML = `<div class="node-dot" style="background:${nt.color}"></div>${nt.icon} ${nt.label}`;
     el.addEventListener('dragstart', e => e.dataTransfer.setData('nodeType', nt.type));
-    pal.appendChild(el);
+    container.appendChild(el);
   }
 }
 
@@ -301,58 +511,47 @@ function allowDrop(e) { e.preventDefault(); }
 function drop(e) {
   e.preventDefault();
   const type = e.dataTransfer.getData('nodeType');
-  if (!type) return;
-  addNode(type, e.clientX, e.clientY);
+  if (type) addNode(type, e.clientX, e.clientY);
 }
 
 function addNode(type, clientX, clientY) {
   const nt = nodeTypes.find(n => n.type === type);
   if (!nt) return;
-
   const canvas = document.getElementById('drawflow');
-  const rect = canvas.getBoundingClientRect();
-  // Account for canvas pan and zoom
-  const zoom = editor.zoom;
-  const pos_x = (clientX - rect.left) * (1 / zoom) - editor.canvas_x * (1 / zoom);
-  const pos_y = (clientY - rect.top)  * (1 / zoom) - editor.canvas_y * (1 / zoom);
-
+  const rect   = canvas.getBoundingClientRect();
+  const zoom   = editor.zoom;
+  const pos_x  = (clientX - rect.left)  / zoom - editor.canvas_x / zoom;
+  const pos_y  = (clientY - rect.top)   / zoom - editor.canvas_y / zoom;
   const defaultData = {};
-  for (const f of nt.fields || []) {
-    defaultData[f.key] = f.default !== undefined ? f.default : '';
-  }
-
-  const html = buildNodeHtml(nt, defaultData);
-  editor.addNode(type, nt.inputs, nt.outputs, pos_x, pos_y, type, defaultData, html);
+  for (const f of nt.fields || []) defaultData[f.key] = f.default !== undefined ? f.default : '';
+  editor.addNode(type, nt.inputs, nt.outputs, pos_x, pos_y, type, defaultData, buildNodeHtml(nt, defaultData));
 }
 
 function buildNodeHtml(nt, data) {
   if (nt.type === 'input') {
-    return `<div class="df-node-wrap">
-      <div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
-        <span>${nt.icon}</span><span>${nt.label}</span>
-      </div>
-      <div class="df-node-body" style="padding:8px 10px 10px">
-        <textarea df-prompt rows="3" placeholder="Type your prompt here…" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5">${data.prompt || ''}</textarea>
-      </div>
+    return `<div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
+      <span>${nt.icon}</span><span>${nt.label}</span>
+    </div>
+    <div class="df-node-body" style="padding:8px 10px 10px">
+      <textarea df-prompt rows="3" placeholder="Type your prompt here…" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5">${data.prompt||''}</textarea>
     </div>`;
   }
   const preview = getPreview(nt.type, data);
-  return `<div class="df-node-wrap">
-    <div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
-      <span>${nt.icon}</span><span>${nt.label}</span>
-    </div>
-    <div class="df-node-body">${preview}</div>
-  </div>`;
+  return `<div class="df-node-head" style="background:${nt.color}22;border-bottom:2px solid ${nt.color}">
+    <span>${nt.icon}</span><span>${nt.label}</span>
+  </div>
+  <div class="df-node-body">${preview}</div>`;
 }
 
 function getPreview(type, data) {
-  if (type === 'input')     return 'User prompt →';
   if (type === 'output')    return '→ Final output';
   if (type === 'llm')       return data.model || 'gpt-4o-mini';
-  if (type === 'condition') return data.condition ? data.condition.slice(0,30) + '…' : 'Set a condition';
+  if (type === 'agent')     return (data.name || 'Agent') + (data.model ? ` · ${data.model}` : '');
+  if (type === 'condition') return data.condition ? data.condition.slice(0, 28) + '…' : 'Set condition';
   if (type === 'tool') {
-    const t = toolsList.find(x => x.id === data.tool_id);
-    return t ? t.name : 'Select a tool';
+    const bt = builtinTools.find(x => x.id === data.tool_id);
+    const ut = toolsList.find(x => x.id === data.tool_id);
+    return bt ? `${bt.icon} ${bt.name}` : ut ? `🔧 ${ut.name}` : 'Select a tool';
   }
   return '';
 }
@@ -361,24 +560,15 @@ function refreshNodeHtml(nodeId) {
   const node = editor.drawflow.drawflow.Home.data[nodeId];
   if (!node) return;
   const nt = nodeTypes.find(n => n.type === node.name);
-  if (!nt) return;
-  // Drawflow doesn't expose a direct HTML-update API; we patch the DOM directly.
+  if (!nt || nt.type === 'input') return;
   const el = document.querySelector(`.drawflow-node[id="node-${nodeId}"] .df-node-body`);
   if (el) el.textContent = getPreview(nt.type, node.data);
 }
 
 // ── Config panel ──────────────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b, i) => {
-    b.classList.toggle('active', ['config','tools'][i] === name);
-  });
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.getElementById(`tab-${name}`).classList.add('active');
-}
-
 function clearConfigPanel() {
   document.getElementById('config-empty').style.display = '';
-  document.getElementById('config-form').style.display = 'none';
+  document.getElementById('config-form').style.display  = 'none';
 }
 
 function renderConfigPanel() {
@@ -386,14 +576,18 @@ function renderConfigPanel() {
   const node = editor.drawflow.drawflow.Home.data[selectedNodeId];
   if (!node) return;
   const nt = nodeTypes.find(n => n.type === node.name);
-  if (!nt) return;
+  if (!nt || !nt.fields?.length) {
+    document.getElementById('config-empty').style.display = '';
+    document.getElementById('config-form').style.display  = 'none';
+    return;
+  }
 
   document.getElementById('config-empty').style.display = 'none';
   const form = document.getElementById('config-form');
   form.style.display = '';
 
   let html = `<h3>${nt.icon} ${nt.label}</h3>`;
-  for (const f of nt.fields || []) {
+  for (const f of nt.fields) {
     html += `<div class="field-group"><label>${f.label}</label>`;
     if (f.type === 'select') {
       html += `<select id="cf-${f.key}">`;
@@ -401,12 +595,47 @@ function renderConfigPanel() {
       html += '</select>';
     } else if (f.type === 'textarea') {
       html += `<textarea id="cf-${f.key}" rows="4">${node.data[f.key]||f.default||''}</textarea>`;
-    } else if (f.type === 'tool_select') {
-      html += `<select id="cf-${f.key}"><option value="">— select —</option>`;
-      for (const t of toolsList) html += `<option value="${t.id}"${node.data[f.key]===t.id?' selected':''}>${t.name} (${t.kind})</option>`;
-      html += '</select>';
     } else if (f.type === 'number') {
       html += `<input id="cf-${f.key}" type="number" min="${f.min||0}" max="${f.max||10}" step="${f.step||1}" value="${node.data[f.key]!==undefined?node.data[f.key]:f.default}">`;
+    } else if (f.type === 'tool_select') {
+      html += `<select id="cf-${f.key}"><option value="">— select —</option>`;
+      if (builtinTools.length) {
+        html += `<optgroup label="Built-in">`;
+        for (const bt of builtinTools) html += `<option value="${bt.id}"${node.data[f.key]===bt.id?' selected':''}>${bt.icon} ${bt.name}</option>`;
+        html += '</optgroup>';
+      }
+      if (toolsList.length) {
+        html += `<optgroup label="My Tools">`;
+        for (const t of toolsList) html += `<option value="${t.id}"${node.data[f.key]===t.id?' selected':''}>🔧 ${t.name}</option>`;
+        html += '</optgroup>';
+      }
+      html += '</select>';
+    } else if (f.type === 'tool_multiselect') {
+      const selectedIds = (node.data[f.key]||'').split(',').filter(Boolean);
+      html += `<div class="tool-check-list" id="cf-${f.key}">`;
+      if (builtinTools.length) {
+        html += `<div style="font-size:10px;font-weight:700;color:var(--muted);margin:4px 0 7px">BUILT-IN</div>`;
+        for (const bt of builtinTools) {
+          const chk = selectedIds.includes(bt.id) ? 'checked' : '';
+          html += `<label class="tool-check"><input type="checkbox" data-id="${bt.id}" ${chk}> ${bt.icon} ${bt.name}<span class="tool-check-tag">built-in</span></label>`;
+        }
+      }
+      if (toolsList.length) {
+        html += `<div style="font-size:10px;font-weight:700;color:var(--muted);margin:6px 0 3px">MY TOOLS</div>`;
+        for (const t of toolsList) {
+          const chk = selectedIds.includes(t.id) ? 'checked' : '';
+          html += `<label class="tool-check"><input type="checkbox" data-id="${t.id}" ${chk}> 🔧 ${t.name}</label>`;
+        }
+      }
+      if (!builtinTools.length && !toolsList.length) html += `<div style="font-size:11px;color:var(--muted)">No tools available yet.</div>`;
+      html += '</div>';
+    } else if (f.type === 'domain_select') {
+      const all = [...allDomains.builtin, ...allDomains.user];
+      html += `<select id="cf-${f.key}"><option value="">— none —</option>`;
+      for (const d of all) html += `<option value="${d.id}"${node.data[f.key]===d.id?' selected':''}>${d.icon} ${d.name}</option>`;
+      html += '</select>';
+    } else if (f.type === 'password') {
+      html += `<input id="cf-${f.key}" type="password" value="${node.data[f.key]||''}" placeholder="Paste key — stored locally only" autocomplete="off">`;
     } else {
       html += `<input id="cf-${f.key}" type="text" value="${node.data[f.key]||''}">`;
     }
@@ -425,10 +654,16 @@ function applyConfig() {
   if (!node) return;
   const nt = nodeTypes.find(n => n.type === node.name);
   for (const f of nt.fields || []) {
-    const el = document.getElementById(`cf-${f.key}`);
-    if (el) node.data[f.key] = el.value;
+    if (f.type === 'tool_multiselect') {
+      const cbs = document.querySelectorAll(`#cf-${f.key} input[type=checkbox]`);
+      node.data[f.key] = [...cbs].filter(c => c.checked).map(c => c.dataset.id).join(',');
+    } else {
+      const el = document.getElementById(`cf-${f.key}`);
+      if (el) node.data[f.key] = el.value;
+    }
   }
   refreshNodeHtml(selectedNodeId);
+  _pushHistory();
 }
 
 function deleteNode() {
@@ -439,95 +674,73 @@ function deleteNode() {
 }
 
 function updateCanvasHint() {
-  const data = editor.drawflow.drawflow.Home.data;
-  const hasNodes = Object.keys(data).length > 0;
-  document.getElementById('canvas-hint').classList.toggle('hidden', hasNodes);
+  const has = Object.keys(editor.drawflow.drawflow.Home.data).length > 0;
+  document.getElementById('canvas-hint').classList.toggle('hidden', has);
 }
 
 // ── Workflow save / load ──────────────────────────────────────────────────────
 async function loadWorkflowList() {
-  const res = await fetch('/api/workflows');
-  const list = await res.json();
-  const sel = document.getElementById('wf-load');
-  sel.innerHTML = '<option value="">Load workflow…</option>';
-  for (const w of list) {
-    const opt = document.createElement('option');
-    opt.value = w.id; opt.textContent = w.name;
-    sel.appendChild(opt);
-  }
+  const list = await fetch('/api/workflows').then(r => r.json());
+  const sel  = document.getElementById('wf-load');
+  sel.innerHTML = '<option value="">Load…</option>';
+  for (const w of list) sel.innerHTML += `<option value="${w.id}">${w.name}</option>`;
   sel.onchange = () => { if (sel.value) loadWorkflow(sel.value); };
 }
 
 async function loadWorkflow(id) {
-  const res = await fetch(`/api/workflows/${id}`);
-  if (!res.ok) return alert('Could not load workflow.');
-  const wf = await res.json();
+  const wf = await fetch(`/api/workflows/${id}`).then(r => r.json());
   currentWfId = wf.id;
   document.getElementById('wf-name').value = wf.name;
-
-  if (wf.drawflow) {
-    editor.import(wf.drawflow);
-  } else {
-    editor.clearModuleSelected();
-    importEngineFormat(wf);
-  }
-  updateCanvasHint();
-  clearConfigPanel();
+  _histLock = true;
+  if (wf.drawflow) editor.import(wf.drawflow);
+  else { editor.clearModuleSelected(); importEngineFormat(wf); }
+  _histLock = false;
+  updateCanvasHint(); clearConfigPanel();
+  _hist.length = 0; _histIdx = -1; _pushHistory();
 }
 
 function importEngineFormat(wf) {
   const df = { drawflow: { Home: { data: {} } } };
-  const cols = 3, spacing = { x: 220, y: 160 }, start = { x: 80, y: 80 };
+  const xStep = 230, yStep = 160, xStart = 80, yStart = 80, cols = 3;
   wf.nodes.forEach((n, i) => {
-    const nt = nodeTypes.find(t => t.type === n.type) || { inputs: 1, outputs: 1 };
-    const numId = i + 1;
-    df.drawflow.Home.data[numId] = {
-      id: numId, name: n.type, data: n.config || {},
-      class: n.type,
-      html: buildNodeHtml(nt, n.config || {}),
-      typenode: false,
+    const nt  = nodeTypes.find(t => t.type === n.type) || { inputs: 1, outputs: 1 };
+    const num = i + 1;
+    df.drawflow.Home.data[num] = {
+      id: num, name: n.type, data: n.config || {}, class: n.type,
+      html: buildNodeHtml(nt, n.config || {}), typenode: false,
       inputs:  buildPorts('input',  nt.inputs),
       outputs: buildPorts('output', nt.outputs),
-      pos_x: start.x + (i % cols) * spacing.x,
-      pos_y: start.y + Math.floor(i / cols) * spacing.y,
+      pos_x: xStart + (i % cols) * xStep,
+      pos_y: yStart + Math.floor(i / cols) * yStep,
     };
-    n._numId = numId;
+    n._num = num;
   });
-  // Wire edges
   for (const e of (wf.edges || [])) {
-    const src = wf.nodes.find(n => n.id === e.source);
-    const tgt = wf.nodes.find(n => n.id === e.target);
-    if (!src || !tgt) continue;
-    const srcData = df.drawflow.Home.data[src._numId];
-    const tgtData = df.drawflow.Home.data[tgt._numId];
-    if (!srcData || !tgtData) continue;
-    srcData.outputs.output_1.connections.push({ node: String(tgt._numId), output: 'input_1' });
-    tgtData.inputs.input_1.connections.push({ node: String(src._numId), input: 'output_1' });
+    const s = wf.nodes.find(n => n.id === e.source);
+    const t = wf.nodes.find(n => n.id === e.target);
+    if (!s || !t) continue;
+    const sD = df.drawflow.Home.data[s._num];
+    const tD = df.drawflow.Home.data[t._num];
+    if (sD) sD.outputs.output_1.connections.push({ node: String(t._num), output: 'input_1' });
+    if (tD) tD.inputs.input_1.connections.push({ node: String(s._num), input: 'output_1' });
   }
   editor.import(df);
 }
 
 function buildPorts(kind, count) {
-  const result = {};
-  for (let i = 1; i <= count; i++) {
-    result[`${kind}_${i}`] = { connections: [] };
-  }
-  return result;
+  const r = {};
+  for (let i = 1; i <= count; i++) r[`${kind}_${i}`] = { connections: [] };
+  return r;
 }
 
 async function saveWorkflow() {
   const name = document.getElementById('wf-name').value.trim() || 'Untitled';
-  const dfExport = editor.export();
-  const { nodes, edges } = toEngineFormat(dfExport);
-
-  const body = { name, nodes, edges, drawflow: dfExport };
-  const url  = currentWfId ? `/api/workflows/${currentWfId}` : '/api/workflows';
+  const dfEx = editor.export();
+  const { nodes, edges } = toEngineFormat(dfEx);
+  const body = { name, nodes, edges, drawflow: dfEx };
+  const url    = currentWfId ? `/api/workflows/${currentWfId}` : '/api/workflows';
   const method = currentWfId ? 'PUT' : 'POST';
-
-  const res = await fetch(url, {
-    method, headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   if (!res.ok) return alert('Save failed: ' + await res.text());
   const saved = await res.json();
   currentWfId = saved.id;
@@ -541,22 +754,46 @@ function newWorkflow() {
   document.getElementById('wf-name').value = 'My Workflow';
   document.getElementById('wf-load').value = '';
   editor.clearModuleSelected();
-  clearConfigPanel();
-  updateCanvasHint();
+  clearConfigPanel(); updateCanvasHint();
 }
 
-function toEngineFormat(dfExport) {
-  const dfData = dfExport.drawflow.Home.data;
+function toEngineFormat(dfEx) {
+  const data = dfEx.drawflow.Home.data;
   const nodes = [], edges = [];
-  for (const [id, node] of Object.entries(dfData)) {
+  for (const [id, node] of Object.entries(data)) {
     nodes.push({ id: String(id), type: node.name, config: { ...node.data } });
-    for (const portData of Object.values(node.outputs || {})) {
-      for (const conn of portData.connections || []) {
+    for (const port of Object.values(node.outputs || {}))
+      for (const conn of port.connections || [])
         edges.push({ source: String(id), target: String(conn.node) });
-      }
-    }
   }
   return { nodes, edges };
+}
+
+// ── Templates ─────────────────────────────────────────────────────────────────
+async function loadTemplates() {
+  const list = await fetch('/api/templates').then(r => r.json());
+  const el   = document.getElementById('template-list');
+  if (!list.length) { el.innerHTML = '<div style="font-size:11px;color:var(--muted)">No templates found.</div>'; return; }
+  el.innerHTML = list.map(t => `
+    <div class="tpl-card" onclick="loadTemplate('${t.id}')">
+      <div class="tpl-card-name">${t.name}</div>
+      <div class="tpl-card-desc">${t.description}</div>
+    </div>`).join('');
+}
+
+async function loadTemplate(id) {
+  const tpl = await fetch(`/api/templates/${id}`).then(r => r.json());
+  currentWfId = null;
+  document.getElementById('wf-name').value = tpl.name;
+  document.getElementById('wf-load').value = '';
+  _histLock = true;
+  editor.clearModuleSelected();
+  importEngineFormat(tpl);
+  _histLock = false;
+  updateCanvasHint(); clearConfigPanel();
+  _hist.length = 0; _histIdx = -1; _pushHistory();
+  switchLeftTab('nodes');
+  showToast(`Template "${tpl.name}" loaded`);
 }
 
 // ── Run workflow ──────────────────────────────────────────────────────────────
@@ -566,154 +803,429 @@ function openRunModal() {
   document.getElementById('run-prompt').value = '';
   document.getElementById('run-modal').classList.remove('hidden');
 }
-function closeRun() { document.getElementById('run-modal').classList.add('hidden'); }
-function runAgain() {
-  document.getElementById('run-input-section').style.display = '';
-  document.getElementById('run-result-section').style.display = 'none';
+function closeRun()  { document.getElementById('run-modal').classList.add('hidden'); }
+function runAgain()  { document.getElementById('run-input-section').style.display = ''; document.getElementById('run-result-section').style.display = 'none'; }
+function toggleTrace() {
+  const b = document.getElementById('run-trace-box');
+  b.style.display = b.style.display === 'none' ? '' : 'none';
 }
 
 async function runWorkflow() {
   const prompt = document.getElementById('run-prompt').value.trim();
-
-  // Auto-save first if unsaved
   if (!currentWfId) await saveWorkflow();
   if (!currentWfId) return;
-
   const btn = document.getElementById('run-go-btn');
   btn.textContent = 'Running…'; btn.disabled = true;
-
   const res = await fetch(`/api/workflows/${currentWfId}/run`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt }),
   });
-
   btn.textContent = 'Run'; btn.disabled = false;
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    return alert('Error: ' + (err.detail || res.statusText));
-  }
-
+  if (!res.ok) { const e = await res.json().catch(() => ({})); return alert('Error: ' + (e.detail || res.statusText)); }
   const data = await res.json();
   document.getElementById('run-input-section').style.display = 'none';
   document.getElementById('run-result-section').style.display = '';
   document.getElementById('run-result-text').textContent = data.result || '(no output)';
-  document.getElementById('run-trace-box').textContent = JSON.stringify(data.trace, null, 2);
-  document.getElementById('run-trace-box').style.display = 'none';
+  document.getElementById('run-trace-box').textContent    = JSON.stringify(data.trace, null, 2);
+  document.getElementById('run-trace-box').style.display  = 'none';
 }
 
-function toggleTrace() {
-  const box = document.getElementById('run-trace-box');
-  box.style.display = box.style.display === 'none' ? '' : 'none';
+// ── Built-in tools ────────────────────────────────────────────────────────────
+async function loadBuiltins() {
+  builtinTools = await fetch('/api/builtin-tools').then(r => r.json());
+  renderBuiltinTools();
+  const pmcps = await fetch('/api/preset-mcps').then(r => r.json());
+  presetMcps  = pmcps;
+  renderPresetMcps();
 }
 
-// ── Tool registry ─────────────────────────────────────────────────────────────
+function renderBuiltinTools() {
+  const el = document.getElementById('builtin-tools-list');
+  el.innerHTML = builtinTools.map(t => `
+    <div class="reg-item">
+      <div class="reg-item-icon">${t.icon}</div>
+      <div class="reg-item-info">
+        <div class="reg-item-name">${t.name}</div>
+        <div class="reg-item-sub">${t.description}</div>
+      </div>
+      <span class="tag ${t.available ? 'tag-on' : 'tag-off'}">${t.available ? 'ready' : 'needs key'}</span>
+    </div>`).join('');
+}
+
+function renderPresetMcps() {
+  const el = document.getElementById('preset-mcps-list');
+  el.innerHTML = presetMcps.map(m => `
+    <div class="reg-item">
+      <div class="reg-item-icon">${m.icon}</div>
+      <div class="reg-item-info">
+        <div class="reg-item-name">${m.name}</div>
+        <div class="reg-item-sub">${m.description}</div>
+      </div>
+      <div class="reg-item-actions">
+        ${m.env_vars.length ? `<button class="icon-btn" title="Configure" onclick="openPresetMcp('${m.id}')">⚙️</button>` : `<button class="icon-btn" title="Add (no config needed)" onclick="addPresetMcpDirect('${m.id}')">＋</button>`}
+      </div>
+    </div>`).join('');
+}
+
+let _currentPreset = null;
+function openPresetMcp(id) {
+  _currentPreset = presetMcps.find(m => m.id === id);
+  if (!_currentPreset) return;
+  document.getElementById('pmcp-title').textContent = `Configure ${_currentPreset.name}`;
+  document.getElementById('pmcp-desc').textContent  = _currentPreset.description;
+  const fields = _currentPreset.env_vars.map(v => `
+    <div class="env-var-row">
+      <label>${v.label}${v.required ? '<span class="req-star">*</span>' : ''}</label>
+      <input id="ev-${v.key}" type="password" placeholder="${v.key}" autocomplete="off">
+    </div>`).join('');
+  document.getElementById('pmcp-env-fields').innerHTML = fields;
+  document.getElementById('preset-mcp-modal').classList.remove('hidden');
+}
+function closePresetMcp() { document.getElementById('preset-mcp-modal').classList.add('hidden'); _currentPreset = null; }
+
+async function savePresetMcp() {
+  if (!_currentPreset) return;
+  const env = {};
+  for (const v of _currentPreset.env_vars) {
+    const val = document.getElementById(`ev-${v.key}`)?.value.trim();
+    if (v.required && !val) return alert(`${v.label} is required.`);
+    if (val) env[v.key] = val;
+  }
+  await fetch('/api/mcps', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: _currentPreset.name, command: _currentPreset.command, args: _currentPreset.args, env, description: _currentPreset.description }),
+  });
+  closePresetMcp(); await loadRegistry(); showToast(`${_currentPreset.name} added`);
+}
+
+async function addPresetMcpDirect(id) {
+  const m = presetMcps.find(x => x.id === id);
+  if (!m) return;
+  await fetch('/api/mcps', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: m.name, command: m.command, args: m.args, env: {}, description: m.description }),
+  });
+  await loadRegistry(); showToast(`${m.name} added`);
+}
+
+// ── User tool / MCP registry ──────────────────────────────────────────────────
 async function loadRegistry() {
-  const [tRes, mRes] = await Promise.all([fetch('/api/tools'), fetch('/api/mcps')]);
-  toolsList = await tRes.json();
-  mcpsList  = await mRes.json();
-  renderRegistry();
+  toolsList = await fetch('/api/tools').then(r => r.json());
+  mcpsList  = await fetch('/api/mcps').then(r => r.json());
+  renderUserTools(); renderUserMcps();
 }
 
-function renderRegistry() {
-  const tl = document.getElementById('tools-list');
-  tl.innerHTML = toolsList.map(t => `
-    <div class="registry-item">
-      <div class="registry-item-info">
-        <div class="registry-item-name">${t.name}</div>
-        <div class="registry-item-type">${t.kind}${t.description ? ' · ' + t.description : ''}</div>
-      </div>
-      <button onclick="removeTool('${t.id}')">✕</button>
-    </div>`).join('') || '<div style="color:var(--muted);font-size:12px">No tools added yet.</div>';
-
-  const ml = document.getElementById('mcps-list');
-  ml.innerHTML = mcpsList.map(m => `
-    <div class="registry-item">
-      <div class="registry-item-info">
-        <div class="registry-item-name">${m.name}</div>
-        <div class="registry-item-type">${m.command}${m.description ? ' · ' + m.description : ''}</div>
-      </div>
-      <button onclick="removeMcp('${m.id}')">✕</button>
-    </div>`).join('') || '<div style="color:var(--muted);font-size:12px">No MCP servers added yet.</div>';
+function renderUserTools() {
+  const el = document.getElementById('user-tools-list');
+  el.innerHTML = toolsList.length
+    ? toolsList.map(t => `<div class="reg-item"><div class="reg-item-icon">🔧</div><div class="reg-item-info"><div class="reg-item-name">${t.name}</div><div class="reg-item-sub">${t.kind}${t.description?' · '+t.description:''}</div></div><button class="icon-btn danger" onclick="removeTool('${t.id}')">✕</button></div>`).join('')
+    : '<div style="font-size:11px;color:var(--muted)">No custom tools yet.</div>';
 }
 
-function openAddTool() { updateToolFields(); document.getElementById('tool-modal').classList.remove('hidden'); }
-function closeTool()   { document.getElementById('tool-modal').classList.add('hidden'); }
+function renderUserMcps() {
+  const el = document.getElementById('user-mcps-list');
+  el.innerHTML = mcpsList.length
+    ? mcpsList.map(m => `<div class="reg-item"><div class="reg-item-icon">🔌</div><div class="reg-item-info"><div class="reg-item-name">${m.name}</div><div class="reg-item-sub">${m.command}${m.description?' · '+m.description:''}</div></div><button class="icon-btn danger" onclick="removeMcp('${m.id}')">✕</button></div>`).join('')
+    : '<div style="font-size:11px;color:var(--muted)">No MCP servers yet.</div>';
+}
 
+function openAddTool()  { updateToolFields(); document.getElementById('tool-modal').classList.remove('hidden'); }
+function closeTool()    { document.getElementById('tool-modal').classList.add('hidden'); }
 function updateToolFields() {
-  const kind = document.getElementById('t-kind').value;
-  document.getElementById('t-http-fields').style.display = kind === 'http' ? '' : 'none';
-  document.getElementById('t-key-field').style.display   = kind !== 'http' ? '' : 'none';
+  const k = document.getElementById('t-kind').value;
+  document.getElementById('t-http-fields').style.display = k==='http' ? '' : 'none';
+  document.getElementById('t-key-field').style.display   = k!=='http' ? '' : 'none';
 }
-
 async function saveTool() {
-  const body = {
-    name:        document.getElementById('t-name').value.trim(),
-    kind:        document.getElementById('t-kind').value,
-    url:         document.getElementById('t-url').value.trim(),
-    method:      document.getElementById('t-method').value,
-    api_key:     document.getElementById('t-apikey').value.trim(),
-    description: document.getElementById('t-desc').value.trim(),
-    headers: {},
-  };
-  if (!body.name) return alert('Tool name is required.');
-  const res = await fetch('/api/tools', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!res.ok) return alert('Failed: ' + await res.text());
-  closeTool();
-  await loadRegistry();
+  const body = { name: document.getElementById('t-name').value.trim(), kind: document.getElementById('t-kind').value, url: document.getElementById('t-url').value.trim(), method: document.getElementById('t-method').value, api_key: document.getElementById('t-apikey').value.trim(), description: document.getElementById('t-desc').value.trim(), headers: {} };
+  if (!body.name) return alert('Name required.');
+  await fetch('/api/tools', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  closeTool(); await loadRegistry();
 }
-
 async function removeTool(id) {
-  if (!confirm('Remove this tool?')) return;
+  if (!confirm('Remove?')) return;
   await fetch(`/api/tools/${id}`, { method: 'DELETE' });
   await loadRegistry();
-  if (selectedNodeId) renderConfigPanel(); // refresh tool_select dropdown
+  if (selectedNodeId) renderConfigPanel();
 }
 
 function openAddMcp() { document.getElementById('mcp-modal').classList.remove('hidden'); }
 function closeMcp()   { document.getElementById('mcp-modal').classList.add('hidden'); }
-
 async function saveMcp() {
-  const body = {
-    name:        document.getElementById('m-name').value.trim(),
-    command:     document.getElementById('m-cmd').value.trim(),
-    args:        document.getElementById('m-args').value.trim().split(/\s+/).filter(Boolean),
-    description: document.getElementById('m-desc').value.trim(),
-    env: {},
-  };
-  if (!body.name || !body.command) return alert('Name and command are required.');
-  const res = await fetch('/api/mcps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-  if (!res.ok) return alert('Failed: ' + await res.text());
-  closeMcp();
+  const body = { name: document.getElementById('m-name').value.trim(), command: document.getElementById('m-cmd').value.trim(), args: document.getElementById('m-args').value.trim().split(/\s+/).filter(Boolean), description: document.getElementById('m-desc').value.trim(), env: {} };
+  if (!body.name || !body.command) return alert('Name and command required.');
+  await fetch('/api/mcps', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  closeMcp(); await loadRegistry();
+}
+async function removeMcp(id) {
+  if (!confirm('Remove?')) return;
+  await fetch(`/api/mcps/${id}`, { method: 'DELETE' });
   await loadRegistry();
 }
 
-async function removeMcp(id) {
-  if (!confirm('Remove this MCP server?')) return;
-  await fetch(`/api/mcps/${id}`, { method: 'DELETE' });
-  await loadRegistry();
+// ── Domains ───────────────────────────────────────────────────────────────────
+async function loadDomains() {
+  allDomains = await fetch('/api/domains').then(r => r.json());
+  renderDomains();
+}
+
+function renderDomains() {
+  document.getElementById('builtin-domains-list').innerHTML = allDomains.builtin.map(d => {
+    const placeholder = !d.folder ? ' <span style="font-weight:400;font-size:10px;color:var(--muted)">(Temporary placeholder)</span>' : '';
+    return `<div class="domain-card">
+      <div class="domain-icon">${d.icon}</div>
+      <div class="domain-info"><div class="domain-name">${d.name}${placeholder}</div><div class="domain-desc">${d.description}</div></div>
+    </div>`;
+  }).join('');
+  const ul = allDomains.user;
+  document.getElementById('user-domains-list').innerHTML = ul.length
+    ? ul.map(d => `<div class="domain-card"><div class="domain-icon">${d.icon}</div><div class="domain-info"><div class="domain-name">${d.name}</div><div class="domain-desc">${d.description}</div></div><button class="icon-btn danger" onclick="removeDomain('${d.id}')">✕</button></div>`).join('')
+    : '<div style="font-size:11px;color:var(--muted)">No custom domains yet.</div>';
+}
+
+function openAddDomain() { document.getElementById('domain-modal').classList.remove('hidden'); }
+function closeDomain()   { document.getElementById('domain-modal').classList.add('hidden'); }
+async function saveDomain() {
+  const body = { name: document.getElementById('d-name').value.trim(), icon: document.getElementById('d-icon').value.trim() || '📦', description: document.getElementById('d-desc').value.trim(), context: document.getElementById('d-context').value.trim() };
+  if (!body.name) return alert('Name required.');
+  await fetch('/api/domains', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  closeDomain(); await loadDomains();
+}
+async function removeDomain(id) {
+  if (!confirm('Remove domain?')) return;
+  await fetch(`/api/domains/${id}`, { method: 'DELETE' });
+  await loadDomains();
+}
+
+// ── RAG documents ─────────────────────────────────────────────────────────────
+let ragDocs = [], ragExamples = [];
+
+async function loadRag() {
+  const data = await fetch('/api/rag').then(r => r.json());
+  ragDocs     = data.docs     || [];
+  ragExamples = data.examples || [];
+  renderRag();
+}
+
+function renderRag() {
+  // User docs
+  const ul = document.getElementById('rag-docs-list');
+  ul.innerHTML = ragDocs.length
+    ? ragDocs.map(d => `
+        <div class="reg-item">
+          <div class="reg-item-icon">${d.icon || '📄'}</div>
+          <div class="reg-item-info">
+            <div class="reg-item-name">${d.name}</div>
+            <div class="reg-item-sub">${d.type}${d.description ? ' · ' + d.description : ''}</div>
+          </div>
+          <button class="icon-btn danger" onclick="removeRagDoc('${d.id}')">✕</button>
+        </div>`).join('')
+    : '<div style="font-size:11px;color:var(--muted);margin-bottom:4px">No documents yet. Add your company data to inject it into all agent prompts.</div>';
+
+  // Example templates
+  const el = document.getElementById('rag-examples-list');
+  el.innerHTML = ragExamples.map(e => `
+    <div class="domain-card" style="flex-direction:column;align-items:flex-start;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px;width:100%">
+        <div class="domain-icon">${e.icon}</div>
+        <div class="domain-info" style="flex:1">
+          <div class="domain-name">${e.name}</div>
+          <div class="domain-desc">${e.description}</div>
+        </div>
+        <button class="icon-btn" title="Add to workspace" onclick="addRagExample('${e.id}')" style="font-size:16px;color:var(--accent)">＋</button>
+      </div>
+      <details style="width:100%;font-size:10px;color:var(--muted)">
+        <summary style="cursor:pointer;user-select:none;font-weight:700;font-size:10px">Preview content</summary>
+        <pre style="white-space:pre-wrap;word-break:break-word;margin-top:6px;line-height:1.5;font-size:10px;background:var(--bg);border-radius:4px;padding:7px">${e.content.replace(/</g,'&lt;')}</pre>
+      </details>
+    </div>`).join('');
+}
+
+function openAddRag() { document.getElementById('rag-modal').classList.remove('hidden'); }
+function closeRag()   { document.getElementById('rag-modal').classList.add('hidden'); }
+
+async function saveRag() {
+  const body = {
+    name:        document.getElementById('rag-name').value.trim(),
+    icon:        document.getElementById('rag-icon').value.trim() || '📄',
+    type:        document.getElementById('rag-type').value,
+    description: document.getElementById('rag-desc').value.trim(),
+    content:     document.getElementById('rag-content').value.trim(),
+  };
+  if (!body.name)    return alert('Name required.');
+  if (!body.content) return alert('Content required.');
+  await fetch('/api/rag', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  closeRag();
+  // Clear form
+  ['rag-name','rag-icon','rag-desc','rag-content'].forEach(id => document.getElementById(id).value = '');
+  await loadRag();
+  showToast('Document added — will be injected into all agent prompts');
+}
+
+async function removeRagDoc(id) {
+  if (!confirm('Remove this document? It will no longer be injected into agent prompts.')) return;
+  await fetch(`/api/rag/${id}`, { method: 'DELETE' });
+  await loadRag();
+}
+
+async function addRagExample(exampleId) {
+  const ex = ragExamples.find(e => e.id === exampleId);
+  if (!ex) return;
+  const already = ragDocs.find(d => d.name === ex.name);
+  if (already) return showToast(`"${ex.name}" is already in your workspace`);
+  await fetch('/api/rag', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: ex.name, icon: ex.icon, type: ex.type, description: ex.description, content: ex.content }),
+  });
+  await loadRag();
+  showToast(`"${ex.name}" added to workspace`);
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:#fff;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;z-index:999;transition:opacity .4s';
+  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#10b981;color:#fff;padding:9px 16px;border-radius:8px;font-size:12px;font-weight:700;z-index:999;transition:opacity .4s';
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 1800);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(), 400); }, 1800);
 }
 
-// Close modals on backdrop click
-document.querySelectorAll('.modal-backdrop').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+document.querySelectorAll('.modal-backdrop').forEach(el =>
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); })
+);
+document.addEventListener('keydown', e => {
+  const typing = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
+  // Undo / Redo — works even while typing is not active
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z') && !typing) {
+    e.preventDefault();
+    e.shiftKey ? redo() : undo();
+    return;
+  }
+  // Ctrl+Y — Windows-style redo
+  if ((e.ctrlKey || e.metaKey) && e.key === 'y' && !typing) {
+    e.preventDefault();
+    redo();
+    return;
+  }
+  if ((e.key==='Delete'||e.key==='Backspace') && !typing) {
+    if (multiSelected.size > 0) deleteMultiSelected();
+    else if (selectedNodeId) deleteNode();
+  }
 });
 
-// Delete selected node with Backspace/Delete key
-document.addEventListener('keydown', e => {
-  const tag = document.activeElement.tagName;
-  if ((e.key === 'Delete' || e.key === 'Backspace') && !['INPUT','TEXTAREA','SELECT'].includes(tag)) {
-    if (selectedNodeId) deleteNode();
+// ── Drag-select & wheel pan ────────────────────────────────────────────────────
+const multiSelected = new Set();
+let dragStart = null;
+let midDrag   = null;
+
+const selBox      = document.getElementById('sel-box');
+const multiDelBtn = document.getElementById('multi-delete-btn');
+const canvasWrap  = document.getElementById('canvas-wrap');
+const dfEl        = document.getElementById('drawflow');
+
+// Capture-phase mousedown on #drawflow fires BEFORE Drawflow's bubble handler,
+// letting us intercept background clicks for selection (and block Drawflow's pan).
+dfEl.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  if (e.target.closest('.drawflow-node')) return; // let node drags pass through
+  e.stopPropagation(); // prevents Drawflow's pan handler from ever seeing this event
+  clearMultiSelect();
+  const r = canvasWrap.getBoundingClientRect();
+  dragStart = { x: e.clientX - r.left, y: e.clientY - r.top };
+  selBox.style.display = 'none';
+  _updateSelBox(dragStart.x, dragStart.y, dragStart.x, dragStart.y);
+}, { capture: true });
+
+document.addEventListener('mousemove', e => {
+  if (!dragStart) return;
+  const r = canvasWrap.getBoundingClientRect();
+  const cx = e.clientX - r.left, cy = e.clientY - r.top;
+  if (Math.abs(cx - dragStart.x) > 4 || Math.abs(cy - dragStart.y) > 4)
+    selBox.style.display = 'block';
+  _updateSelBox(dragStart.x, dragStart.y, cx, cy);
+});
+
+document.addEventListener('mouseup', e => {
+  if (e.button === 1) { midDrag = null; return; }
+  if (!dragStart) return;
+  const start = dragStart;
+  dragStart = null;
+  selBox.style.display = 'none';
+  const r = canvasWrap.getBoundingClientRect();
+  _finishSelection(start.x, start.y, e.clientX - r.left, e.clientY - r.top, r);
+});
+
+function _updateSelBox(x1, y1, x2, y2) {
+  selBox.style.left   = Math.min(x1, x2) + 'px';
+  selBox.style.top    = Math.min(y1, y2) + 'px';
+  selBox.style.width  = Math.abs(x2 - x1) + 'px';
+  selBox.style.height = Math.abs(y2 - y1) + 'px';
+}
+
+function _finishSelection(x1, y1, x2, y2, wrapRect) {
+  if (Math.abs(x2 - x1) < 5 && Math.abs(y2 - y1) < 5) return;
+  const selL = Math.min(x1, x2) + wrapRect.left;
+  const selT = Math.min(y1, y2) + wrapRect.top;
+  const selR = Math.max(x1, x2) + wrapRect.left;
+  const selB = Math.max(y1, y2) + wrapRect.top;
+  for (const id of Object.keys(editor.drawflow.drawflow.Home.data)) {
+    const el = document.getElementById(`node-${id}`);
+    if (!el) continue;
+    const nr = el.getBoundingClientRect();
+    if (nr.left < selR && nr.right > selL && nr.top < selB && nr.bottom > selT) {
+      multiSelected.add(id);
+      el.classList.add('multi-selected');
+    }
   }
+  if (multiSelected.size > 0) {
+    multiDelBtn.textContent = `Delete ${multiSelected.size} node${multiSelected.size > 1 ? 's' : ''}`;
+    multiDelBtn.style.display = '';
+  }
+}
+
+function clearMultiSelect() {
+  for (const id of multiSelected)
+    document.getElementById(`node-${id}`)?.classList.remove('multi-selected');
+  multiSelected.clear();
+  multiDelBtn.style.display = 'none';
+}
+
+function deleteMultiSelected() {
+  for (const id of [...multiSelected]) editor.removeNodeId(`node-${id}`);
+  clearMultiSelect();
+  updateCanvasHint();
+  clearConfigPanel();
+}
+
+// ── Wheel → pan  |  Ctrl/Cmd+wheel → zoom (Drawflow handles zoom) ─────────────
+// Mac:     two-finger swipe  = wheel events (deltaX + deltaY, no ctrlKey)
+// Mac:     pinch             = wheel events with ctrlKey=true
+// Windows: scroll wheel      = wheel events (deltaY only, deltaMode=1 = lines)
+// Windows: middle-btn drag   = pan (handled below)
+dfEl.addEventListener('wheel', e => {
+  if (e.ctrlKey || e.metaKey) return; // pinch-to-zoom — let Drawflow's handler run
+  e.preventDefault();
+  e.stopPropagation();
+  // deltaMode 0 = pixels (Mac trackpad), 1 = lines (Windows wheel ~30px each)
+  const px = e.deltaMode === 1 ? 30 : 1;
+  editor.canvas_x -= e.deltaX * px;
+  editor.canvas_y -= e.deltaY * px;
+  editor.precanvas.style.transform =
+    `translate(${editor.canvas_x}px, ${editor.canvas_y}px) scale(${editor.zoom})`;
+}, { capture: true, passive: false });
+
+// Middle-mouse-button drag → pan (Windows / external mouse on Mac)
+dfEl.addEventListener('mousedown', e => {
+  if (e.button !== 1) return;
+  e.preventDefault();
+  midDrag = { x: e.clientX, y: e.clientY, cx: editor.canvas_x, cy: editor.canvas_y };
+});
+document.addEventListener('mousemove', e => {
+  if (!midDrag) return;
+  editor.canvas_x = midDrag.cx + (e.clientX - midDrag.x);
+  editor.canvas_y = midDrag.cy + (e.clientY - midDrag.y);
+  editor.precanvas.style.transform =
+    `translate(${editor.canvas_x}px, ${editor.canvas_y}px) scale(${editor.zoom})`;
 });
 </script>
 </body>
