@@ -108,3 +108,4 @@ def remove_mcp(mcp_id: str) -> bool:
     if changed:
         _save(data)
     return changed
+#
