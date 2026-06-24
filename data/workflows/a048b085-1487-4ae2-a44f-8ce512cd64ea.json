@@ -1,0 +1,226 @@
+{
+  "id": "a048b085-1487-4ae2-a44f-8ce512cd64ea",
+  "name": "Cold Sales Email",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "Prospect: Sarah Kim, Head of Marketing at Notion. Signal: Notion just announced a new AI feature last week. Sender: Account Executive at FlowAI, selling AI productivity software. Goal: book a 15-minute call."
+      }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Cold Email Writer",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "email",
+        "instructions": "You are a cold email copywriter. Write ONE cold sales email based on the prospect information provided.\n\nYou MUST follow every rule below \u2014 these are hard constraints, not suggestions:\n\n1. SUBJECT LINE: Maximum 50 characters. Must be specific to the prospect or signal. Never generic.\n2. OPENER: Reference the specific signal mentioned (product launch, funding, job change, published article, etc.). Never open with 'I hope this email finds you well', 'My name is', 'I wanted to reach out', or any generic greeting.\n3. BODY LENGTH: Cold email body must be under 125 words total. Count carefully.\n4. PERSONALISATION: Include the prospect's first name or company name at least once.\n5. CTA: Exactly one call-to-action. Make it low-friction (e.g. '15-minute call?' or 'Worth a quick chat?'). Never more than one ask.\n6. FORBIDDEN WORDS: Never use \u2014 revolutionary, game-changer, disruptive, world-class, best-in-class, synergy, paradigm shift, cutting-edge, next-generation, FREE, URGENT, ACT FAST.\n7. TONE: Peer-to-peer. Direct. Human. Not corporate, not salesy.\n8. STATISTICS: Only use figures explicitly mentioned in the input. Do not invent stats.\n\nReturn the email in this exact format:\nSubject: <subject line>\n\n<email body>"
+      }
+    },
+    {
+      "id": "3",
+      "type": "approval",
+      "config": {
+        "message": "Review the cold email below. Check: subject \u226450 chars, body \u2264125 words, one CTA, signal-based opener, no buzzwords. Approve to send, or edit and approve."
+      }
+    },
+    {
+      "id": "4",
+      "type": "output",
+      "config": {
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "Cold Email Draft"
+      }
+    },
+    {
+      "id": "5",
+      "type": "output",
+      "config": {
+        "delivery": "none"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "1",
+      "target": "2",
+      "source_port": "output_1"
+    },
+    {
+      "source": "2",
+      "target": "3",
+      "source_port": "output_1"
+    },
+    {
+      "source": "3",
+      "target": "4",
+      "source_port": "output_1"
+    },
+    {
+      "source": "3",
+      "target": "5",
+      "source_port": "output_1"
+    }
+  ],
+  "drawflow": {
+    "drawflow": {
+      "Home": {
+        "data": {
+          "1": {
+            "id": 1,
+            "name": "input",
+            "data": {
+              "prompt": "Prospect: Sarah Kim, Head of Marketing at Notion. Signal: Notion just announced a new AI feature last week. Sender: Account Executive at FlowAI, selling AI productivity software. Goal: book a 15-minute call."
+            },
+            "class": "input",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Prospect: Sarah Kim, Head of Marketing at Notion. Signal: Notion just announced a new AI feature last week. Sender: Account Executive at FlowAI, selling AI productivity software. Goal: book a 15-minute call.</textarea>\n    </div>",
+            "typenode": false,
+            "inputs": {},
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 80
+          },
+          "2": {
+            "id": 2,
+            "name": "agent",
+            "data": {
+              "name": "Cold Email Writer",
+              "model": "gpt-4o",
+              "tool_ids": "",
+              "mcp_ids": "",
+              "domain_id": "email",
+              "instructions": "You are a cold email copywriter. Write ONE cold sales email based on the prospect information provided.\n\nYou MUST follow every rule below \u2014 these are hard constraints, not suggestions:\n\n1. SUBJECT LINE: Maximum 50 characters. Must be specific to the prospect or signal. Never generic.\n2. OPENER: Reference the specific signal mentioned (product launch, funding, job change, published article, etc.). Never open with 'I hope this email finds you well', 'My name is', 'I wanted to reach out', or any generic greeting.\n3. BODY LENGTH: Cold email body must be under 125 words total. Count carefully.\n4. PERSONALISATION: Include the prospect's first name or company name at least once.\n5. CTA: Exactly one call-to-action. Make it low-friction (e.g. '15-minute call?' or 'Worth a quick chat?'). Never more than one ask.\n6. FORBIDDEN WORDS: Never use \u2014 revolutionary, game-changer, disruptive, world-class, best-in-class, synergy, paradigm shift, cutting-edge, next-generation, FREE, URGENT, ACT FAST.\n7. TONE: Peer-to-peer. Direct. Human. Not corporate, not salesy.\n8. STATISTICS: Only use figures explicitly mentioned in the input. Do not invent stats.\n\nReturn the email in this exact format:\nSubject: <subject line>\n\n<email body>"
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Cold Email Writer \u00b7 gpt-4o</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "1",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 310,
+            "pos_y": 80
+          },
+          "3": {
+            "id": 3,
+            "name": "approval",
+            "data": {
+              "message": "Review the cold email below. Check: subject \u226450 chars, body \u2264125 words, one CTA, signal-based opener, no buzzwords. Approve to send, or edit and approve."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "output": "input_1"
+                  },
+                  {
+                    "node": "5",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 540,
+            "pos_y": 80
+          },
+          "4": {
+            "id": 4,
+            "name": "output",
+            "data": {
+              "delivery": "gmail",
+              "recipient": "yesol2137@gmail.com",
+              "subject": "Cold Email Draft"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 80,
+            "pos_y": 240
+          },
+          "5": {
+            "id": 5,
+            "name": "output",
+            "data": {
+              "delivery": "none"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 310,
+            "pos_y": 240
+          }
+        }
+      }
+    },
+    "sticky_notes": []
+  }
+}
