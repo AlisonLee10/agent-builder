@@ -1,5 +1,5 @@
 {
-  "id": "fd6d57d8-4aa9-44f4-80b2-8d5a952553e8",
+  "id": "47f4843d-479b-46b9-a1f7-efa51a566a62",
   "name": "AI Future Newsletter",
   "nodes": [
     {
@@ -235,7 +235,7 @@
               }
             },
             "pos_x": 540,
-            "pos_y": 78
+            "pos_y": 80
           },
           "4": {
             "id": 4,

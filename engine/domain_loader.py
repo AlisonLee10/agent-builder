@@ -65,6 +65,18 @@ def load_rich_context(folder: str | Path) -> str:
             + "\n\n---\n\n".join(examples)
         )
 
+    # ── 4. Rejected style examples (if domain-specific rejections exist) ────────
+    rejected_rel = td.get("rejected", "training_data/rejected")
+    rejected_path = _resolve(path, rejected_rel)
+    rejected_examples = _sample_examples(rejected_path, n=3)
+    if rejected_examples:
+        parts.append(
+            "## Rejected Style Examples\n\n"
+            "The following outputs were rejected by a human reviewer. "
+            "Do NOT replicate their tone, structure, phrasing, or content:\n\n"
+            + "\n\n---\n\n".join(rejected_examples)
+        )
+
     return "\n\n".join(parts)
 
 

@@ -1,12 +1,12 @@
 {
-  "id": "b50f79a1-5613-476f-bdac-23a1197ea2e6",
+  "id": "54124855-7590-4dee-9630-345b1fbf133e",
   "name": "AI Future Newsletter",
   "nodes": [
     {
       "id": "1",
       "type": "input",
       "config": {
-        "prompt": "Write an AI Future newsletter and send it to yesol2137@gmail.com"
+        "prompt": "Write an email newsletter about the future of AI"
       }
     },
     {
@@ -15,42 +15,41 @@
       "config": {
         "name": "Newsletter Writer",
         "model": "gpt-4o",
-        "tool_ids": "web_fetch,news_fetch",
+        "tool_ids": "news_fetch",
         "mcp_ids": "",
         "domain_id": "email",
-        "instructions": "You are an AI newsletter writer. Your job:\n1. Use the news_fetch tool to search for 'AI future technology 2025 2026' and 'artificial intelligence upcoming developments'.\n2. Use web_fetch to retrieve 1-2 in-depth articles about the future of AI.\n3. Write a compelling email newsletter covering: (a) a punchy subject line, (b) an intro paragraph, (c) 3-4 key AI future developments with brief explanations, (d) a forward-looking closing.\n\nReturn ONLY a valid JSON object with exactly these two keys:\n{\"subject\": \"<email subject line>\", \"body\": \"<full newsletter body as plain text>\"}\n\nDo not include markdown fences, extra keys, or any text outside the JSON."
+        "instructions": "You are an email newsletter writer specialising in AI and technology.\n\nSteps:\n1. Use news_fetch to search for 'future of AI 2025 2026' and 'artificial intelligence trends upcoming'.\n2. Read the results and identify the 3-4 most compelling developments.\n3. Write a polished email newsletter that covers those developments.\n\nOutput format \u2014 return ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<email subject line, max 60 chars>\", \"body\": \"<full newsletter body as plain text, 300-500 words>\"}\n\nNewsletter body structure:\n- Opening hook (1-2 sentences)\n- 3-4 developments, each with a short explanation of why it matters\n- Forward-looking closing paragraph\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
       }
     },
     {
       "id": "3",
       "type": "condition",
       "config": {
-        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the societal and economic implications of AI \u2014 not just a generic or off-topic article\"}]"
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the near-future societal and economic implications of AI\"}]"
       }
     },
     {
       "id": "4",
       "type": "approval",
       "config": {
-        "message": "Please review the AI Future newsletter below. Approve to send it, or reject to end this branch."
+        "message": "Review the AI Future newsletter below. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
       }
     },
     {
       "id": "5",
-      "type": "agent",
+      "type": "output",
       "config": {
-        "name": "Email Dispatcher",
-        "model": "gpt-4o",
-        "tool_ids": "gmail_send",
-        "mcp_ids": "",
-        "domain_id": "",
-        "instructions": "You are an email dispatcher. The input is a JSON object with 'subject' and 'body' keys (or plain newsletter text).\n\nYou MUST call the gmail_send tool. Do not describe what you will do \u2014 call the tool immediately.\n\nCall gmail_send with this exact JSON string as input:\n{\"to\": \"yesol2137@gmail.com\", \"subject\": \"<subject from input>\", \"body\": \"<body from input>\"}\n\nIf the input is plain text (not JSON), use 'AI Future Newsletter' as the subject and the full text as the body.\n\nAfter the tool runs, report whether the email was sent successfully."
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "AI Future Newsletter"
       }
     },
     {
       "id": "6",
       "type": "output",
-      "config": {}
+      "config": {
+        "delivery": "none"
+      }
     },
     {
       "id": "7",
@@ -61,32 +60,31 @@
         "tool_ids": "",
         "mcp_ids": "",
         "domain_id": "email",
-        "instructions": "The newsletter you received was flagged as not being focused enough on future AI developments. Rewrite it so it clearly and specifically covers:\n- Concrete upcoming AI technologies (e.g. next-gen LLMs, robotics, AI agents)\n- Real near-future implications for business, society, or individuals\n- A forward-looking, optimistic-but-grounded tone\n\nReturn ONLY a valid JSON object:\n{\"subject\": \"<revised subject line>\", \"body\": \"<revised full newsletter body as plain text>\"}\n\nDo not include markdown fences, extra keys, or any text outside the JSON."
+        "instructions": "The newsletter you received was not focused enough on future AI developments. Rewrite it so that every section is clearly and specifically about:\n- Concrete upcoming AI technologies (next-gen models, robotics, AI agents, etc.)\n- Near-future implications for businesses and individuals\n- A forward-looking, optimistic but grounded tone\n\nReturn ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<revised subject line, max 60 chars>\", \"body\": \"<revised newsletter body as plain text, 300-500 words>\"}\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
       }
     },
     {
       "id": "8",
       "type": "approval",
       "config": {
-        "message": "Please review the rewritten AI newsletter. Approve to send it, or reject to end this branch."
+        "message": "Review the rewritten AI newsletter. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
       }
     },
     {
       "id": "9",
-      "type": "agent",
+      "type": "output",
       "config": {
-        "name": "Email Dispatcher (Rewrite)",
-        "model": "gpt-4o",
-        "tool_ids": "gmail_send",
-        "mcp_ids": "",
-        "domain_id": "",
-        "instructions": "You are an email dispatcher. The input is a JSON object with 'subject' and 'body' keys (or plain newsletter text).\n\nYou MUST call the gmail_send tool. Do not describe what you will do \u2014 call the tool immediately.\n\nCall gmail_send with this exact JSON string as input:\n{\"to\": \"yesol2137@gmail.com\", \"subject\": \"<subject from input>\", \"body\": \"<body from input>\"}\n\nIf the input is plain text (not JSON), use 'AI Future Newsletter (Revised)' as the subject and the full text as the body.\n\nAfter the tool runs, report whether the email was sent successfully."
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "AI Future Newsletter"
       }
     },
     {
       "id": "10",
       "type": "output",
-      "config": {}
+      "config": {
+        "delivery": "none"
+      }
     }
   ],
   "edges": [
@@ -116,7 +114,7 @@
       "source_port": "output_1"
     },
     {
-      "source": "5",
+      "source": "4",
       "target": "6",
       "source_port": "output_1"
     },
@@ -131,7 +129,7 @@
       "source_port": "output_1"
     },
     {
-      "source": "9",
+      "source": "8",
       "target": "10",
       "source_port": "output_1"
     }
@@ -144,10 +142,10 @@
             "id": 1,
             "name": "input",
             "data": {
-              "prompt": "Write an AI Future newsletter and send it to yesol2137@gmail.com"
+              "prompt": "Write an email newsletter about the future of AI"
             },
             "class": "input",
-            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Write an AI Future newsletter and send it to yesol2137@gmail.com</textarea>\n    </div>",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Write an email newsletter about the future of AI</textarea>\n    </div>",
             "typenode": false,
             "inputs": {},
             "outputs": {
@@ -160,8 +158,8 @@
                 ]
               }
             },
-            "pos_x": 80,
-            "pos_y": 80
+            "pos_x": 78,
+            "pos_y": 36.09090909090909
           },
           "2": {
             "id": 2,
@@ -169,10 +167,10 @@
             "data": {
               "name": "Newsletter Writer",
               "model": "gpt-4o",
-              "tool_ids": "web_fetch,news_fetch",
+              "tool_ids": "news_fetch",
               "mcp_ids": "",
               "domain_id": "email",
-              "instructions": "You are an AI newsletter writer. Your job:\n1. Use the news_fetch tool to search for 'AI future technology 2025 2026' and 'artificial intelligence upcoming developments'.\n2. Use web_fetch to retrieve 1-2 in-depth articles about the future of AI.\n3. Write a compelling email newsletter covering: (a) a punchy subject line, (b) an intro paragraph, (c) 3-4 key AI future developments with brief explanations, (d) a forward-looking closing.\n\nReturn ONLY a valid JSON object with exactly these two keys:\n{\"subject\": \"<email subject line>\", \"body\": \"<full newsletter body as plain text>\"}\n\nDo not include markdown fences, extra keys, or any text outside the JSON."
+              "instructions": "You are an email newsletter writer specialising in AI and technology.\n\nSteps:\n1. Use news_fetch to search for 'future of AI 2025 2026' and 'artificial intelligence trends upcoming'.\n2. Read the results and identify the 3-4 most compelling developments.\n3. Write a polished email newsletter that covers those developments.\n\nOutput format \u2014 return ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<email subject line, max 60 chars>\", \"body\": \"<full newsletter body as plain text, 300-500 words>\"}\n\nNewsletter body structure:\n- Opening hook (1-2 sentences)\n- 3-4 developments, each with a short explanation of why it matters\n- Forward-looking closing paragraph\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
             },
             "class": "agent",
             "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Newsletter Writer \u00b7 gpt-4o</div>",
@@ -204,7 +202,7 @@
             "id": 3,
             "name": "condition",
             "data": {
-              "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the societal and economic implications of AI \u2014 not just a generic or off-topic article\"}]"
+              "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the near-future societal and economic implications of AI\"}]"
             },
             "class": "condition",
             "html": "<div class=\"df-node-head\" style=\"background:#8b5cf622;border-bottom:2px solid #8b5cf6\">\n    <span>\ud83d\udd00</span><span>Condition</span>\n  </div>\n  <div class=\"df-node-body\">IF The content is specificall / ELSE</div>",
@@ -243,7 +241,7 @@
             "id": 4,
             "name": "approval",
             "data": {
-              "message": "Please review the AI Future newsletter below. Approve to send it, or reject to end this branch."
+              "message": "Review the AI Future newsletter below. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
             },
             "class": "approval",
             "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
@@ -264,6 +262,10 @@
                   {
                     "node": "5",
                     "output": "input_1"
+                  },
+                  {
+                    "node": "6",
+                    "output": "input_1"
                   }
                 ]
               },
@@ -276,17 +278,14 @@
           },
           "5": {
             "id": 5,
-            "name": "agent",
+            "name": "output",
             "data": {
-              "name": "Email Dispatcher",
-              "model": "gpt-4o",
-              "tool_ids": "gmail_send",
-              "mcp_ids": "",
-              "domain_id": "",
-              "instructions": "You are an email dispatcher. The input is a JSON object with 'subject' and 'body' keys (or plain newsletter text).\n\nYou MUST call the gmail_send tool. Do not describe what you will do \u2014 call the tool immediately.\n\nCall gmail_send with this exact JSON string as input:\n{\"to\": \"yesol2137@gmail.com\", \"subject\": \"<subject from input>\", \"body\": \"<body from input>\"}\n\nIf the input is plain text (not JSON), use 'AI Future Newsletter' as the subject and the full text as the body.\n\nAfter the tool runs, report whether the email was sent successfully."
+              "delivery": "gmail",
+              "recipient": "yesol2137@gmail.com",
+              "subject": "AI Future Newsletter"
             },
-            "class": "agent",
-            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Email Dispatcher \u00b7 gpt-4o</div>",
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
             "typenode": false,
             "inputs": {
               "input_1": {
@@ -298,23 +297,16 @@
                 ]
               }
             },
-            "outputs": {
-              "output_1": {
-                "connections": [
-                  {
-                    "node": "6",
-                    "output": "input_1"
-                  }
-                ]
-              }
-            },
+            "outputs": {},
             "pos_x": 310,
             "pos_y": 240
           },
           "6": {
             "id": 6,
             "name": "output",
-            "data": {},
+            "data": {
+              "delivery": "none"
+            },
             "class": "output",
             "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
             "typenode": false,
@@ -322,7 +314,7 @@
               "input_1": {
                 "connections": [
                   {
-                    "node": "5",
+                    "node": "4",
                     "input": "output_1"
                   }
                 ]
@@ -341,7 +333,7 @@
               "tool_ids": "",
               "mcp_ids": "",
               "domain_id": "email",
-              "instructions": "The newsletter you received was flagged as not being focused enough on future AI developments. Rewrite it so it clearly and specifically covers:\n- Concrete upcoming AI technologies (e.g. next-gen LLMs, robotics, AI agents)\n- Real near-future implications for business, society, or individuals\n- A forward-looking, optimistic-but-grounded tone\n\nReturn ONLY a valid JSON object:\n{\"subject\": \"<revised subject line>\", \"body\": \"<revised full newsletter body as plain text>\"}\n\nDo not include markdown fences, extra keys, or any text outside the JSON."
+              "instructions": "The newsletter you received was not focused enough on future AI developments. Rewrite it so that every section is clearly and specifically about:\n- Concrete upcoming AI technologies (next-gen models, robotics, AI agents, etc.)\n- Near-future implications for businesses and individuals\n- A forward-looking, optimistic but grounded tone\n\nReturn ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<revised subject line, max 60 chars>\", \"body\": \"<revised newsletter body as plain text, 300-500 words>\"}\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
             },
             "class": "agent",
             "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Newsletter Rewriter \u00b7 gpt-4o</div>",
@@ -373,7 +365,7 @@
             "id": 8,
             "name": "approval",
             "data": {
-              "message": "Please review the rewritten AI newsletter. Approve to send it, or reject to end this branch."
+              "message": "Review the rewritten AI newsletter. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
             },
             "class": "approval",
             "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
@@ -394,6 +386,10 @@
                   {
                     "node": "9",
                     "output": "input_1"
+                  },
+                  {
+                    "node": "10",
+                    "output": "input_1"
                   }
                 ]
               },
@@ -406,17 +402,14 @@
           },
           "9": {
             "id": 9,
-            "name": "agent",
+            "name": "output",
             "data": {
-              "name": "Email Dispatcher (Rewrite)",
-              "model": "gpt-4o",
-              "tool_ids": "gmail_send",
-              "mcp_ids": "",
-              "domain_id": "",
-              "instructions": "You are an email dispatcher. The input is a JSON object with 'subject' and 'body' keys (or plain newsletter text).\n\nYou MUST call the gmail_send tool. Do not describe what you will do \u2014 call the tool immediately.\n\nCall gmail_send with this exact JSON string as input:\n{\"to\": \"yesol2137@gmail.com\", \"subject\": \"<subject from input>\", \"body\": \"<body from input>\"}\n\nIf the input is plain text (not JSON), use 'AI Future Newsletter (Revised)' as the subject and the full text as the body.\n\nAfter the tool runs, report whether the email was sent successfully."
+              "delivery": "gmail",
+              "recipient": "yesol2137@gmail.com",
+              "subject": "AI Future Newsletter"
             },
-            "class": "agent",
-            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Email Dispatcher (Rewrite) \u00b7 gpt-4o</div>",
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
             "typenode": false,
             "inputs": {
               "input_1": {
@@ -428,23 +421,16 @@
                 ]
               }
             },
-            "outputs": {
-              "output_1": {
-                "connections": [
-                  {
-                    "node": "10",
-                    "output": "input_1"
-                  }
-                ]
-              }
-            },
+            "outputs": {},
             "pos_x": 540,
-            "pos_y": 402
+            "pos_y": 400
           },
           "10": {
             "id": 10,
             "name": "output",
-            "data": {},
+            "data": {
+              "delivery": "none"
+            },
             "class": "output",
             "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
             "typenode": false,
@@ -452,7 +438,7 @@
               "input_1": {
                 "connections": [
                   {
-                    "node": "9",
+                    "node": "8",
                     "input": "output_1"
                   }
                 ]

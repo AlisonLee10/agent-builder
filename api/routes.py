@@ -380,3 +380,18 @@ def delete_key(env_name: str):
     if not _delete(env_name):
         raise HTTPException(404, "Key not found")
     return {"env": env_name, "is_set": False}
+
+
+# ── Rejection Feedback ─────────────────────────────────────────────────────────
+
+@router.get("/feedback/rejections")
+def get_rejections():
+    from engine.feedback_store import list_all_rejections
+    return list_all_rejections()
+
+
+@router.delete("/feedback/rejections")
+def clear_rejections():
+    from engine.feedback_store import clear_rejections as _clear
+    count = _clear()
+    return {"cleared": count}

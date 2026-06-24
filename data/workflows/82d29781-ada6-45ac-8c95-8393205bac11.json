@@ -1,47 +1,45 @@
 {
-  "id": "f8030d6a-5c2d-49d9-9871-088d7a00cfcc",
-  "name": "AI Future Newsletter",
+  "id": "82d29781-ada6-45ac-8c95-8393205bac11",
+  "name": "AI Future Slack Post",
   "nodes": [
     {
       "id": "1",
       "type": "input",
       "config": {
-        "prompt": "Write an email newsletter about the future of AI"
+        "prompt": "Write a Slack marketing post about FlowAI in the context of AI trends"
       }
     },
     {
       "id": "2",
       "type": "agent",
       "config": {
-        "name": "Newsletter Writer",
+        "name": "Marketing Post Writer",
         "model": "gpt-4o",
         "tool_ids": "news_fetch",
         "mcp_ids": "",
         "domain_id": "",
-        "instructions": "You are an email newsletter writer specialising in AI and technology.\n\nSteps:\n1. Use news_fetch to search for 'future of AI 2025 2026' and 'artificial intelligence trends upcoming'.\n2. Read the results and identify the 3-4 most compelling developments.\n3. Write a polished email newsletter that covers those developments.\n\nOutput format \u2014 return ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<email subject line, max 60 chars>\", \"body\": \"<full newsletter body as plain text, 300-500 words>\"}\n\nNewsletter body structure:\n- Opening hook (1-2 sentences)\n- 3-4 developments, each with a short explanation of why it matters\n- Forward-looking closing paragraph\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+        "instructions": "You are a marketing copywriter for FlowAI.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target audience: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer \u2014 never corporate or salesy\n\nSteps:\n1. Use news_fetch to search for 'AI productivity tools 2025' and 'future of work artificial intelligence'.\n2. Pick 1-2 relevant AI trends that connect naturally to FlowAI's value proposition.\n3. Write a compelling Slack post that ties those trends to FlowAI.\n\nPost requirements:\n- Strong opening hook that names FlowAI\n- Reference 1-2 real AI trends from the news\n- 2-3 bullet points with specific FlowAI benefits (use the stats above)\n- One short call-to-action at the end\n- Use Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- Do NOT use generic filler content\n\nReturn ONLY the post text, ready to paste into Slack. No preamble, no commentary."
       }
     },
     {
       "id": "3",
       "type": "condition",
       "config": {
-        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the near-future societal and economic implications of AI\"}]"
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
       }
     },
     {
       "id": "4",
       "type": "approval",
       "config": {
-        "message": "Review the AI Future newsletter below. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+        "message": "Review the FlowAI Slack post below. Approve to post it to your Slack channel, or reject to end the workflow."
       }
     },
     {
       "id": "5",
       "type": "output",
       "config": {
-        "delivery": "gmail",
-        "recipient": "yesol2137@gmail.com",
-        "subject": "AI Future Newsletter"
+        "delivery": "slack"
       }
     },
     {
@@ -55,28 +53,26 @@
       "id": "7",
       "type": "agent",
       "config": {
-        "name": "Newsletter Rewriter",
+        "name": "Post Rewriter",
         "model": "gpt-4o",
         "tool_ids": "",
         "mcp_ids": "",
         "domain_id": "",
-        "instructions": "The newsletter you received was not focused enough on future AI developments. Rewrite it so that every section is clearly and specifically about:\n- Concrete upcoming AI technologies (next-gen models, robotics, AI agents, etc.)\n- Near-future implications for businesses and individuals\n- A forward-looking, optimistic but grounded tone\n\nReturn ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<revised subject line, max 60 chars>\", \"body\": \"<revised newsletter body as plain text, 300-500 words>\"}\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+        "instructions": "The Slack post you received was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so that it clearly connects to concrete upcoming AI developments.\n\nCompany context:\n- FlowAI: AI productivity software, tagline 'Work less. Flow more.'\n- Saves users 2 hours/day, 10,000+ users, 50+ integrations\n- Voice: direct, peer-to-peer, never corporate\n\nRequirements:\n- Reference at least one specific near-future AI trend\n- Connect that trend directly to FlowAI's value\n- Keep Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- End with a call-to-action\n\nReturn ONLY the revised post text. No preamble, no commentary."
       }
     },
     {
       "id": "8",
       "type": "approval",
       "config": {
-        "message": "Review the rewritten AI newsletter. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+        "message": "Review the rewritten Slack post. Approve to post it to your Slack channel, or reject to end the workflow."
       }
     },
     {
       "id": "9",
       "type": "output",
       "config": {
-        "delivery": "gmail",
-        "recipient": "yesol2137@gmail.com",
-        "subject": "AI Future Newsletter"
+        "delivery": "slack"
       }
     },
     {
@@ -142,10 +138,10 @@
             "id": 1,
             "name": "input",
             "data": {
-              "prompt": "Write an email newsletter about the future of AI"
+              "prompt": "Write a Slack marketing post about FlowAI in the context of AI trends"
             },
             "class": "input",
-            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Write an email newsletter about the future of AI</textarea>\n    </div>",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Write a Slack marketing post about FlowAI in the context of AI trends</textarea>\n    </div>",
             "typenode": false,
             "inputs": {},
             "outputs": {
@@ -165,15 +161,15 @@
             "id": 2,
             "name": "agent",
             "data": {
-              "name": "Newsletter Writer",
+              "name": "Marketing Post Writer",
               "model": "gpt-4o",
               "tool_ids": "news_fetch",
               "mcp_ids": "",
               "domain_id": "",
-              "instructions": "You are an email newsletter writer specialising in AI and technology.\n\nSteps:\n1. Use news_fetch to search for 'future of AI 2025 2026' and 'artificial intelligence trends upcoming'.\n2. Read the results and identify the 3-4 most compelling developments.\n3. Write a polished email newsletter that covers those developments.\n\nOutput format \u2014 return ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<email subject line, max 60 chars>\", \"body\": \"<full newsletter body as plain text, 300-500 words>\"}\n\nNewsletter body structure:\n- Opening hook (1-2 sentences)\n- 3-4 developments, each with a short explanation of why it matters\n- Forward-looking closing paragraph\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+              "instructions": "You are a marketing copywriter for FlowAI.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target audience: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer \u2014 never corporate or salesy\n\nSteps:\n1. Use news_fetch to search for 'AI productivity tools 2025' and 'future of work artificial intelligence'.\n2. Pick 1-2 relevant AI trends that connect naturally to FlowAI's value proposition.\n3. Write a compelling Slack post that ties those trends to FlowAI.\n\nPost requirements:\n- Strong opening hook that names FlowAI\n- Reference 1-2 real AI trends from the news\n- 2-3 bullet points with specific FlowAI benefits (use the stats above)\n- One short call-to-action at the end\n- Use Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- Do NOT use generic filler content\n\nReturn ONLY the post text, ready to paste into Slack. No preamble, no commentary."
             },
             "class": "agent",
-            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Newsletter Writer \u00b7 gpt-4o</div>",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Marketing Post Writer \u00b7 gpt-4o</div>",
             "typenode": false,
             "inputs": {
               "input_1": {
@@ -202,7 +198,7 @@
             "id": 3,
             "name": "condition",
             "data": {
-              "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the near-future societal and economic implications of AI\"}]"
+              "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
             },
             "class": "condition",
             "html": "<div class=\"df-node-head\" style=\"background:#8b5cf622;border-bottom:2px solid #8b5cf6\">\n    <span>\ud83d\udd00</span><span>Condition</span>\n  </div>\n  <div class=\"df-node-body\">IF The content is specificall / ELSE</div>",
@@ -241,7 +237,7 @@
             "id": 4,
             "name": "approval",
             "data": {
-              "message": "Review the AI Future newsletter below. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+              "message": "Review the FlowAI Slack post below. Approve to post it to your Slack channel, or reject to end the workflow."
             },
             "class": "approval",
             "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
@@ -280,9 +276,7 @@
             "id": 5,
             "name": "output",
             "data": {
-              "delivery": "gmail",
-              "recipient": "yesol2137@gmail.com",
-              "subject": "AI Future Newsletter"
+              "delivery": "slack"
             },
             "class": "output",
             "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
@@ -328,15 +322,15 @@
             "id": 7,
             "name": "agent",
             "data": {
-              "name": "Newsletter Rewriter",
+              "name": "Post Rewriter",
               "model": "gpt-4o",
               "tool_ids": "",
               "mcp_ids": "",
               "domain_id": "",
-              "instructions": "The newsletter you received was not focused enough on future AI developments. Rewrite it so that every section is clearly and specifically about:\n- Concrete upcoming AI technologies (next-gen models, robotics, AI agents, etc.)\n- Near-future implications for businesses and individuals\n- A forward-looking, optimistic but grounded tone\n\nReturn ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<revised subject line, max 60 chars>\", \"body\": \"<revised newsletter body as plain text, 300-500 words>\"}\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+              "instructions": "The Slack post you received was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so that it clearly connects to concrete upcoming AI developments.\n\nCompany context:\n- FlowAI: AI productivity software, tagline 'Work less. Flow more.'\n- Saves users 2 hours/day, 10,000+ users, 50+ integrations\n- Voice: direct, peer-to-peer, never corporate\n\nRequirements:\n- Reference at least one specific near-future AI trend\n- Connect that trend directly to FlowAI's value\n- Keep Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- End with a call-to-action\n\nReturn ONLY the revised post text. No preamble, no commentary."
             },
             "class": "agent",
-            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Newsletter Rewriter \u00b7 gpt-4o</div>",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Post Rewriter \u00b7 gpt-4o</div>",
             "typenode": false,
             "inputs": {
               "input_1": {
@@ -365,7 +359,7 @@
             "id": 8,
             "name": "approval",
             "data": {
-              "message": "Review the rewritten AI newsletter. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+              "message": "Review the rewritten Slack post. Approve to post it to your Slack channel, or reject to end the workflow."
             },
             "class": "approval",
             "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
@@ -404,9 +398,7 @@
             "id": 9,
             "name": "output",
             "data": {
-              "delivery": "gmail",
-              "recipient": "yesol2137@gmail.com",
-              "subject": "AI Future Newsletter"
+              "delivery": "slack"
             },
             "class": "output",
             "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",

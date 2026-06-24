@@ -171,15 +171,17 @@
     .drawflow .drawflow-node .output[data-label]::after {
       content: attr(data-label);
       position: absolute; right: 17px; top: 50%; transform: translateY(-50%);
-      font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+      font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
       white-space: nowrap; pointer-events: none; user-select: none;
-      background: rgba(255,255,255,.88); border-radius: 3px; padding: 1px 4px;
+      border-radius: 3px; padding: 2px 5px;
+      border: 1px solid var(--muted); background: rgba(255,255,255,.95);
       color: var(--muted);
     }
     .drawflow .drawflow-node .output[data-label="IF"]::after,
-    .drawflow .drawflow-node .output[data-label^="ELSE IF"]::after { color: var(--accent); }
-    .drawflow .drawflow-node .output[data-label="Approve"]::after { color: #16a34a; }
-    .drawflow .drawflow-node .output[data-label="Reject"]::after  { color: #dc2626; }
+    .drawflow .drawflow-node .output[data-label^="ELSE IF"]::after { color: var(--accent); border-color: var(--accent); background: rgba(99,102,241,.08); }
+    .drawflow .drawflow-node .output[data-label="ELSE"]::after { color: var(--muted); border-color: var(--muted); }
+    .drawflow .drawflow-node .output[data-label="Approve"]::after { color: #16a34a; border-color: #16a34a; background: rgba(22,163,74,.08); }
+    .drawflow .drawflow-node .output[data-label="Deny"]::after    { color: #dc2626; border-color: #dc2626; background: rgba(220,38,38,.08); }
     .drawflow .connection .main-path { stroke: var(--accent); stroke-width: 2.5; }
     .df-node-head { display: flex; align-items: center; gap: 6px; padding: 8px 11px 6px; font-size: 12px; font-weight: 700; border-radius: 9px 9px 0 0; }
     .df-node-body { padding: 7px 11px 9px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
@@ -269,6 +271,7 @@
       <button class="rtab" onclick="switchRightTab('domains')">Domains</button>
       <button class="rtab" onclick="switchRightTab('rag')">RAG</button>
       <button class="rtab" onclick="switchRightTab('keys')">Keys</button>
+      <button class="rtab" onclick="switchRightTab('feedback')">Feedback</button>
     </div>
 
     <!-- Config -->
@@ -327,6 +330,16 @@
         Keys are stored locally in <code style="font-size:9px;background:var(--surface);padding:1px 4px;border-radius:3px">data/api_keys.json</code> and never sent externally.
       </p>
       <div id="keys-list"></div>
+    </div>
+
+    <!-- Feedback -->
+    <div id="rtab-feedback" class="rtab-content">
+      <div class="section-label" style="margin-bottom:4px">Rejection Log</div>
+      <p style="font-size:10px;color:var(--muted);margin-bottom:10px;line-height:1.6">
+        Outputs denied via Human Approval are stored here and automatically injected into future agent prompts as negative examples.
+      </p>
+      <button class="add-btn" style="background:none;border:1px solid #dc2626;color:#dc2626;margin-bottom:10px" onclick="clearRejections()">✕ Clear All</button>
+      <div id="rejection-log-list"></div>
     </div>
   </div>
 </div>
@@ -458,7 +471,7 @@
       </div>
       <div id="approval-action-btns" class="modal-actions">
         <button class="btn" style="background:#16a34a;color:#fff;border:none" onclick="decideApproval('approve')">✓ Approve</button>
-        <button class="btn btn-danger" onclick="decideApproval('reject')">✕ Reject</button>
+        <button class="btn btn-danger" onclick="decideApproval('deny')">✕ Deny</button>
         <button class="btn btn-ghost" style="margin-left:auto" onclick="closeRun()">Cancel</button>
       </div>
     </div>
@@ -562,11 +575,37 @@ function switchLeftTab(name) {
 }
 
 // ── Right tabs ────────────────────────────────────────────────────────────────
-const RIGHT_TABS = ['config','tools','mcps','domains','rag','keys'];
+const RIGHT_TABS = ['config','tools','mcps','domains','rag','keys','feedback'];
 function switchRightTab(name) {
   document.querySelectorAll('.rtab').forEach((b, i) => b.classList.toggle('active', RIGHT_TABS[i] === name));
   document.querySelectorAll('.rtab-content').forEach(t => t.classList.remove('active'));
   document.getElementById(`rtab-${name}`).classList.add('active');
+  if (name === 'feedback') loadRejectionLog();
+}
+
+async function loadRejectionLog() {
+  const list = document.getElementById('rejection-log-list');
+  list.innerHTML = '<div style="font-size:10px;color:var(--muted)">Loading…</div>';
+  const entries = await fetch('/api/feedback/rejections').then(r => r.json()).catch(() => []);
+  if (!entries.length) {
+    list.innerHTML = '<div style="font-size:10px;color:var(--muted);margin-top:4px">No rejections recorded yet.</div>';
+    return;
+  }
+  list.innerHTML = entries.map((e, i) => `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:10px">
+      <div style="font-weight:700;color:#dc2626;margin-bottom:4px">#${entries.length - i} &nbsp;<span style="font-weight:400;color:var(--muted)">${e.timestamp || ''}</span></div>
+      <div style="color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:100px;overflow-y:auto;line-height:1.5">${escHtml(e.content || '')}</div>
+    </div>`).join('');
+}
+
+async function clearRejections() {
+  if (!confirm('Clear all rejection records? This cannot be undone.')) return;
+  await fetch('/api/feedback/rejections', { method: 'DELETE' });
+  loadRejectionLog();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 // ── Node types & palette ───────────────────────────────────────────────────────
@@ -630,7 +669,7 @@ function buildNodeHtml(nt, data) {
 }
 
 function getOutputLabels(type, data) {
-  if (type === 'approval') return ['Approve', 'Reject'];
+  if (type === 'approval') return ['Approve', 'Deny'];
   if (type === 'condition') {
     try {
       const conds = JSON.parse(data.conditions || '[]');
@@ -878,8 +917,15 @@ async function loadWorkflow(id) {
   currentWfId = wf.id;
   document.getElementById('wf-name').value = wf.name;
   _histLock = true;
-  if (wf.drawflow) editor.import(wf.drawflow);
-  else { editor.clearModuleSelected(); importEngineFormat(wf); }
+  if (wf.drawflow) {
+    editor.import(wf.drawflow);
+    setTimeout(() => {
+      Object.values(editor.drawflow.drawflow.Home.data).forEach(nd => {
+        if (nd.name === 'condition' || nd.name === 'approval')
+          labelOutputHandles(nd.id, nd.name, nd.data);
+      });
+    }, 50);
+  } else { editor.clearModuleSelected(); importEngineFormat(wf); }
   _histLock = false;
   _stickyNotes = wf.drawflow?.sticky_notes || [];
   renderStickyNotes();

@@ -120,7 +120,9 @@ class ApprovalNode(Node):
             decision = str(raw).strip().lower()
         if decision == "approve":
             return {"output": text, "route_port": "output_1"}
-        if decision == "reject":
+        if decision in ("reject", "deny"):
+            from engine.feedback_store import record_rejection
+            record_rejection(text, self.node_id)
             return {"output": text, "route_port": "output_2"}
         return {
             "__approval_pending__": True,
@@ -178,6 +180,21 @@ class AgentNode(Node):
         rag = _load_rag_context()
         if rag:
             system = f"{system}\n\n## Company Context\n\n{rag}"
+
+        from engine.feedback_store import load_rejections
+        rejected = load_rejections(limit=5)
+        if rejected:
+            examples = "\n\n".join(
+                f"[{i + 1}] {r['content'][:500]}{'…' if len(r['content']) > 500 else ''}"
+                for i, r in enumerate(rejected)
+            )
+            system += (
+                "\n\n## Previously Rejected Output Examples\n\n"
+                "A human reviewer explicitly rejected the following outputs. "
+                "Study these carefully — your output must not replicate their structure, "
+                "tone, phrasing, or content patterns:\n\n"
+                + examples
+            )
 
         # Collect built-in / HTTP tools
         from engine.builtin_tools import get_builtin_tool

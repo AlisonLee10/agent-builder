@@ -1,0 +1,678 @@
+<title>Agent Builder — Architecture Diagram</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --border: #2a2f3e;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #6366f1;
+    --green: #10b981;
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --teal: #0891b2;
+    --purple: #8b5cf6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    min-height: 100vh;
+    padding: 32px 24px 48px;
+  }
+
+  h1 {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: system-ui, sans-serif;
+    margin-bottom: 36px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    margin-bottom: 32px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: var(--muted);
+    font-family: system-ui, sans-serif;
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 2px;
+  }
+
+  /* ── Main grid ── */
+  .diagram {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    grid-template-rows: auto;
+    gap: 0;
+    position: relative;
+  }
+
+  /* ── Layer rows ── */
+  .layer {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 200px 1fr 200px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .layer-label {
+    writing-mode: horizontal-tb;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 4px 0 0 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-right: 12px;
+  }
+
+  .layer-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .layer-right {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-left: 12px;
+  }
+
+  /* ── Row within layer ── */
+  .row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  /* ── Box ── */
+  .box {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 13px;
+    background: var(--surface);
+    position: relative;
+    cursor: default;
+    transition: border-color .15s, box-shadow .15s;
+    flex-shrink: 0;
+  }
+  .box:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent)22, 0 4px 16px rgba(99,102,241,.15);
+    z-index: 10;
+  }
+
+  .box-title {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    font-family: system-ui, sans-serif;
+  }
+  .box-file {
+    font-size: 9px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .box-desc {
+    font-size: 9.5px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-family: system-ui, sans-serif;
+  }
+  .box-badge {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 5px;
+  }
+
+  /* Color variants */
+  .c-green  { border-color: #10b98133; } .c-green  .box-badge { background: #10b98122; color: var(--green); }
+  .c-blue   { border-color: #3b82f633; } .c-blue   .box-badge { background: #3b82f622; color: var(--blue); }
+  .c-orange { border-color: #f59e0b33; } .c-orange .box-badge { background: #f59e0b22; color: var(--orange); }
+  .c-red    { border-color: #ef444433; } .c-red    .box-badge { background: #ef444422; color: var(--red); }
+  .c-teal   { border-color: #0891b233; } .c-teal   .box-badge { background: #0891b222; color: var(--teal); }
+  .c-purple { border-color: #8b5cf633; } .c-purple .box-badge { background: #8b5cf622; color: var(--purple); }
+  .c-accent { border-color: #6366f133; } .c-accent .box-badge { background: #6366f122; color: var(--accent); }
+  .c-muted  { border-color: var(--border); } .c-muted .box-badge { background: #ffffff0d; color: var(--muted); }
+
+  /* ── Folder box (groups multiple files) ── */
+  .folder {
+    border: 1px dashed;
+    border-radius: 10px;
+    padding: 12px;
+    position: relative;
+  }
+  .folder-label {
+    position: absolute;
+    top: -9px; left: 12px;
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 0 6px;
+    border-radius: 3px;
+  }
+  .folder.c-orange { border-color: #f59e0b44; } .folder.c-orange .folder-label { background: #1d1d2a; color: var(--orange); }
+  .folder.c-purple { border-color: #8b5cf644; } .folder.c-purple .folder-label { background: #1d1d2a; color: var(--purple); }
+  .folder.c-teal   { border-color: #0891b244; } .folder.c-teal   .folder-label { background: #1d1d2a; color: var(--teal); }
+  .folder.c-muted  { border-color: #ffffff22; } .folder.c-muted  .folder-label { background: #1d1d2a; color: var(--muted); }
+  .folder.c-blue   { border-color: #3b82f644; } .folder.c-blue   .folder-label { background: #1d1d2a; color: var(--blue); }
+  .folder.c-green  { border-color: #10b98144; } .folder.c-green  .folder-label { background: #1d1d2a; color: var(--green); }
+
+  .folder-inner { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+
+  /* ── Arrows ── */
+  .arrow-row {
+    grid-column: 2 / 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 0 0 12px;
+    position: relative;
+  }
+
+  .arrow-label {
+    font-size: 9px;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 1px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    font-family: system-ui, sans-serif;
+    white-space: nowrap;
+  }
+
+  .divider {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 20px;
+    position: relative;
+  }
+  .divider-label {
+    position: absolute;
+    top: -9px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg);
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    padding: 0 10px;
+    color: var(--muted);
+    font-family: system-ui, sans-serif;
+  }
+
+  /* ── SVG arrows overlay ── */
+  .arrows-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  /* ── Flow path ── */
+  svg.flow {
+    display: block;
+    width: 100%;
+    overflow: visible;
+    margin-bottom: 24px;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    display: none;
+    position: fixed;
+    background: #1e2235;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 13px;
+    font-size: 10px;
+    color: var(--text);
+    max-width: 260px;
+    line-height: 1.6;
+    z-index: 999;
+    pointer-events: none;
+    font-family: system-ui, sans-serif;
+    box-shadow: 0 8px 30px rgba(0,0,0,.5);
+  }
+  .tooltip strong { color: var(--accent); }
+
+  /* ── Section title ── */
+  .section-title {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: var(--muted);
+    margin-bottom: 14px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    font-family: system-ui, sans-serif;
+  }
+
+  /* ── Main layout ── */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .side-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── Flow diagram sections ── */
+  .flow-section {
+    margin-bottom: 28px;
+  }
+
+  /* connector lines via CSS */
+  .connector {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 4px 0;
+  }
+  .conn-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    position: relative;
+  }
+  .conn-line::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: -3px;
+    border: 3px solid transparent;
+    border-left-color: var(--border);
+  }
+  .conn-label {
+    font-size: 9px;
+    color: var(--muted);
+    padding: 0 6px;
+    font-family: system-ui, sans-serif;
+    white-space: nowrap;
+  }
+</style>
+
+<div class="tooltip" id="tooltip"></div>
+
+<h1>Agent Builder — Architecture</h1>
+<p class="subtitle">Hover over any component for details · All data stays local (no cloud sync)</p>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Entry / Entry Points</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>Frontend</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>API Layer</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Engine (Core)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Data / Storage</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0891b2"></div>Domain Pack</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>External Services</div>
+</div>
+
+<div class="main-layout">
+
+<!-- ═══════════════════════════════════════════════
+     CENTRE COLUMN — layer-by-layer flow
+════════════════════════════════════════════════ -->
+<div>
+
+<!-- 1. Entry -->
+<div class="section-title">① Entry Point</div>
+<div class="flow-section" style="display:flex;gap:10px;flex-wrap:wrap">
+  <div class="box c-green" style="flex:1;min-width:160px" data-tip="<strong>agent.py</strong><br>uvicorn entry point. Serves FastAPI on port 8000. Mounts /api router and serves frontend/index.html at /.">
+    <div class="box-badge">Python</div>
+    <div class="box-title">agent.py</div>
+    <div class="box-file">root/agent.py</div>
+    <div class="box-desc">uvicorn server entry — mounts FastAPI app, serves static frontend</div>
+  </div>
+  <div class="box c-accent" style="flex:2;min-width:220px" data-tip="<strong>frontend/index.html</strong><br>Single-page app (no framework). Drawflow 0.0.59 canvas for visual workflow building. ~1100 lines of vanilla JS.">
+    <div class="box-badge">HTML / JS</div>
+    <div class="box-title">frontend/index.html</div>
+    <div class="box-file">frontend/index.html</div>
+    <div class="box-desc">Visual canvas (Drawflow) · node palette · right-panel tabs (Config / Tools / MCPs / Domains / RAG / Keys / Feedback)</div>
+  </div>
+</div>
+
+<!-- arrow -->
+<div style="text-align:center;color:var(--muted);font-size:16px;margin:4px 0 8px">↕</div>
+
+<!-- 2. API -->
+<div class="section-title">② API Layer</div>
+<div class="flow-section">
+  <div class="box c-blue" style="width:100%" data-tip="<strong>api/routes.py</strong><br>FastAPI APIRouter. All REST endpoints: workflows CRUD, run/resume, node-types, tools, MCPs, domains, RAG docs, API keys, rejection feedback.">
+    <div class="box-badge">FastAPI</div>
+    <div class="box-title">api/routes.py</div>
+    <div class="box-file">api/routes.py</div>
+    <div class="box-desc">
+      GET/POST /workflows · POST /run · POST /run/resume<br>
+      /node-types · /tools · /mcps · /domains · /rag · /keys · /feedback/rejections
+    </div>
+  </div>
+</div>
+
+<!-- arrow -->
+<div style="text-align:center;color:var(--muted);font-size:16px;margin:4px 0 8px">↓</div>
+
+<!-- 3. Engine -->
+<div class="section-title">③ Execution Engine</div>
+<div class="flow-section" style="display:flex;flex-direction:column;gap:8px">
+
+  <!-- executor -->
+  <div class="box c-purple" style="width:100%" data-tip="<strong>engine/executor.py</strong><br>Topological sort (Kahn's algorithm) → walks the DAG. Caches per-node results keyed by run_id to support approval resume without re-running LLM nodes.">
+    <div class="box-badge">Core</div>
+    <div class="box-title">engine/executor.py</div>
+    <div class="box-file">engine/executor.py</div>
+    <div class="box-desc">execute_workflow() · topo-sort DAG · edge-port routing · in-memory state store for approval resume</div>
+  </div>
+
+  <!-- nodes row -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div class="box c-purple" style="flex:1;min-width:130px" data-tip="<strong>InputNode</strong> — passes runtime prompt to the graph.<br><strong>LLMNode</strong> — calls GPT / Claude directly.<br><strong>AgentNode</strong> — LangChain ReAct agent with tools + MCP + domain context + rejection feedback injection.">
+      <div class="box-badge">Nodes</div>
+      <div class="box-title">engine/nodes.py</div>
+      <div class="box-file">engine/nodes.py</div>
+      <div class="box-desc">Input · LLM · Agent · Tool · Condition · Approval · Output<br><span style="color:#8b5cf6">AgentNode injects rejection feedback into system prompt</span></div>
+    </div>
+    <div class="box c-purple" style="flex:1;min-width:130px" data-tip="<strong>engine/feedback_store.py</strong><br>Appends denied outputs to data/feedback/rejected.jsonl on each human denial. load_rejections() returns the 5 most recent for injection into agent prompts.">
+      <div class="box-badge">New</div>
+      <div class="box-title">engine/feedback_store.py</div>
+      <div class="box-file">engine/feedback_store.py</div>
+      <div class="box-desc">record_rejection() · load_rejections(n=5) · clear_rejections()<br>→ data/feedback/rejected.jsonl</div>
+    </div>
+    <div class="box c-purple" style="flex:1;min-width:130px" data-tip="<strong>engine/mcp_runner.py</strong><br>Detects native MCPs (Gmail SMTP, Slack Web API, Discord Webhook) vs subprocess MCPs (stdio). Routes to delivery.py for native, MultiServerMCPClient for subprocess.">
+      <div class="box-badge">MCP</div>
+      <div class="box-title">engine/mcp_runner.py</div>
+      <div class="box-file">engine/mcp_runner.py</div>
+      <div class="box-desc">_is_native() detection · get_native_mcp_tools() · get_mcp_server_configs()</div>
+    </div>
+  </div>
+
+  <!-- tools + delivery row -->
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div class="box c-orange" style="flex:1;min-width:130px" data-tip="<strong>engine/builtin_tools.py</strong><br>11 built-in LangChain Tool objects: image_gen (DALL-E), translate, classify, pdf_reader, csv_analyzer, web_fetch, news_fetch, gmail_send, discord_send, video_gen, summarize.">
+      <div class="box-badge">Tools</div>
+      <div class="box-title">engine/builtin_tools.py</div>
+      <div class="box-file">engine/builtin_tools.py</div>
+      <div class="box-desc">11 built-in tools · get_builtin_tool(id) · is_available(id)</div>
+    </div>
+    <div class="box c-orange" style="flex:1;min-width:130px" data-tip="<strong>engine/delivery.py</strong><br>Native delivery functions called by OutputNode. deliver_slack() → Slack Web API. deliver_gmail() → SMTP SSL. deliver_discord() → Webhook POST.">
+      <div class="box-badge">Delivery</div>
+      <div class="box-title">engine/delivery.py</div>
+      <div class="box-file">engine/delivery.py</div>
+      <div class="box-desc">deliver_slack() · deliver_gmail() · deliver_discord()</div>
+    </div>
+    <div class="box c-orange" style="flex:1;min-width:130px" data-tip="<strong>engine/registry.py</strong><br>User-registered custom HTTP tools and MCP servers. Reads/writes data/registry.json.">
+      <div class="box-badge">Registry</div>
+      <div class="box-title">engine/registry.py</div>
+      <div class="box-file">engine/registry.py</div>
+      <div class="box-desc">list_tools() · add_tool() · list_mcps() · add_mcp()<br>→ data/registry.json</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- arrow -->
+<div style="text-align:center;color:var(--muted);font-size:16px;margin:4px 0 8px">↓</div>
+
+<!-- 4. Domain / Context -->
+<div class="section-title">④ Domain Context Injection</div>
+<div class="flow-section" style="display:flex;gap:8px;flex-wrap:wrap">
+
+  <div class="box c-teal" style="flex:1;min-width:160px" data-tip="<strong>engine/domain_loader.py</strong><br>load_rich_context(folder) builds a formatted system-prompt block from a domain pack: brand guidelines → content policy rules → approved examples (random 3) → rejected examples (random 3 if folder exists).">
+    <div class="box-badge">Loader</div>
+    <div class="box-title">engine/domain_loader.py</div>
+    <div class="box-file">engine/domain_loader.py</div>
+    <div class="box-desc">load_rich_context() → brand guidelines + content rules + approved examples + rejected examples</div>
+  </div>
+
+  <div class="folder c-teal" style="flex:2;min-width:220px">
+    <div class="folder-label">📂 domains/marketing/</div>
+    <div class="folder-inner">
+      <div class="box c-teal" style="min-width:100px" data-tip="<strong>domain.yaml</strong><br>Domain metadata: name, description, folder paths for governance and training_data sections.">
+        <div class="box-file">domain.yaml</div>
+        <div class="box-desc">Domain metadata & paths</div>
+      </div>
+      <div class="box c-teal" style="min-width:100px" data-tip="<strong>governance/brand_guidelines.md</strong><br>Voice, tone, do/don't rules, sender-persona vocabulary, regulatory notes (CAN-SPAM, GDPR, CASL).<br><br><strong>governance/content_policy.yaml</strong><br>12 rules (error/warning severity): forbidden words, max lengths, required signals, approved claims only.">
+        <div class="box-file">governance/</div>
+        <div class="box-desc">brand_guidelines.md<br>content_policy.yaml</div>
+      </div>
+      <div class="box c-teal" style="min-width:120px" data-tip="<strong>training_data/approved/</strong><br>285%+ training examples across 5 sequence types: cold email, nurture, follow-up, break-up, booking-confirmation.<br><br><strong>training_data/rejected/</strong><br>Domain-specific rejected examples (auto-picked as negative few-shot examples).">
+        <div class="box-file">training_data/</div>
+        <div class="box-desc">approved/ (few-shot +)<br>rejected/ (few-shot −)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- arrow -->
+<div style="text-align:center;color:var(--muted);font-size:16px;margin:4px 0 8px">↓</div>
+
+<!-- 5. Data layer -->
+<div class="section-title">⑤ Data &amp; Persistence</div>
+<div class="flow-section" style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="box c-orange" style="flex:1;min-width:120px" data-tip="<strong>data/workflows/*.json</strong><br>Saved workflow graphs. Each file stores the Drawflow canvas state (nodes + edges + positions) plus sticky notes.">
+    <div class="box-file">data/workflows/</div>
+    <div class="box-title">Workflow Graphs</div>
+    <div class="box-desc">JSON files · nodes, edges, positions</div>
+  </div>
+  <div class="box c-orange" style="flex:1;min-width:120px" data-tip="<strong>data/templates/</strong><br>4 starter templates: Cold Sales Email, AI Newsletter, AI Slack Post, AI Slack Post + Image.">
+    <div class="box-file">data/templates/</div>
+    <div class="box-title">Templates</div>
+    <div class="box-desc">Starter workflow templates (JSON)</div>
+  </div>
+  <div class="box c-orange" style="flex:1;min-width:120px" data-tip="<strong>data/registry.json</strong><br>User-defined custom HTTP tools and MCP server registrations. Written by engine/registry.py.">
+    <div class="box-file">data/registry.json</div>
+    <div class="box-title">Tool / MCP Registry</div>
+    <div class="box-desc">Custom tools & MCP entries</div>
+  </div>
+  <div class="box c-orange" style="flex:1;min-width:120px" data-tip="<strong>data/api_keys.json</strong><br>Encrypted-at-rest API keys (OpenAI, NewsAPI, RunwayML, Slack, Discord, Gmail). Managed via Keys tab and engine/key_store.py.">
+    <div class="box-file">data/api_keys.json</div>
+    <div class="box-title">API Keys</div>
+    <div class="box-desc">engine/key_store.py</div>
+  </div>
+  <div class="box c-orange" style="flex:1;min-width:120px" data-tip="<strong>data/rag_docs.json</strong><br>User-uploaded RAG documents (company data, brand info). Injected as ## Company Context into every AgentNode system prompt.">
+    <div class="box-file">data/rag_docs.json</div>
+    <div class="box-title">RAG Documents</div>
+    <div class="box-desc">Company context injected into agent prompts</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:120px" data-tip="<strong>data/feedback/rejected.jsonl</strong><br>Append-only log of human-denied outputs. Each line: {timestamp, node_id, content}. Read by AgentNode to inject negative examples. Managed via Feedback tab.">
+    <div class="box-file">data/feedback/rejected.jsonl</div>
+    <div class="box-title">Rejection Log</div>
+    <div class="box-desc">Human denials → negative few-shot injection</div>
+  </div>
+</div>
+
+<!-- arrow -->
+<div style="text-align:center;color:var(--muted);font-size:16px;margin:4px 0 8px">↓</div>
+
+<!-- 6. External -->
+<div class="section-title">⑥ External Services</div>
+<div class="flow-section" style="display:flex;gap:8px;flex-wrap:wrap">
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="OpenAI GPT-4o / GPT-4o-mini / DALL-E 3 / gpt-image-1. Used by LLMNode, AgentNode, most built-in tools.">
+    <div class="box-badge">LLM</div>
+    <div class="box-title">OpenAI API</div>
+    <div class="box-desc">GPT-4o · GPT-4o-mini · DALL-E 3</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="Anthropic Claude claude-sonnet-4-6 / claude-haiku-4-5. Used by LLMNode and AgentNode when model starts with 'claude'.">
+    <div class="box-badge">LLM</div>
+    <div class="box-title">Anthropic API</div>
+    <div class="box-desc">claude-sonnet-4-6 · claude-haiku-4-5</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="Slack Web API (chat.postMessage). Configured via Slack Bot Token in Keys tab. Called natively by deliver_slack() in delivery.py.">
+    <div class="box-badge">Delivery</div>
+    <div class="box-title">Slack API</div>
+    <div class="box-desc">chat.postMessage via Bot Token</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="Discord Incoming Webhook. No bot required — just a webhook URL from Server Settings → Integrations. Called natively by deliver_discord().">
+    <div class="box-badge">Delivery</div>
+    <div class="box-title">Discord Webhook</div>
+    <div class="box-desc">POST to Incoming Webhook URL</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="Gmail SMTP SSL on port 465. Uses App Password (not OAuth). Called natively by deliver_gmail() and the gmail_send built-in tool.">
+    <div class="box-badge">Delivery</div>
+    <div class="box-title">Gmail SMTP</div>
+    <div class="box-desc">SMTP SSL port 465 · App Password</div>
+  </div>
+  <div class="box c-red" style="flex:1;min-width:110px" data-tip="User-defined MCP servers run as child processes (stdio transport). MultiServerMCPClient from langchain-mcp-adapters wraps them as LangChain tools.">
+    <div class="box-badge">MCP</div>
+    <div class="box-title">Custom MCP Servers</div>
+    <div class="box-desc">stdio subprocess · langchain-mcp-adapters</div>
+  </div>
+</div>
+
+</div><!-- end centre column -->
+
+<!-- ═══════════════════════════════════════════════
+     RIGHT COLUMN — side panels
+════════════════════════════════════════════════ -->
+<div class="side-panel">
+
+  <!-- Node types -->
+  <div class="box c-purple" style="width:100%" data-tip="All 7 node types. Each is a Python class in engine/nodes.py with an async run(inputs) method.">
+    <div class="box-badge">Node Types</div>
+    <div class="box-title" style="margin-bottom:8px">workflow nodes</div>
+    <div style="display:flex;flex-direction:column;gap:5px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">📥</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--green)">Input</div><div style="font-size:9px;color:var(--muted)">Injects run prompt</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🤖</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--blue)">LLM</div><div style="font-size:9px;color:var(--muted)">Direct GPT / Claude call</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🤖</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--teal)">Agent</div><div style="font-size:9px;color:var(--muted)">ReAct + tools + domain + feedback</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🔧</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--orange)">Tool</div><div style="font-size:9px;color:var(--muted)">Runs a built-in or custom tool</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🔀</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--purple)">Condition</div><div style="font-size:9px;color:var(--muted)">IF / ELSE IF / ELSE routing</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">🙋</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--orange)">Approval</div><div style="font-size:9px;color:var(--muted)">Human review → APPROVE / DENY<br><span style="color:#dc2626">DENY records to feedback log</span></div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:13px">📤</span>
+        <div><div style="font-size:10px;font-weight:700;color:var(--red)">Output</div><div style="font-size:9px;color:var(--muted)">Delivers via Slack / Gmail / Discord</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback loop -->
+  <div class="box" style="border-color:#dc262633;width:100%" data-tip="The human feedback loop. When an Approval node is denied, the rejected content is stored and automatically injected into future AgentNode system prompts as negative examples.">
+    <div class="box-badge" style="background:#dc262622;color:#ef4444">Feedback Loop</div>
+    <div class="box-title" style="margin-bottom:8px">Learn from Denials</div>
+    <div style="font-size:9.5px;color:var(--muted);line-height:1.7;font-family:system-ui,sans-serif">
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
+        <span style="color:#dc2626;font-weight:800;flex-shrink:0">1.</span>
+        <span>Human clicks <strong style="color:#dc2626">Deny</strong> in approval modal</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
+        <span style="color:#dc2626;font-weight:800;flex-shrink:0">2.</span>
+        <span><code style="font-size:8.5px;background:var(--surface);padding:1px 3px;border-radius:2px">record_rejection()</code> writes content to <code style="font-size:8.5px;background:var(--surface);padding:1px 3px;border-radius:2px">rejected.jsonl</code></span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
+        <span style="color:#dc2626;font-weight:800;flex-shrink:0">3.</span>
+        <span>Next agent run: <code style="font-size:8.5px;background:var(--surface);padding:1px 3px;border-radius:2px">load_rejections(5)</code> appended to system prompt</span>
+      </div>
+      <div style="display:flex;align-items:flex-start;gap:6px">
+        <span style="color:#dc2626;font-weight:800;flex-shrink:0">4.</span>
+        <span>LLM sees "do not replicate these" and adjusts output</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stack -->
+  <div class="box c-muted" style="width:100%">
+    <div class="box-badge">Tech Stack</div>
+    <div class="box-title" style="margin-bottom:7px">Dependencies</div>
+    <div style="font-size:9px;color:var(--muted);line-height:1.8;font-family:system-ui,sans-serif">
+      <div><span style="color:var(--blue)">▸</span> FastAPI 0.x + uvicorn</div>
+      <div><span style="color:var(--blue)">▸</span> LangChain 1.3.1 + LangGraph</div>
+      <div><span style="color:var(--blue)">▸</span> langchain-mcp-adapters 0.3.0</div>
+      <div><span style="color:var(--blue)">▸</span> langchain-openai + anthropic</div>
+      <div><span style="color:var(--blue)">▸</span> Drawflow 0.0.59 (canvas)</div>
+      <div><span style="color:var(--blue)">▸</span> python-yaml + python-docx</div>
+      <div><span style="color:var(--blue)">▸</span> requests (HTTP delivery)</div>
+      <div><span style="color:var(--blue)">▸</span> pypdf (PDF reader tool)</div>
+    </div>
+  </div>
+
+  <!-- Request lifecycle -->
+  <div class="box c-blue" style="width:100%">
+    <div class="box-badge">Request Flow</div>
+    <div class="box-title" style="margin-bottom:8px">Run Lifecycle</div>
+    <div style="font-size:9px;color:var(--muted);line-height:1.9;font-family:system-ui,sans-serif">
+      <div>Browser → POST /run</div>
+      <div style="padding-left:10px">↓ execute_workflow()</div>
+      <div style="padding-left:20px">↓ topo_sort()</div>
+      <div style="padding-left:20px">↓ for each node.run()</div>
+      <div style="padding-left:30px">↓ if approval_pending</div>
+      <div style="padding-left:40px">→ save state</div>
+      <div style="padding-left:40px">← return pending</div>
+      <div style="padding-left:30px">↓ POST /run/resume</div>
+      <div style="padding-left:40px">↓ restore state</div>
+      <div style="padding-left:40px">↓ record_rejection()</div>
+      <div style="padding-left:40px">↓ continue DAG</div>
+      <div style="padding-left:10px">← return result</div>
+    </div>
+  </div>
+
+</div>
+</div><!-- end main-layout -->
+
+<script>
+  const tooltip = document.getElementById('tooltip');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', e => {
+      tooltip.innerHTML = el.dataset.tip;
+      tooltip.style.display = 'block';
+    });
+    el.addEventListener('mousemove', e => {
+      const x = e.clientX + 14, y = e.clientY + 14;
+      const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+      tooltip.style.left = (x + tw > window.innerWidth ? e.clientX - tw - 14 : x) + 'px';
+      tooltip.style.top  = (y + th > window.innerHeight ? e.clientY - th - 14 : y) + 'px';
+    });
+    el.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+  });
+</script>
