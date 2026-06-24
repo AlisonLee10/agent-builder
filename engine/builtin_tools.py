@@ -3,7 +3,6 @@ Each tool requires the relevant API key in .env to function.
 """
 from __future__ import annotations
 
-import os
 from langchain_core.tools import Tool
 
 BUILTIN_TOOLS = [
@@ -50,6 +49,27 @@ BUILTIN_TOOLS = [
         "requires_key": None,
     },
     {
+        "id":           "news_fetch",
+        "name":         "News Fetch",
+        "icon":         "📰",
+        "description":  "Search and fetch recent news articles via NewsAPI",
+        "requires_key": "NEWS_API_KEY",
+    },
+    {
+        "id":           "gmail_send",
+        "name":         "Gmail Send",
+        "icon":         "📧",
+        "description":  "Send an email via Gmail using SMTP App Password",
+        "requires_key": "GMAIL_APP_PASSWORD",
+    },
+    {
+        "id":           "discord_send",
+        "name":         "Discord Send",
+        "icon":         "🎮",
+        "description":  "Post a message to Discord via an Incoming Webhook URL",
+        "requires_key": "DISCORD_WEBHOOK_URL",
+    },
+    {
         "id":           "video_gen",
         "name":         "Video Generation",
         "icon":         "🎬",
@@ -71,7 +91,10 @@ def is_available(tool_id: str) -> bool:
     if not entry:
         return False
     key = entry.get("requires_key")
-    return not key or bool(os.getenv(key))
+    if not key:
+        return True
+    from engine.key_store import get_key
+    return bool(get_key(key))
 
 
 def get_builtin_tool(tool_id: str) -> Tool | None:
@@ -82,8 +105,19 @@ def get_builtin_tool(tool_id: str) -> Tool | None:
         def _gen(prompt: str) -> str:
             from openai import OpenAI
             client = OpenAI()
-            resp = client.images.generate(model="dall-e-3", prompt=prompt, n=1, size="1024x1024")
-            return resp.data[0].url or "Image generation failed"
+            try:
+                resp = client.images.generate(model="gpt-image-1", prompt=prompt, n=1, size="1024x1024")
+                # gpt-image-1 may return base64 instead of URL
+                item = resp.data[0]
+                if getattr(item, "url", None):
+                    return item.url
+                if getattr(item, "b64_json", None):
+                    return f"data:image/png;base64,{item.b64_json}"
+            except Exception:
+                # Fall back to dall-e-2 if gpt-image-1 is unavailable on this key
+                resp = client.images.generate(model="dall-e-2", prompt=prompt, n=1, size="1024x1024")
+                return resp.data[0].url or "Image generation failed"
+            return "Image generation failed"
         return Tool(name="image_generation", func=_gen, description="Generate an image from a text prompt. Returns a URL.")
 
     if tool_id == "translate":
@@ -145,6 +179,35 @@ def get_builtin_tool(tool_id: str) -> Tool | None:
             return resp.content
         return Tool(name="csv_analyzer", func=_csv, description="Analyze CSV data. Pass the CSV text or a question about it.")
 
+    if tool_id == "news_fetch":
+        from engine.key_store import get_key
+        api_key = get_key("NEWS_API_KEY")
+        def _news(query: str) -> str:
+            import requests as _req
+            params = {
+                "q":        query,
+                "pageSize": 5,
+                "language": "en",
+                "sortBy":   "publishedAt",
+                "apiKey":   api_key,
+            }
+            try:
+                r = _req.get("https://newsapi.org/v2/everything", params=params, timeout=15)
+                if r.status_code != 200:
+                    return f"NewsAPI error {r.status_code}: {r.text}"
+                articles = r.json().get("articles", [])
+                parts = []
+                for i, a in enumerate(articles, 1):
+                    title = a.get("title", "")
+                    desc  = a.get("description", "")
+                    url   = a.get("url", "")
+                    if title and desc:
+                        parts.append(f"[{i}] {title}\n    {desc}\n    {url}")
+                return "\n\n".join(parts) if parts else "No articles found."
+            except Exception as exc:
+                return f"News fetch failed: {exc}"
+        return Tool(name="news_fetch", func=_news, description="Search recent news articles. Input: search query. Returns titles, descriptions, and URLs.")
+
     if tool_id == "web_fetch":
         def _fetch(url: str) -> str:
             import requests
@@ -168,10 +231,68 @@ def get_builtin_tool(tool_id: str) -> Tool | None:
                 return f"Fetch failed: {exc}"
         return Tool(name="web_fetch", func=_fetch, description="Fetch readable text from a URL.")
 
+    if tool_id == "gmail_send":
+        from engine.key_store import get_key as _gk
+        sender  = _gk("GMAIL_ADDRESS").strip()
+        app_pwd = _gk("GMAIL_APP_PASSWORD").strip()
+        def _gmail_send(payload: str) -> str:
+            import smtplib, json as _j
+            from email.mime.text import MIMEText
+            from email.mime.multipart import MIMEMultipart
+            try:
+                req = _j.loads(payload)
+            except Exception:
+                # Accept plain "to|subject|body" fallback
+                parts = payload.split("|", 2)
+                req = {"to": parts[0].strip(), "subject": parts[1].strip() if len(parts) > 1 else "(no subject)", "body": parts[2].strip() if len(parts) > 2 else payload}
+            to      = req.get("to", "").strip()
+            subject = req.get("subject", "(no subject)").strip()
+            body    = req.get("body", "").strip()
+            if not to:
+                return "Error: recipient address ('to') is required."
+            msg = MIMEMultipart()
+            msg["From"]    = sender
+            msg["To"]      = to
+            msg["Subject"] = subject
+            msg.attach(MIMEText(body, "plain"))
+            try:
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+                    smtp.login(sender, app_pwd)
+                    smtp.sendmail(sender, to, msg.as_string())
+                return f"Email sent successfully to {to}."
+            except Exception as exc:
+                return f"Failed to send email: {exc}"
+        return Tool(
+            name="gmail_send",
+            func=_gmail_send,
+            description=(
+                "Send an email via Gmail. "
+                'Input must be a JSON string with keys: "to" (recipient address), '
+                '"subject" (email subject), "body" (plain-text body). '
+                'Example: {"to": "alice@example.com", "subject": "Hello", "body": "Hi Alice!"}'
+            ),
+        )
+
+    if tool_id == "discord_send":
+        from engine.key_store import get_key as _gk
+        webhook_url = _gk("DISCORD_WEBHOOK_URL").strip()
+        def _discord_send(text: str) -> str:
+            import requests as _req
+            r = _req.post(webhook_url, json={"content": text}, timeout=15)
+            if r.status_code in (200, 204):
+                return "✅ Posted to Discord."
+            return f"Discord webhook error {r.status_code}: {r.text}"
+        return Tool(
+            name="discord_send",
+            func=_discord_send,
+            description="Post a message to Discord via webhook. Input: the message text to post.",
+        )
+
     if tool_id == "video_gen":
         def _video(prompt: str) -> str:
             import requests
-            api_key = os.getenv("RUNWAYML_API_KEY", "")
+            from engine.key_store import get_key
+            api_key = get_key("RUNWAYML_API_KEY")
             resp = requests.post(
                 "https://api.runwayml.com/v1/image_to_video",
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},

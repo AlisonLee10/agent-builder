@@ -90,6 +90,13 @@
     #config-empty { color: var(--muted); font-size: 12px; text-align: center; margin-top: 36px; line-height: 1.9; }
     #config-form h3 { font-size: 13px; font-weight: 700; margin-bottom: 13px; display: flex; align-items: center; gap: 5px; }
 
+    /* Condition list in config */
+    .condition-row { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+    .condition-prefix { font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--accent); background: rgba(99,102,241,.1); border-radius: 4px; padding: 2px 5px; white-space: nowrap; flex-shrink: 0; min-width: 46px; text-align: center; }
+    .condition-expr { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 5px; padding: 5px 7px; font-size: 11px; }
+    .condition-expr:focus { outline: none; border-color: var(--accent); }
+    .condition-else-label { font-size: 10px; font-weight: 700; color: var(--muted); padding: 4px 0 2px; letter-spacing: .04em; }
+
     /* Tool multiselect in config */
     .tool-check-list { display: flex; flex-direction: column; gap: 4px; }
     .tool-check { display: flex; align-items: center; gap: 7px; font-size: 12px; cursor: pointer; padding: 5px 7px; border-radius: 5px; background: var(--surface); border: 1px solid var(--border); }
@@ -157,12 +164,51 @@
     .drawflow .drawflow-node { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0; min-width: 165px; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: background .13s; }
     .drawflow .drawflow-node.selected { background: #e8e3dc; border-color: #b0a898; box-shadow: 0 2px 10px rgba(0,0,0,.13); }
     .drawflow .drawflow-node .input,
-    .drawflow .drawflow-node .output { background: var(--border) !important; border: 2px solid #fff; border-radius: 50%; width: 12px; height: 12px; }
+    .drawflow .drawflow-node .output { background: var(--border) !important; border: 2px solid #fff; border-radius: 50%; width: 12px; height: 12px; position: relative; overflow: visible; }
+    .drawflow .drawflow-node .outputs { overflow: visible; }
     .drawflow .drawflow-node .input:hover,
     .drawflow .drawflow-node .output:hover { background: var(--accent) !important; }
+    .drawflow .drawflow-node .output[data-label]::after {
+      content: attr(data-label);
+      position: absolute; right: 17px; top: 50%; transform: translateY(-50%);
+      font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+      white-space: nowrap; pointer-events: none; user-select: none;
+      background: rgba(255,255,255,.88); border-radius: 3px; padding: 1px 4px;
+      color: var(--muted);
+    }
+    .drawflow .drawflow-node .output[data-label="IF"]::after,
+    .drawflow .drawflow-node .output[data-label^="ELSE IF"]::after { color: var(--accent); }
+    .drawflow .drawflow-node .output[data-label="Approve"]::after { color: #16a34a; }
+    .drawflow .drawflow-node .output[data-label="Reject"]::after  { color: #dc2626; }
     .drawflow .connection .main-path { stroke: var(--accent); stroke-width: 2.5; }
     .df-node-head { display: flex; align-items: center; gap: 6px; padding: 8px 11px 6px; font-size: 12px; font-weight: 700; border-radius: 9px 9px 0 0; }
     .df-node-body { padding: 7px 11px 9px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--border); }
+
+    /* ── Result drawer ── */
+    #result-drawer { position: fixed; bottom: 0; right: 430px; width: 420px; background: var(--panel); border: 1px solid var(--border); border-bottom: none; border-radius: 10px 10px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,.12); z-index: 190; display: none; }
+    #result-drawer.has-result { display: block; }
+    #result-drawer-tab { display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer; user-select: none; }
+    #result-drawer-tab:hover { background: var(--surface); border-radius: 10px 10px 0 0; }
+    #result-drawer-label { font-size: 11px; font-weight: 700; flex: 1; }
+    #result-drawer-chevron { font-size: 11px; color: var(--muted); transition: transform .2s; }
+    #result-drawer.collapsed #result-drawer-chevron { transform: rotate(180deg); }
+    #result-drawer-body { padding: 10px 12px 12px; max-height: 300px; overflow-y: auto; border-top: 1px solid var(--border); }
+    #result-drawer.collapsed #result-drawer-body { display: none; }
+    #result-drawer-text { font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: var(--text); }
+
+    /* ── Sticky notes ── */
+    #sticky-container { position: absolute; inset: 0; pointer-events: none; z-index: 100; }
+    .sticky-note { position: absolute; width: 210px; min-height: 150px; border-radius: 10px; border: 1.5px solid; box-shadow: 2px 5px 16px rgba(0,0,0,.13); display: flex; flex-direction: column; pointer-events: all; }
+    .sn-header { display: flex; align-items: center; justify-content: space-between; padding: 7px 9px 5px; cursor: move; user-select: none; border-radius: 9px 9px 0 0; }
+    .sn-dot { width: 11px; height: 11px; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: transform .12s; }
+    .sn-dot:hover { transform: scale(1.25); }
+    .sn-close { background: none; border: none; cursor: pointer; font-size: 12px; opacity: .5; padding: 0 2px; line-height: 1; }
+    .sn-close:hover { opacity: 1; }
+    .sn-body { flex: 1; border: none; background: transparent; padding: 3px 10px 10px; font-size: 12px; line-height: 1.6; resize: none; outline: none; font-family: inherit; min-height: 100px; border-radius: 0 0 9px 9px; }
+
+    /* ── Approval textarea ── */
+    #approval-preview-text { width: 100%; resize: vertical; font-family: inherit; line-height: 1.7; min-height: 120px; max-height: 260px; overflow-y: auto; white-space: pre-wrap; }
+    #approval-preview-text:not([readonly]) { border-color: var(--accent) !important; }
   </style>
 </head>
 <body>
@@ -176,6 +222,7 @@
   <button class="btn btn-ghost" onclick="newWorkflow()">New</button>
   <button class="btn btn-ghost" onclick="saveWorkflow()">Save</button>
   <div class="sep"></div>
+  <button class="btn btn-ghost" onclick="addStickyNote()" title="Add sticky note">📝</button>
   <button class="btn btn-success" onclick="openRunModal()">▶ Run</button>
 </div>
 
@@ -203,6 +250,7 @@
   <!-- Canvas -->
   <div id="canvas-wrap" ondragover="allowDrop(event)" ondrop="drop(event)">
     <div id="drawflow"></div>
+    <div id="sticky-container"></div>
     <div id="sel-box"></div>
     <button id="multi-delete-btn" onclick="deleteMultiSelected()"></button>
     <div id="canvas-hint">
@@ -220,6 +268,7 @@
       <button class="rtab" onclick="switchRightTab('mcps')">MCPs</button>
       <button class="rtab" onclick="switchRightTab('domains')">Domains</button>
       <button class="rtab" onclick="switchRightTab('rag')">RAG</button>
+      <button class="rtab" onclick="switchRightTab('keys')">Keys</button>
     </div>
 
     <!-- Config -->
@@ -269,6 +318,15 @@
         Click <strong>+</strong> to copy an example into your workspace.
       </p>
       <div id="rag-examples-list"></div>
+    </div>
+
+    <!-- Keys -->
+    <div id="rtab-keys" class="rtab-content">
+      <div class="section-label" style="margin-bottom:6px">API Keys</div>
+      <p style="font-size:10px;color:var(--muted);margin-bottom:12px;line-height:1.6">
+        Keys are stored locally in <code style="font-size:9px;background:var(--surface);padding:1px 4px;border-radius:3px">data/api_keys.json</code> and never sent externally.
+      </p>
+      <div id="keys-list"></div>
     </div>
   </div>
 </div>
@@ -378,7 +436,7 @@
 <!-- Run workflow -->
 <div id="run-modal" class="modal-backdrop hidden">
   <div class="modal" style="width:500px">
-    <h2>▶ Run Workflow</h2>
+    <h2>▶ Running Workflow</h2>
     <div id="run-input-section">
       <div class="field-group"><label>Override Prompt <span style="font-weight:400;text-transform:none;color:var(--muted)">(optional — uses Input node prompt if blank)</span></label>
         <textarea id="run-prompt" rows="3" placeholder="Leave blank to use the prompt typed in the Input node…"></textarea>
@@ -386,6 +444,22 @@
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeRun()">Cancel</button>
         <button class="btn btn-success" id="run-go-btn" onclick="runWorkflow()">Run</button>
+      </div>
+    </div>
+    <div id="run-approval-section" style="display:none">
+      <div class="field-group" style="margin-bottom:4px">
+        <label style="color:#f97316">⏸ Awaiting Your Review</label>
+      </div>
+      <div id="approval-message-text" style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5"></div>
+      <textarea id="approval-preview-text" class="result-box" readonly></textarea>
+      <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:5px;margin-bottom:2px">
+        <button id="approval-edit-btn" class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="startEditApproval()">✏ Edit</button>
+        <button id="approval-finish-btn" class="btn btn-primary" style="font-size:11px;padding:4px 10px;display:none" onclick="finishEditApproval()">✓ Finish Editing</button>
+      </div>
+      <div id="approval-action-btns" class="modal-actions">
+        <button class="btn" style="background:#16a34a;color:#fff;border:none" onclick="decideApproval('approve')">✓ Approve</button>
+        <button class="btn btn-danger" onclick="decideApproval('reject')">✕ Reject</button>
+        <button class="btn btn-ghost" style="margin-left:auto" onclick="closeRun()">Cancel</button>
       </div>
     </div>
     <div id="run-result-section" style="display:none">
@@ -396,6 +470,7 @@
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeRun()">Close</button>
         <button class="btn btn-ghost" onclick="runAgain()">Run Again</button>
+        <button class="btn btn-ghost" onclick="saveResultAsJson()" title="Download result as JSON" style="margin-left:auto">⬇ Save JSON</button>
       </div>
     </div>
   </div>
@@ -406,6 +481,13 @@
 // ── State ──────────────────────────────────────────────────────────────────────
 let editor, selectedNodeId = null, currentWfId = null;
 let nodeTypes = [], toolsList = [], mcpsList = [];
+let _stickyNotes = [], _stickyColorIdx = 0, _noteDrag = null;
+const STICKY_COLORS = [
+  { bg: '#fef9c3', border: '#fde68a', text: '#713f12', dot: '#eab308' },
+  { bg: '#e0e7ff', border: '#c7d2fe', text: '#312e81', dot: '#6366f1' },
+  { bg: '#dcfce7', border: '#bbf7d0', text: '#14532d', dot: '#22c55e' },
+  { bg: '#fce7f3', border: '#fbcfe8', text: '#831843', dot: '#ec4899' },
+];
 let builtinTools = [], presetMcps = [], allDomains = { builtin: [], user: [] };
 let configuredPresetMcpId = null;
 
@@ -448,7 +530,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   initDrawflow();
   await Promise.all([
     loadNodeTypes(), loadWorkflowList(),
-    loadRegistry(), loadBuiltins(), loadDomains(), loadRag(),
+    loadRegistry(), loadBuiltins(), loadDomains(), loadRag(), loadKeys(),
   ]);
   loadTemplates();
 });
@@ -460,7 +542,11 @@ function initDrawflow() {
   editor.start();
   editor.on('nodeSelected',      id => { selectedNodeId = id;   renderConfigPanel(); });
   editor.on('nodeUnselected',    ()  => { selectedNodeId = null; clearConfigPanel(); });
-  editor.on('nodeCreated',       ()  => { updateCanvasHint(); _pushHistory(); });
+  editor.on('nodeCreated', id => {
+    updateCanvasHint(); _pushHistory();
+    const nd = editor.drawflow.drawflow.Home.data[id];
+    if (nd) labelOutputHandles(id, nd.name, nd.data);
+  });
   editor.on('nodeRemoved',       ()  => { updateCanvasHint(); _pushHistory(); });
   editor.on('connectionCreated', ()  => _pushHistory());
   editor.on('connectionRemoved', ()  => _pushHistory());
@@ -476,7 +562,7 @@ function switchLeftTab(name) {
 }
 
 // ── Right tabs ────────────────────────────────────────────────────────────────
-const RIGHT_TABS = ['config','tools','mcps','domains','rag'];
+const RIGHT_TABS = ['config','tools','mcps','domains','rag','keys'];
 function switchRightTab(name) {
   document.querySelectorAll('.rtab').forEach((b, i) => b.classList.toggle('active', RIGHT_TABS[i] === name));
   document.querySelectorAll('.rtab-content').forEach(t => t.classList.remove('active'));
@@ -543,11 +629,65 @@ function buildNodeHtml(nt, data) {
   <div class="df-node-body">${preview}</div>`;
 }
 
+function getOutputLabels(type, data) {
+  if (type === 'approval') return ['Approve', 'Reject'];
+  if (type === 'condition') {
+    try {
+      const conds = JSON.parse(data.conditions || '[]');
+      const labels = conds.map((c, i) => i === 0 ? 'IF' : `ELSE IF ${i + 1}`);
+      labels.push('ELSE');
+      return labels;
+    } catch(e) {}
+    return ['IF', 'ELSE'];
+  }
+  return [];
+}
+
+function labelOutputHandles(nodeId, type, data) {
+  const labels = getOutputLabels(type, data);
+  setTimeout(() => {
+    const nodeEl = document.getElementById(`node-${nodeId}`);
+    if (!nodeEl) return;
+    nodeEl.querySelectorAll('.output').forEach((el, i) => {
+      if (labels[i]) el.setAttribute('data-label', labels[i]);
+      else el.removeAttribute('data-label');
+    });
+  }, 0);
+}
+
+function addConditionRow() {
+  const list = document.getElementById('condition-list-rows');
+  if (!list) return;
+  const row = document.createElement('div');
+  row.className = 'condition-row';
+  row.innerHTML = `<span class="condition-prefix">ELSE IF</span>
+    <input class="condition-expr" placeholder="e.g. the text is positive">
+    <button type="button" class="icon-btn danger" onclick="this.closest('.condition-row').remove();renumberConditionRows()">✕</button>`;
+  list.appendChild(row);
+}
+
+function renumberConditionRows() {
+  document.querySelectorAll('#condition-list-rows .condition-row').forEach((row, i) => {
+    row.querySelector('.condition-prefix').textContent = i === 0 ? 'IF' : 'ELSE IF';
+    row.querySelector('.icon-btn.danger').style.visibility = i === 0 ? 'hidden' : '';
+  });
+}
+
 function getPreview(type, data) {
   if (type === 'output')    return '→ Final output';
+  if (type === 'approval')  return '🙋 Waiting for human decision';
   if (type === 'llm')       return data.model || 'gpt-4o-mini';
   if (type === 'agent')     return (data.name || 'Agent') + (data.model ? ` · ${data.model}` : '');
-  if (type === 'condition') return data.condition ? data.condition.slice(0, 28) + '…' : 'Set condition';
+  if (type === 'condition') {
+    try {
+      const conds = JSON.parse(data.conditions || '[]');
+      if (conds.length) {
+        const first = (conds[0].expr || '').slice(0, 26) || '…';
+        return `IF ${first}${conds.length > 1 ? ` +${conds.length - 1} else if` : ''} / ELSE`;
+      }
+    } catch(e) {}
+    return data.condition ? data.condition.slice(0, 28) + '…' : 'Set conditions';
+  }
   if (type === 'tool') {
     const bt = builtinTools.find(x => x.id === data.tool_id);
     const ut = toolsList.find(x => x.id === data.tool_id);
@@ -629,11 +769,39 @@ function renderConfigPanel() {
       }
       if (!builtinTools.length && !toolsList.length) html += `<div style="font-size:11px;color:var(--muted)">No tools available yet.</div>`;
       html += '</div>';
+    } else if (f.type === 'mcp_multiselect') {
+      const selectedIds = (node.data[f.key]||'').split(',').filter(Boolean);
+      html += `<div class="tool-check-list" id="cf-${f.key}">`;
+      if (mcpsList.length) {
+        for (const m of mcpsList) {
+          const chk = selectedIds.includes(m.id) ? 'checked' : '';
+          html += `<label class="tool-check"><input type="checkbox" data-id="${m.id}" ${chk}> 🔌 ${m.name}<span class="tool-check-tag" style="color:#6366f1">mcp</span></label>`;
+        }
+      } else {
+        html += `<div style="font-size:11px;color:var(--muted)">No MCP servers registered yet.</div>`;
+      }
+      html += '</div>';
     } else if (f.type === 'domain_select') {
       const all = [...allDomains.builtin, ...allDomains.user];
       html += `<select id="cf-${f.key}"><option value="">— none —</option>`;
       for (const d of all) html += `<option value="${d.id}"${node.data[f.key]===d.id?' selected':''}>${d.icon} ${d.name}</option>`;
       html += '</select>';
+    } else if (f.type === 'condition_list') {
+      let conds = [];
+      try { conds = JSON.parse(node.data[f.key] || '[]'); } catch(e) {}
+      if (!conds.length) conds = [{ label: 'if', expr: '' }];
+      html += `<div id="condition-list-rows">`;
+      conds.forEach((c, i) => {
+        const safe = (c.expr||'').replace(/"/g,'&quot;');
+        html += `<div class="condition-row">
+          <span class="condition-prefix">${i===0?'IF':'ELSE IF'}</span>
+          <input class="condition-expr" value="${safe}" placeholder="e.g. the text expresses anger">
+          <button type="button" class="icon-btn danger" ${i===0?'style="visibility:hidden"':''} onclick="this.closest('.condition-row').remove();renumberConditionRows()">✕</button>
+        </div>`;
+      });
+      html += `</div>`;
+      html += `<div class="condition-else-label">↳ ELSE — automatic last output</div>`;
+      html += `<button type="button" class="add-btn" style="margin-top:5px" onclick="addConditionRow()">＋ Add Else If</button>`;
     } else if (f.type === 'password') {
       html += `<input id="cf-${f.key}" type="password" value="${node.data[f.key]||''}" placeholder="Paste key — stored locally only" autocomplete="off">`;
     } else {
@@ -654,14 +822,32 @@ function applyConfig() {
   if (!node) return;
   const nt = nodeTypes.find(n => n.type === node.name);
   for (const f of nt.fields || []) {
-    if (f.type === 'tool_multiselect') {
+    if (f.type === 'tool_multiselect' || f.type === 'mcp_multiselect') {
       const cbs = document.querySelectorAll(`#cf-${f.key} input[type=checkbox]`);
       node.data[f.key] = [...cbs].filter(c => c.checked).map(c => c.dataset.id).join(',');
+    } else if (f.type === 'condition_list') {
+      const rows = document.querySelectorAll('#condition-list-rows .condition-row');
+      const conditions = [...rows].map((row, i) => ({
+        label: i === 0 ? 'if' : 'else_if',
+        expr:  row.querySelector('.condition-expr').value.trim(),
+      })).filter(c => c.expr);
+      if (!conditions.length) conditions.push({ label: 'if', expr: '' });
+      node.data[f.key] = JSON.stringify(conditions);
+      // Sync Drawflow output handles: one per condition + one for else
+      const needed  = conditions.length + 1;
+      const dfNode  = editor.drawflow.drawflow.Home.data[selectedNodeId];
+      const current = Object.keys(dfNode.outputs || {}).length;
+      if (needed > current)
+        for (let i = current; i < needed; i++) editor.addNodeOutput(selectedNodeId);
+      else if (needed < current)
+        for (let i = current; i > needed; i--) editor.removeNodeOutput(selectedNodeId, `output_${i}`);
     } else {
       const el = document.getElementById(`cf-${f.key}`);
       if (el) node.data[f.key] = el.value;
     }
   }
+  const finalNode = editor.drawflow.drawflow.Home.data[selectedNodeId];
+  labelOutputHandles(selectedNodeId, finalNode.name, finalNode.data);
   refreshNodeHtml(selectedNodeId);
   _pushHistory();
 }
@@ -695,6 +881,8 @@ async function loadWorkflow(id) {
   if (wf.drawflow) editor.import(wf.drawflow);
   else { editor.clearModuleSelected(); importEngineFormat(wf); }
   _histLock = false;
+  _stickyNotes = wf.drawflow?.sticky_notes || [];
+  renderStickyNotes();
   updateCanvasHint(); clearConfigPanel();
   _hist.length = 0; _histIdx = -1; _pushHistory();
 }
@@ -737,7 +925,7 @@ async function saveWorkflow() {
   const name = document.getElementById('wf-name').value.trim() || 'Untitled';
   const dfEx = editor.export();
   const { nodes, edges } = toEngineFormat(dfEx);
-  const body = { name, nodes, edges, drawflow: dfEx };
+  const body = { name, nodes, edges, drawflow: { ...dfEx, sticky_notes: _stickyNotes } };
   const url    = currentWfId ? `/api/workflows/${currentWfId}` : '/api/workflows';
   const method = currentWfId ? 'PUT' : 'POST';
   const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -754,6 +942,7 @@ function newWorkflow() {
   document.getElementById('wf-name').value = 'My Workflow';
   document.getElementById('wf-load').value = '';
   editor.clearModuleSelected();
+  _stickyNotes = []; renderStickyNotes();
   clearConfigPanel(); updateCanvasHint();
 }
 
@@ -762,9 +951,9 @@ function toEngineFormat(dfEx) {
   const nodes = [], edges = [];
   for (const [id, node] of Object.entries(data)) {
     nodes.push({ id: String(id), type: node.name, config: { ...node.data } });
-    for (const port of Object.values(node.outputs || {}))
+    for (const [portName, port] of Object.entries(node.outputs || {}))
       for (const conn of port.connections || [])
-        edges.push({ source: String(id), target: String(conn.node) });
+        edges.push({ source: String(id), target: String(conn.node), source_port: portName });
   }
   return { nodes, edges };
 }
@@ -790,6 +979,7 @@ async function loadTemplate(id) {
   editor.clearModuleSelected();
   importEngineFormat(tpl);
   _histLock = false;
+  _stickyNotes = []; renderStickyNotes();
   updateCanvasHint(); clearConfigPanel();
   _hist.length = 0; _histIdx = -1; _pushHistory();
   switchLeftTab('nodes');
@@ -797,37 +987,109 @@ async function loadTemplate(id) {
 }
 
 // ── Run workflow ──────────────────────────────────────────────────────────────
+let _runPrompt = '';
+let _approvalDecisions = {};
+let _pendingApprovalNodeId = null;
+let _runId = '';
+
 function openRunModal() {
+  _runPrompt = '';
+  _approvalDecisions = {};
+  _pendingApprovalNodeId = null;
+  _runId = '';
   document.getElementById('run-input-section').style.display = '';
+  document.getElementById('run-approval-section').style.display = 'none';
   document.getElementById('run-result-section').style.display = 'none';
   document.getElementById('run-prompt').value = '';
   document.getElementById('run-modal').classList.remove('hidden');
 }
 function closeRun()  { document.getElementById('run-modal').classList.add('hidden'); }
-function runAgain()  { document.getElementById('run-input-section').style.display = ''; document.getElementById('run-result-section').style.display = 'none'; }
+function runAgain()  {
+  _approvalDecisions = {};
+  _pendingApprovalNodeId = null;
+  _runId = '';
+  document.getElementById('run-input-section').style.display = '';
+  document.getElementById('run-approval-section').style.display = 'none';
+  document.getElementById('run-result-section').style.display = 'none';
+}
 function toggleTrace() {
   const b = document.getElementById('run-trace-box');
   b.style.display = b.style.display === 'none' ? '' : 'none';
 }
 
 async function runWorkflow() {
-  const prompt = document.getElementById('run-prompt').value.trim();
+  _runPrompt = document.getElementById('run-prompt').value.trim();
+  _approvalDecisions = {};
+  _runId = '';
+  await _executeRun();
+}
+
+async function decideApproval(decision) {
+  const editedContent = document.getElementById('approval-preview-text').value;
+  _approvalDecisions[_pendingApprovalNodeId] = { decision, edited_content: editedContent };
+  document.getElementById('run-approval-section').style.display = 'none';
+  await _executeRun();
+}
+
+function startEditApproval() {
+  const ta = document.getElementById('approval-preview-text');
+  ta.removeAttribute('readonly');
+  ta.focus();
+  document.getElementById('approval-edit-btn').style.display = 'none';
+  document.getElementById('approval-finish-btn').style.display = '';
+  document.getElementById('approval-action-btns').style.display = 'none';
+}
+
+function finishEditApproval() {
+  const ta = document.getElementById('approval-preview-text');
+  ta.setAttribute('readonly', '');
+  document.getElementById('approval-edit-btn').style.display = '';
+  document.getElementById('approval-finish-btn').style.display = 'none';
+  document.getElementById('approval-action-btns').style.display = '';
+}
+
+async function _executeRun() {
   if (!currentWfId) await saveWorkflow();
   if (!currentWfId) return;
   const btn = document.getElementById('run-go-btn');
   btn.textContent = 'Running…'; btn.disabled = true;
+  document.getElementById('run-input-section').style.display = 'none';
   const res = await fetch(`/api/workflows/${currentWfId}/run`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt: _runPrompt, approval_decisions: _approvalDecisions, run_id: _runId || '' }),
   });
   btn.textContent = 'Run'; btn.disabled = false;
-  if (!res.ok) { const e = await res.json().catch(() => ({})); return alert('Error: ' + (e.detail || res.statusText)); }
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    document.getElementById('run-input-section').style.display = '';
+    return alert('Error: ' + (e.detail || res.statusText));
+  }
   const data = await res.json();
-  document.getElementById('run-input-section').style.display = 'none';
-  document.getElementById('run-result-section').style.display = '';
-  document.getElementById('run-result-text').textContent = data.result || '(no output)';
-  document.getElementById('run-trace-box').textContent    = JSON.stringify(data.trace, null, 2);
-  document.getElementById('run-trace-box').style.display  = 'none';
+  if (data.status === 'pending_approval') {
+    _runId = data.run_id || '';
+    _pendingApprovalNodeId = data.node_id;
+    document.getElementById('approval-message-text').textContent = data.message || 'Review the content and approve or reject.';
+    const previewEl = document.getElementById('approval-preview-text');
+    previewEl.value = data.preview || '(no preview)';
+    previewEl.setAttribute('readonly', '');
+    document.getElementById('approval-edit-btn').style.display = '';
+    document.getElementById('approval-finish-btn').style.display = 'none';
+    document.getElementById('approval-action-btns').style.display = '';
+    document.getElementById('run-approval-section').style.display = '';
+  } else {
+    const result = data.result || '(no output)';
+    document.getElementById('run-result-text').textContent = result;
+    document.getElementById('run-trace-box').textContent    = JSON.stringify(data.trace, null, 2);
+    document.getElementById('run-trace-box').style.display  = 'none';
+    document.getElementById('run-result-section').style.display = '';
+    // Populate the persistent result drawer
+    const wfName = document.getElementById('wf-name').value.trim() || 'Workflow';
+    document.getElementById('result-drawer-label').textContent = `Last Result — ${wfName}`;
+    document.getElementById('result-drawer-text').textContent = result;
+    const drawer = document.getElementById('result-drawer');
+    drawer.classList.add('has-result');
+    drawer.classList.remove('collapsed');
+  }
 }
 
 // ── Built-in tools ────────────────────────────────────────────────────────────
@@ -1081,6 +1343,153 @@ async function addRagExample(exampleId) {
   showToast(`"${ex.name}" added to workspace`);
 }
 
+// ── Sticky notes ──────────────────────────────────────────────────────────────
+function addStickyNote() {
+  const n = {
+    id: Date.now().toString(),
+    x: 40 + Math.random() * 80,
+    y: 40 + Math.random() * 80,
+    colorIdx: _stickyColorIdx++ % STICKY_COLORS.length,
+    text: '',
+  };
+  _stickyNotes.push(n);
+  renderStickyNote(n);
+}
+
+function renderStickyNote(note) {
+  const c = STICKY_COLORS[note.colorIdx % STICKY_COLORS.length];
+  const el = document.createElement('div');
+  el.className = 'sticky-note';
+  el.id = `sticky-${note.id}`;
+  el.style.cssText = `left:${note.x}px;top:${note.y}px;background:${c.bg};border-color:${c.border}`;
+  el.innerHTML = `<div class="sn-header" onmousedown="startNoteD(event,'${note.id}')">
+    <span class="sn-dot" style="background:${c.dot}" title="Change colour" onclick="cycleNoteColor(event,'${note.id}')"></span>
+    <button class="sn-close" onclick="removeNote('${note.id}')">✕</button>
+  </div>
+  <textarea class="sn-body" style="color:${c.text}" placeholder="Add a note…"
+    oninput="updateNoteText('${note.id}',this.value)">${note.text.replace(/</g,'&lt;')}</textarea>`;
+  document.getElementById('sticky-container').appendChild(el);
+}
+
+function renderStickyNotes() {
+  document.getElementById('sticky-container').innerHTML = '';
+  _stickyNotes.forEach(n => renderStickyNote(n));
+}
+
+function removeNote(id) {
+  _stickyNotes = _stickyNotes.filter(n => n.id !== id);
+  document.getElementById(`sticky-${id}`)?.remove();
+}
+
+function updateNoteText(id, text) {
+  const note = _stickyNotes.find(n => n.id === id);
+  if (note) note.text = text;
+}
+
+function cycleNoteColor(e, id) {
+  e.stopPropagation();
+  const note = _stickyNotes.find(n => n.id === id);
+  if (!note) return;
+  note.colorIdx = (note.colorIdx + 1) % STICKY_COLORS.length;
+  document.getElementById(`sticky-${id}`)?.remove();
+  renderStickyNote(note);
+}
+
+function startNoteD(e, id) {
+  if (e.button !== 0) return;
+  const note = _stickyNotes.find(n => n.id === id);
+  if (!note) return;
+  _noteDrag = { id, sx: e.clientX, sy: e.clientY, ox: note.x, oy: note.y };
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+document.addEventListener('mousemove', e => {
+  if (!_noteDrag) return;
+  const note = _stickyNotes.find(n => n.id === _noteDrag.id);
+  if (!note) return;
+  note.x = _noteDrag.ox + (e.clientX - _noteDrag.sx);
+  note.y = _noteDrag.oy + (e.clientY - _noteDrag.sy);
+  const el = document.getElementById(`sticky-${note.id}`);
+  if (el) { el.style.left = note.x + 'px'; el.style.top = note.y + 'px'; }
+});
+document.addEventListener('mouseup', () => { _noteDrag = null; });
+
+// ── Result drawer ─────────────────────────────────────────────────────────────
+function toggleResultDrawer() {
+  document.getElementById('result-drawer').classList.toggle('collapsed');
+}
+
+// ── Save result as JSON ────────────────────────────────────────────────────────
+function saveResultAsJson() {
+  const result = document.getElementById('run-result-text').textContent;
+  const traceText = document.getElementById('run-trace-box').textContent;
+  let trace = {};
+  try { trace = JSON.parse(traceText); } catch(e) {}
+  const data = {
+    workflow: document.getElementById('wf-name').value.trim() || 'Untitled',
+    generated_at: new Date().toISOString(),
+    result,
+    trace,
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${data.workflow.replace(/\s+/g,'_')}_${Date.now()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── API Keys ──────────────────────────────────────────────────────────────────
+async function loadKeys() {
+  const keys = await fetch('/api/keys').then(r => r.json());
+  renderKeys(keys);
+}
+
+function renderKeys(keys) {
+  const el = document.getElementById('keys-list');
+  el.innerHTML = keys.map(k => `
+    <div class="reg-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:9px 10px">
+      <div style="display:flex;align-items:center;gap:7px">
+        <span style="font-size:15px">${k.icon}</span>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700">${k.label}</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.4">${k.description}</div>
+        </div>
+        <span class="tag ${k.is_set ? 'tag-on' : 'tag-off'}" id="key-status-${k.env}">${k.is_set ? 'set' : 'not set'}</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <input type="password" id="key-input-${k.env}" placeholder="${k.is_set ? '••••••••••••  (already set)' : 'Paste API key…'}"
+          style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:5px;padding:5px 8px;font-size:11px">
+        <button class="btn btn-primary" style="padding:5px 10px;font-size:11px" onclick="saveKey('${k.env}')">Save</button>
+        ${k.is_set ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px" onclick="removeKey('${k.env}')">✕</button>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+async function saveKey(env) {
+  const input = document.getElementById(`key-input-${env}`);
+  const value = input.value.trim();
+  if (!value) return;
+  await fetch('/api/keys', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ env, value }),
+  });
+  input.value = '';
+  input.placeholder = '••••••••••••  (already set)';
+  await loadKeys();
+  showToast('Key saved');
+  loadBuiltins(); // refresh "ready / needs key" badges
+}
+
+async function removeKey(env) {
+  await fetch(`/api/keys/${env}`, { method: 'DELETE' });
+  await loadKeys();
+  showToast('Key removed');
+  loadBuiltins();
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.createElement('div');
@@ -1090,9 +1499,10 @@ function showToast(msg) {
   setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(), 400); }, 1800);
 }
 
-document.querySelectorAll('.modal-backdrop').forEach(el =>
-  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); })
-);
+document.querySelectorAll('.modal-backdrop').forEach(el => {
+  if (el.id === 'run-modal') return; // run modal must never close on outside click
+  el.addEventListener('click', e => { if (e.target === el) el.classList.add('hidden'); });
+});
 document.addEventListener('keydown', e => {
   const typing = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName);
   // Undo / Redo — works even while typing is not active
@@ -1228,5 +1638,17 @@ document.addEventListener('mousemove', e => {
     `translate(${editor.canvas_x}px, ${editor.canvas_y}px) scale(${editor.zoom})`;
 });
 </script>
+
+<!-- Result drawer -->
+<div id="result-drawer">
+  <div id="result-drawer-tab" onclick="toggleResultDrawer()">
+    <span style="font-size:14px">✦</span>
+    <span id="result-drawer-label">Last Result</span>
+    <span id="result-drawer-chevron">▲</span>
+  </div>
+  <div id="result-drawer-body">
+    <div id="result-drawer-text"></div>
+  </div>
+</div>
 </body>
 </html>

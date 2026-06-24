@@ -1,0 +1,114 @@
+{
+  "id": "ai_slack_post_image",
+  "name": "AI Future Slack Post + Image",
+  "description": "Same as AI Future Slack Post but also generates a matching image with DALL-E and sends both to your Slack channel",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": { "prompt": "Write a Slack marketing post about FlowAI with an AI-generated image" }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Marketing Post + Image Writer",
+        "model": "gpt-4o",
+        "tool_ids": "news_fetch,image_gen",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "You are a marketing copywriter for FlowAI. Your job is to write a Slack post AND generate a matching visual image.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer\n\nSteps:\n1. Use news_fetch to search for 'AI productivity 2025' and 'future of work AI trends'.\n2. Write a Slack post tying 1-2 real AI trends to FlowAI's value (max 200 words, Slack markdown: *bold*, _italic_, • bullets, end with a CTA).\n3. Call image_gen with a prompt like: 'A sleek, modern illustration of an AI-powered productivity workspace, futuristic minimal design, soft blue and white tones, professional atmosphere' — or adapt to match your post theme.\n\nReturn your response in this exact format (two sections separated by a blank line):\n\nPOST:\n<the full Slack post text>\n\nIMAGE:\n<the image URL returned by image_gen>\n\nDo not add any other commentary."
+      }
+    },
+    {
+      "id": "3",
+      "type": "condition",
+      "config": {
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The POST section of the content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "approval",
+      "config": {
+        "message": "Review the FlowAI Slack post and image below. Approve to post both to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "5",
+      "type": "agent",
+      "config": {
+        "name": "Slack Formatter",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "You receive a response with a POST section and an IMAGE section.\n\nExtract both and return them combined as a single Slack-ready message in this format:\n<post text>\n\n<image URL>\n\nReturn ONLY the combined text. No preamble, no labels, no commentary."
+      }
+    },
+    {
+      "id": "6",
+      "type": "output",
+      "config": { "delivery": "slack" }
+    },
+    {
+      "id": "7",
+      "type": "output",
+      "config": { "delivery": "none" }
+    },
+    {
+      "id": "8",
+      "type": "agent",
+      "config": {
+        "name": "Post + Image Rewriter",
+        "model": "gpt-4o",
+        "tool_ids": "image_gen",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "The Slack post was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so it clearly connects to concrete upcoming AI developments, and generate a new matching image.\n\nCompany: FlowAI — AI productivity software, 'Work less. Flow more.', 2 hrs/day saved, 10k+ users. Voice: direct, peer-to-peer.\n\nSteps:\n1. Rewrite the post (max 200 words, *bold*, _italic_, • bullets, CTA at the end, must reference near-future AI trends).\n2. Call image_gen with a suitable prompt for the revised content.\n\nReturn in this exact format:\n\nPOST:\n<revised Slack post text>\n\nIMAGE:\n<image URL from image_gen>\n\nNo other commentary."
+      }
+    },
+    {
+      "id": "9",
+      "type": "approval",
+      "config": {
+        "message": "Review the rewritten Slack post and image. Approve to post both to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "10",
+      "type": "agent",
+      "config": {
+        "name": "Slack Formatter (Rewrite)",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "You receive a response with a POST section and an IMAGE section.\n\nExtract both and return them combined as a single Slack-ready message:\n<post text>\n\n<image URL>\n\nReturn ONLY the combined text. No preamble, no labels, no commentary."
+      }
+    },
+    {
+      "id": "11",
+      "type": "output",
+      "config": { "delivery": "slack" }
+    },
+    {
+      "id": "12",
+      "type": "output",
+      "config": { "delivery": "none" }
+    }
+  ],
+  "edges": [
+    {"source": "1",  "target": "2"},
+    {"source": "2",  "target": "3"},
+    {"source": "3",  "target": "4",  "source_port": "output_1"},
+    {"source": "3",  "target": "8",  "source_port": "output_2"},
+    {"source": "4",  "target": "5",  "source_port": "output_1"},
+    {"source": "4",  "target": "7",  "source_port": "output_2"},
+    {"source": "5",  "target": "6"},
+    {"source": "8",  "target": "9"},
+    {"source": "9",  "target": "10", "source_port": "output_1"},
+    {"source": "9",  "target": "12", "source_port": "output_2"},
+    {"source": "10", "target": "11"}
+  ]
+}

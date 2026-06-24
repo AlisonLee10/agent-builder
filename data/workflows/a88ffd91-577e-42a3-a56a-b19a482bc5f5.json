@@ -1,0 +1,277 @@
+{
+  "id": "a88ffd91-577e-42a3-a56a-b19a482bc5f5",
+  "name": "Marketing Post \u2192 Slack",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "https://ideatec.co.kr"
+      }
+    },
+    {
+      "id": "2",
+      "type": "tool",
+      "config": {
+        "tool_id": "web_fetch"
+      }
+    },
+    {
+      "id": "3",
+      "type": "agent",
+      "config": {
+        "name": "Marketing Copywriter",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "email",
+        "instructions": "You are a marketing copywriter. Based on the company information provided, write a compelling Slack marketing post.\n\nThe post should:\n- Open with a strong hook (one punchy sentence)\n- Highlight what the company does and its key value proposition\n- Include 2\u20133 specific benefits or differentiators\n- End with a clear call-to-action\n- Use Slack markdown (*bold*, _italic_, bullet points with \u2022)\n- Stay under 280 words \u2014 concise and engaging\n- Sound human and conversational, not corporate\n\nReturn ONLY the post text, ready to paste into Slack. No extra commentary."
+      }
+    },
+    {
+      "id": "4",
+      "type": "approval",
+      "config": {
+        "message": "Review the marketing post below before it goes to Slack. Approve to send, or reject to rewrite."
+      }
+    },
+    {
+      "id": "5",
+      "type": "agent",
+      "config": {
+        "name": "Slack Poster",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "5564a81a-3348-4f26-a025-bc9f016a9b82",
+        "domain_id": "",
+        "instructions": "You are a Slack posting assistant. Your only job is to post the marketing content you receive to Slack using the Slack MCP tool.\n\nPost the exact text you received as input \u2014 do not rewrite, summarize, or modify it.\nUse the send_message or create_message Slack tool to post to the configured channel.\nAfter posting, confirm with: 'Posted to Slack successfully.'"
+      }
+    },
+    {
+      "id": "6",
+      "type": "output",
+      "config": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "1",
+      "target": "2",
+      "source_port": "output_1"
+    },
+    {
+      "source": "2",
+      "target": "3",
+      "source_port": "output_1"
+    },
+    {
+      "source": "3",
+      "target": "4",
+      "source_port": "output_1"
+    },
+    {
+      "source": "4",
+      "target": "5",
+      "source_port": "output_1"
+    },
+    {
+      "source": "5",
+      "target": "6",
+      "source_port": "output_1"
+    }
+  ],
+  "drawflow": {
+    "drawflow": {
+      "Home": {
+        "data": {
+          "1": {
+            "id": 1,
+            "name": "input",
+            "data": {
+              "prompt": "https://ideatec.co.kr"
+            },
+            "class": "input",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">https://ideatec.co.kr</textarea>\n    </div>",
+            "typenode": false,
+            "inputs": {},
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 80
+          },
+          "2": {
+            "id": 2,
+            "name": "tool",
+            "data": {
+              "tool_id": "web_fetch"
+            },
+            "class": "tool",
+            "html": "<div class=\"df-node-head\" style=\"background:#f59e0b22;border-bottom:2px solid #f59e0b\">\n    <span>\ud83d\udd27</span><span>Tool</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\udd17 Web Fetch</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "1",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 310,
+            "pos_y": 80
+          },
+          "3": {
+            "id": 3,
+            "name": "agent",
+            "data": {
+              "name": "Marketing Copywriter",
+              "model": "gpt-4o",
+              "tool_ids": "",
+              "mcp_ids": "",
+              "domain_id": "email",
+              "instructions": "You are a marketing copywriter. Based on the company information provided, write a compelling Slack marketing post.\n\nThe post should:\n- Open with a strong hook (one punchy sentence)\n- Highlight what the company does and its key value proposition\n- Include 2\u20133 specific benefits or differentiators\n- End with a clear call-to-action\n- Use Slack markdown (*bold*, _italic_, bullet points with \u2022)\n- Stay under 280 words \u2014 concise and engaging\n- Sound human and conversational, not corporate\n\nReturn ONLY the post text, ready to paste into Slack. No extra commentary."
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Marketing Copywriter \u00b7 gpt-4o</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 540,
+            "pos_y": 80
+          },
+          "4": {
+            "id": 4,
+            "name": "approval",
+            "data": {
+              "message": "Review the marketing post below before it goes to Slack. Approve to send, or reject to rewrite."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "5",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 240
+          },
+          "5": {
+            "id": 5,
+            "name": "agent",
+            "data": {
+              "name": "Slack Poster",
+              "model": "gpt-4o",
+              "tool_ids": "",
+              "mcp_ids": "5564a81a-3348-4f26-a025-bc9f016a9b82",
+              "domain_id": "",
+              "instructions": "You are a Slack posting assistant. Your only job is to post the marketing content you receive to Slack using the Slack MCP tool.\n\nPost the exact text you received as input \u2014 do not rewrite, summarize, or modify it.\nUse the send_message or create_message Slack tool to post to the configured channel.\nAfter posting, confirm with: 'Posted to Slack successfully.'"
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Slack Poster \u00b7 gpt-4o</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "6",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 310,
+            "pos_y": 240
+          },
+          "6": {
+            "id": 6,
+            "name": "output",
+            "data": {},
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "5",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 540,
+            "pos_y": 240
+          }
+        }
+      }
+    },
+    "sticky_notes": []
+  }
+}

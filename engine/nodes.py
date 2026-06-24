@@ -24,11 +24,14 @@ class InputNode(Node):
 
 class LLMNode(Node):
     async def run(self, inputs: dict[str, Any]) -> Any:
+        from datetime import datetime
         model       = self.config.get("model", "gpt-4o-mini")
         system_prompt = self.config.get("system_prompt", "You are a helpful assistant.")
         temperature = float(self.config.get("temperature", 0.7))
         api_key     = self.config.get("api_key", "").strip() or None
         user_input  = str(inputs.get("input", ""))
+        now = datetime.now().strftime("%A, %B %d, %Y at %I:%M %p")
+        system_prompt = f"Today is {now}.\n\n{system_prompt}"
 
         if model.startswith("claude"):
             import anthropic
@@ -70,24 +73,79 @@ class ToolNode(Node):
 
 class ConditionNode(Node):
     async def run(self, inputs: dict[str, Any]) -> Any:
+        import json as _j
         text = str(inputs.get("input", ""))
-        condition = self.config.get("condition", "")
-        if not condition:
-            return {"output": text, "route": "true"}
+
+        # Parse conditions list; fall back to legacy single-condition field
+        raw = self.config.get("conditions", "[]")
+        try:
+            conditions = _j.loads(raw) if isinstance(raw, str) else raw
+        except Exception:
+            conditions = []
+        if not conditions:
+            legacy = self.config.get("condition", "").strip()
+            conditions = [{"label": "if", "expr": legacy}] if legacy else []
+
+        if not conditions:
+            return {"output": text, "route_port": "output_1"}
+
         from langchain_openai import ChatOpenAI
         from langchain_core.messages import HumanMessage, SystemMessage
         llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-        response = await llm.ainvoke([
-            SystemMessage(content="Answer ONLY 'true' or 'false'. No explanation."),
-            HumanMessage(content=f"Condition: {condition}\n\nInput: {text}"),
-        ])
-        route = "true" if "true" in response.content.lower() else "false"
-        return {"output": text, "route": route}
+
+        for i, cond in enumerate(conditions):
+            expr = cond.get("expr", "").strip()
+            if not expr:
+                continue
+            resp = await llm.ainvoke([
+                SystemMessage(content="Answer ONLY 'true' or 'false'. No explanation."),
+                HumanMessage(content=f"Condition: {expr}\n\nInput: {text}"),
+            ])
+            if "true" in resp.content.strip().lower():
+                return {"output": text, "route_port": f"output_{i + 1}"}
+
+        # No condition matched → else branch (last output port)
+        return {"output": text, "route_port": f"output_{len(conditions) + 1}"}
+
+
+class ApprovalNode(Node):
+    async def run(self, inputs: dict[str, Any]) -> Any:
+        text = str(inputs.get("input", ""))
+        raw = inputs.get("__decision__", "")
+        # Accept either a plain string ("approve"/"reject") or a dict with edited content
+        if isinstance(raw, dict):
+            decision = raw.get("decision", "").strip().lower()
+            text = raw.get("edited_content") or text
+        else:
+            decision = str(raw).strip().lower()
+        if decision == "approve":
+            return {"output": text, "route_port": "output_1"}
+        if decision == "reject":
+            return {"output": text, "route_port": "output_2"}
+        return {
+            "__approval_pending__": True,
+            "node_id": self.node_id,
+            "preview": text,
+            "message": self.config.get("message", "Please review the content and choose to approve or reject."),
+        }
 
 
 class OutputNode(Node):
     async def run(self, inputs: dict[str, Any]) -> Any:
-        return inputs.get("input", "")
+        text = str(inputs.get("input", ""))
+        delivery = self.config.get("delivery", "none")
+        if delivery == "slack":
+            from engine.delivery import deliver_slack
+            deliver_slack(text)
+        elif delivery == "gmail":
+            from engine.delivery import deliver_gmail
+            recipient = self.config.get("recipient", "").strip()
+            subject   = self.config.get("subject", "").strip()
+            deliver_gmail(text, recipient, subject)
+        elif delivery == "discord":
+            from engine.delivery import deliver_discord
+            deliver_discord(text)
+        return text
 
 
 class AgentNode(Node):
@@ -99,18 +157,20 @@ class AgentNode(Node):
         model        = self.config.get("model", "gpt-4o-mini")
         domain_id    = self.config.get("domain_id", "")
 
-        # tool_ids stored as comma-separated string or list
-        raw_ids = self.config.get("tool_ids", "")
-        tool_ids: list[str] = (
-            [t.strip() for t in raw_ids.split(",") if t.strip()]
-            if isinstance(raw_ids, str)
-            else [str(t) for t in raw_ids if t]
-        )
+        def _parse_ids(raw: Any) -> list[str]:
+            if isinstance(raw, str):
+                return [x.strip() for x in raw.split(",") if x.strip()]
+            return [str(x) for x in raw if x]
+
+        tool_ids = _parse_ids(self.config.get("tool_ids", ""))
+        mcp_ids  = _parse_ids(self.config.get("mcp_ids",  ""))
 
         user_input = str(inputs.get("input", ""))
 
-        # Build system prompt: identity + instructions, then domain context, then RAG
-        system = f"You are {name}. {instructions}"
+        # Build system prompt: date + identity + instructions, then domain context, then RAG
+        from datetime import datetime
+        now = datetime.now().strftime("%A, %B %d, %Y at %I:%M %p")
+        system = f"Today is {now}.\n\nYou are {name}. {instructions}"
         if domain_id:
             ctx = _load_domain_context(domain_id)
             if ctx:
@@ -119,7 +179,7 @@ class AgentNode(Node):
         if rag:
             system = f"{system}\n\n## Company Context\n\n{rag}"
 
-        # Collect LangChain tools
+        # Collect built-in / HTTP tools
         from engine.builtin_tools import get_builtin_tool
         from engine.registry import get_tool_instance
         from langchain_core.tools import Tool as LCTool
@@ -130,6 +190,30 @@ class AgentNode(Node):
             if isinstance(t, LCTool):
                 lc_tools.append(t)
 
+        # Run inside MCP context if any MCP servers are selected
+        from engine.mcp_runner import get_mcp_server_configs, get_native_mcp_tools
+        mcp_configs   = get_mcp_server_configs(mcp_ids)
+        lc_tools      = lc_tools + get_native_mcp_tools(mcp_ids)
+
+        if mcp_configs:
+            from langchain_mcp_adapters.client import MultiServerMCPClient
+            try:
+                mcp_client = MultiServerMCPClient(mcp_configs)
+                mcp_tools = await mcp_client.get_tools()
+            except BaseException as exc:
+                import traceback, sys
+                traceback.print_exc(file=sys.stderr)
+                root = exc
+                while hasattr(root, "exceptions") and root.exceptions:
+                    root = root.exceptions[0]
+                raise RuntimeError(
+                    f"MCP server failed to start ({type(root).__name__}): {root}"
+                ) from root
+            return await self._invoke(model, system, user_input, lc_tools + mcp_tools)
+        else:
+            return await self._invoke(model, system, user_input, lc_tools)
+
+    async def _invoke(self, model: str, system: str, user_input: str, lc_tools: list) -> Any:
         if not lc_tools:
             if model.startswith("claude"):
                 import anthropic
@@ -147,21 +231,21 @@ class AgentNode(Node):
                 resp = await llm.ainvoke([SystemMessage(content=system), HumanMessage(content=user_input)])
                 return resp.content
 
-        # Agent with tools
+        # Agent with tools — use LangChain 1.x create_agent (backed by LangGraph)
+        from langchain.agents import create_agent
         from langchain_openai import ChatOpenAI
-        from langchain.agents import create_tool_calling_agent, AgentExecutor
-        from langchain_core.prompts import ChatPromptTemplate
+        from langchain_core.messages import HumanMessage
 
-        llm = ChatOpenAI(model=model, temperature=0.7)
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system),
-            ("human", "{input}"),
-            ("placeholder", "{agent_scratchpad}"),
-        ])
-        agent    = create_tool_calling_agent(llm, lc_tools, prompt)
-        executor = AgentExecutor(agent=agent, tools=lc_tools, max_iterations=6, verbose=False)
-        result   = await asyncio.to_thread(executor.invoke, {"input": user_input})
-        return result.get("output", "")
+        llm    = ChatOpenAI(model=model, temperature=0.7)
+        agent  = create_agent(llm, lc_tools, system_prompt=system)
+        result = await agent.ainvoke({"messages": [HumanMessage(content=user_input)]})
+
+        # The final AI reply is the last non-tool-call message
+        for msg in reversed(result.get("messages", [])):
+            content = getattr(msg, "content", None)
+            if content and not getattr(msg, "tool_calls", None):
+                return content if isinstance(content, str) else str(content)
+        return ""
 
 
 def _load_domain_context(domain_id: str) -> str:
@@ -217,12 +301,13 @@ def _load_rag_context() -> str:
 
 
 NODE_TYPE_MAP: dict[str, type[Node]] = {
-    "input":     InputNode,
-    "llm":       LLMNode,
-    "agent":     AgentNode,
-    "tool":      ToolNode,
+    "input":    InputNode,
+    "llm":      LLMNode,
+    "agent":    AgentNode,
+    "tool":     ToolNode,
     "condition": ConditionNode,
-    "output":    OutputNode,
+    "approval": ApprovalNode,
+    "output":   OutputNode,
 }
 
 # Schema consumed by the frontend to render the node palette and config panels.
@@ -297,10 +382,10 @@ NODE_TYPE_SCHEMA = [
         "outputs": 2,
         "fields": [
             {
-                "key": "condition",
-                "label": "Condition (plain English)",
-                "type": "text",
-                "default": "",
+                "key": "conditions",
+                "label": "Conditions",
+                "type": "condition_list",
+                "default": '[{"label":"if","expr":""}]',
             },
         ],
     },
@@ -319,8 +404,25 @@ NODE_TYPE_SCHEMA = [
                 "options": ["gpt-4o", "gpt-4o-mini", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
                 "default": "gpt-4o-mini",
             },
-            {"key": "tool_ids",   "label": "Tools",   "type": "tool_multiselect"},
-            {"key": "domain_id",  "label": "Domain",  "type": "domain_select"},
+            {"key": "tool_ids",  "label": "Tools",       "type": "tool_multiselect"},
+            {"key": "mcp_ids",   "label": "MCP Servers", "type": "mcp_multiselect"},
+            {"key": "domain_id", "label": "Domain",      "type": "domain_select"},
+        ],
+    },
+    {
+        "type": "approval",
+        "label": "Human Approval",
+        "icon": "🙋",
+        "color": "#f97316",
+        "inputs": 1,
+        "outputs": 2,
+        "fields": [
+            {
+                "key": "message",
+                "label": "Review Prompt",
+                "type": "textarea",
+                "default": "Please review the content above and choose to approve or reject.",
+            },
         ],
     },
     {
@@ -330,6 +432,26 @@ NODE_TYPE_SCHEMA = [
         "color": "#ef4444",
         "inputs": 1,
         "outputs": 0,
-        "fields": [],
+        "fields": [
+            {
+                "key": "delivery",
+                "label": "Deliver output to",
+                "type": "select",
+                "options": ["none", "slack", "gmail", "discord"],
+                "default": "none",
+            },
+            {
+                "key": "recipient",
+                "label": "Recipient email (Gmail only)",
+                "type": "text",
+                "default": "",
+            },
+            {
+                "key": "subject",
+                "label": "Email subject (Gmail only)",
+                "type": "text",
+                "default": "Workflow Output",
+            },
+        ],
     },
 ]

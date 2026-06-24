@@ -1,0 +1,53 @@
+{
+  "id": "cold_sales_email",
+  "name": "Cold Sales Email",
+  "description": "Writes a short, personalised cold sales email strictly following the Email domain ruleset — word limits, forbidden phrases, signal-based opener, one CTA",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "Prospect: Sarah Kim, Head of Marketing at Notion. Signal: Notion just announced a new AI feature last week. Sender: Account Executive at FlowAI, selling AI productivity software. Goal: book a 15-minute call."
+      }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Cold Email Writer",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "email",
+        "instructions": "You are a cold email copywriter. Write ONE cold sales email based on the prospect information provided.\n\nYou MUST follow every rule below — these are hard constraints, not suggestions:\n\n1. SUBJECT LINE: Maximum 50 characters. Must be specific to the prospect or signal. Never generic.\n2. OPENER: Reference the specific signal mentioned (product launch, funding, job change, published article, etc.). Never open with 'I hope this email finds you well', 'My name is', 'I wanted to reach out', or any generic greeting.\n3. BODY LENGTH: Cold email body must be under 125 words total. Count carefully.\n4. PERSONALISATION: Include the prospect's first name or company name at least once.\n5. CTA: Exactly one call-to-action. Make it low-friction (e.g. '15-minute call?' or 'Worth a quick chat?'). Never more than one ask.\n6. FORBIDDEN WORDS: Never use — revolutionary, game-changer, disruptive, world-class, best-in-class, synergy, paradigm shift, cutting-edge, next-generation, FREE, URGENT, ACT FAST.\n7. TONE: Peer-to-peer. Direct. Human. Not corporate, not salesy.\n8. STATISTICS: Only use figures explicitly mentioned in the input. Do not invent stats.\n\nReturn the email in this exact format:\nSubject: <subject line>\n\n<email body>"
+      }
+    },
+    {
+      "id": "3",
+      "type": "approval",
+      "config": {
+        "message": "Review the cold email below. Check: subject ≤50 chars, body ≤125 words, one CTA, signal-based opener, no buzzwords. Approve to send, or edit and approve."
+      }
+    },
+    {
+      "id": "4",
+      "type": "output",
+      "config": {
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "Cold Email Draft"
+      }
+    },
+    {
+      "id": "5",
+      "type": "output",
+      "config": { "delivery": "none" }
+    }
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3"},
+    {"source": "3", "target": "4", "source_port": "output_1"},
+    {"source": "3", "target": "5", "source_port": "output_2"}
+  ]
+}

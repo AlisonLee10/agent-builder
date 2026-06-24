@@ -1,0 +1,422 @@
+{
+  "id": "3e029b7f-6445-43e3-843d-99062a8429ac",
+  "name": "Customer Support Reply",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "Write a email newsletter about AI in future and send it to dkvowfu@gmail.com from yesol7981@gmail.com. The content should be in Korean."
+      }
+    },
+    {
+      "id": "5",
+      "type": "agent",
+      "config": {
+        "name": "My Agent",
+        "instructions": "Review the generated content and edit it so the topic is about AI in future.",
+        "model": "gpt-4o-mini",
+        "tool_ids": "",
+        "domain_id": ""
+      }
+    },
+    {
+      "id": "6",
+      "type": "tool",
+      "config": {
+        "tool_id": "web_fetch"
+      }
+    },
+    {
+      "id": "7",
+      "type": "llm",
+      "config": {
+        "model": "gpt-4o-mini",
+        "system_prompt": "You are a professional email newsletter writer. Generate a email newsletter about the prompted topic based on the relevant information.",
+        "temperature": "0.7",
+        "api_key": "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"
+      }
+    },
+    {
+      "id": "8",
+      "type": "tool",
+      "config": {
+        "tool_id": ""
+      }
+    },
+    {
+      "id": "9",
+      "type": "condition",
+      "config": {
+        "conditions": "[{\"label\":\"if\",\"expr\":\"If the content is not based on AI in future\"}]"
+      }
+    },
+    {
+      "id": "11",
+      "type": "approval",
+      "config": {
+        "message": "Please review the content above and choose to approve or reject."
+      }
+    },
+    {
+      "id": "12",
+      "type": "approval",
+      "config": {
+        "message": "Please review the content above and choose to approve or reject."
+      }
+    },
+    {
+      "id": "13",
+      "type": "output",
+      "config": {}
+    }
+  ],
+  "edges": [
+    {
+      "source": "1",
+      "target": "6",
+      "source_port": "output_1"
+    },
+    {
+      "source": "5",
+      "target": "12",
+      "source_port": "output_1"
+    },
+    {
+      "source": "6",
+      "target": "7",
+      "source_port": "output_1"
+    },
+    {
+      "source": "7",
+      "target": "8",
+      "source_port": "output_1"
+    },
+    {
+      "source": "8",
+      "target": "9",
+      "source_port": "output_1"
+    },
+    {
+      "source": "9",
+      "target": "5",
+      "source_port": "output_1"
+    },
+    {
+      "source": "9",
+      "target": "11",
+      "source_port": "output_2"
+    },
+    {
+      "source": "11",
+      "target": "13",
+      "source_port": "output_1"
+    },
+    {
+      "source": "12",
+      "target": "13",
+      "source_port": "output_1"
+    }
+  ],
+  "drawflow": {
+    "drawflow": {
+      "Home": {
+        "data": {
+          "1": {
+            "id": 1,
+            "name": "input",
+            "data": {
+              "prompt": "Write a email newsletter about AI in future and send it to dkvowfu@gmail.com from yesol7981@gmail.com. The content should be in Korean."
+            },
+            "class": "input",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Customer email: 'I placed an order 3 weeks ago and still haven't received it. The tracking hasn't updated in 10 days. This is completely unacceptable \u2014 I need this resolved immediately or I want a full refund.'</textarea>\n    </div>",
+            "typenode": false,
+            "inputs": {},
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "6",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 65,
+            "pos_y": 37
+          },
+          "5": {
+            "id": 5,
+            "name": "agent",
+            "data": {
+              "name": "My Agent",
+              "instructions": "Review the generated content and edit it so the topic is about AI in future.",
+              "model": "gpt-4o-mini",
+              "tool_ids": "",
+              "domain_id": ""
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">My Agent \u00b7 gpt-4o-mini</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "9",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "12",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 1309,
+            "pos_y": 53
+          },
+          "6": {
+            "id": 6,
+            "name": "tool",
+            "data": {
+              "tool_id": "web_fetch"
+            },
+            "class": "tool",
+            "html": "<div class=\"df-node-head\" style=\"background:#f59e0b22;border-bottom:2px solid #f59e0b\">\n    <span>\ud83d\udd27</span><span>Tool</span>\n  </div>\n  <div class=\"df-node-body\">Select a tool</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "1",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "7",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 323,
+            "pos_y": 98.23076923076923
+          },
+          "7": {
+            "id": 7,
+            "name": "llm",
+            "data": {
+              "model": "gpt-4o-mini",
+              "system_prompt": "You are a professional email newsletter writer. Generate a email newsletter about the prompted topic based on the relevant information.",
+              "temperature": "0.7",
+              "api_key": "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"
+            },
+            "class": "llm",
+            "html": "<div class=\"df-node-head\" style=\"background:#3b82f622;border-bottom:2px solid #3b82f6\">\n    <span>\ud83e\udd16</span><span>LLM</span>\n  </div>\n  <div class=\"df-node-body\">gpt-4o-mini</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "6",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "8",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 562.2307692307693,
+            "pos_y": 106
+          },
+          "8": {
+            "id": 8,
+            "name": "tool",
+            "data": {
+              "tool_id": ""
+            },
+            "class": "tool",
+            "html": "<div class=\"df-node-head\" style=\"background:#f59e0b22;border-bottom:2px solid #f59e0b\">\n    <span>\ud83d\udd27</span><span>Tool</span>\n  </div>\n  <div class=\"df-node-body\">Select a tool</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "7",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "9",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 803.0769230769231,
+            "pos_y": 105
+          },
+          "9": {
+            "id": 9,
+            "name": "condition",
+            "data": {
+              "conditions": "[{\"label\":\"if\",\"expr\":\"If the content is not based on AI in future\"}]"
+            },
+            "class": "condition",
+            "html": "<div class=\"df-node-head\" style=\"background:#8b5cf622;border-bottom:2px solid #8b5cf6\">\n    <span>\ud83d\udd00</span><span>Condition</span>\n  </div>\n  <div class=\"df-node-body\">IF \u2026 / ELSE</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "8",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "5",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": [
+                  {
+                    "node": "11",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 1044,
+            "pos_y": 104
+          },
+          "11": {
+            "id": 11,
+            "name": "approval",
+            "data": {
+              "message": "Please review the content above and choose to approve or reject."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\u2705</span><span>Approval</span>\n  </div>\n  <div class=\"df-node-body\">Approve / Reject</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "9",
+                    "input": "output_2"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "13",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 1570.909090909091,
+            "pos_y": 168
+          },
+          "12": {
+            "id": 12,
+            "name": "approval",
+            "data": {
+              "message": "Please review the content above and choose to approve or reject."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\u2705</span><span>Approval</span>\n  </div>\n  <div class=\"df-node-body\">Approve / Reject</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "5",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "13",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 1570,
+            "pos_y": 51
+          },
+          "13": {
+            "id": 13,
+            "name": "output",
+            "data": {},
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "11",
+                    "input": "output_1"
+                  },
+                  {
+                    "node": "12",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 1844,
+            "pos_y": 125.81818181818181
+          }
+        }
+      }
+    }
+  }
+}

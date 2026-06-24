@@ -1,0 +1,96 @@
+{
+  "id": "ai_newsletter",
+  "name": "AI Future Newsletter",
+  "description": "Fetches recent AI news, writes an email newsletter bounded by the Email domain, checks AI relevance, gets human approval, then emails yesol2137@gmail.com",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": { "prompt": "Write an email newsletter about the future of AI" }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Newsletter Writer",
+        "model": "gpt-4o",
+        "tool_ids": "news_fetch",
+        "mcp_ids": "",
+        "domain_id": "email",
+        "instructions": "You are an email newsletter writer specialising in AI and technology.\n\nSteps:\n1. Use news_fetch to search for 'future of AI 2025 2026' and 'artificial intelligence trends upcoming'.\n2. Read the results and identify the 3-4 most compelling developments.\n3. Write a polished email newsletter that covers those developments.\n\nOutput format — return ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<email subject line, max 60 chars>\", \"body\": \"<full newsletter body as plain text, 300-500 words>\"}\n\nNewsletter body structure:\n- Opening hook (1-2 sentences)\n- 3-4 developments, each with a short explanation of why it matters\n- Forward-looking closing paragraph\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+      }
+    },
+    {
+      "id": "3",
+      "type": "condition",
+      "config": {
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically and substantively about future AI developments, upcoming AI technologies, or the near-future societal and economic implications of AI\"}]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "approval",
+      "config": {
+        "message": "Review the AI Future newsletter below. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "5",
+      "type": "output",
+      "config": {
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "AI Future Newsletter"
+      }
+    },
+    {
+      "id": "6",
+      "type": "output",
+      "config": { "delivery": "none" }
+    },
+    {
+      "id": "7",
+      "type": "agent",
+      "config": {
+        "name": "Newsletter Rewriter",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "email",
+        "instructions": "The newsletter you received was not focused enough on future AI developments. Rewrite it so that every section is clearly and specifically about:\n- Concrete upcoming AI technologies (next-gen models, robotics, AI agents, etc.)\n- Near-future implications for businesses and individuals\n- A forward-looking, optimistic but grounded tone\n\nReturn ONLY a valid JSON object, no markdown fences:\n{\"subject\": \"<revised subject line, max 60 chars>\", \"body\": \"<revised newsletter body as plain text, 300-500 words>\"}\n\nFollow all voice, tone, and content rules from the Email domain guidelines."
+      }
+    },
+    {
+      "id": "8",
+      "type": "approval",
+      "config": {
+        "message": "Review the rewritten AI newsletter. Approve to send it to yesol2137@gmail.com, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "9",
+      "type": "output",
+      "config": {
+        "delivery": "gmail",
+        "recipient": "yesol2137@gmail.com",
+        "subject": "AI Future Newsletter"
+      }
+    },
+    {
+      "id": "10",
+      "type": "output",
+      "config": { "delivery": "none" }
+    }
+  ],
+  "edges": [
+    {"source": "1",  "target": "2"},
+    {"source": "2",  "target": "3"},
+    {"source": "3",  "target": "4",  "source_port": "output_1"},
+    {"source": "3",  "target": "7",  "source_port": "output_2"},
+    {"source": "4",  "target": "5",  "source_port": "output_1"},
+    {"source": "4",  "target": "6",  "source_port": "output_2"},
+    {"source": "7",  "target": "8"},
+    {"source": "8",  "target": "9",  "source_port": "output_1"},
+    {"source": "8",  "target": "10", "source_port": "output_2"}
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "id": "ai_slack_post",
+  "name": "AI Future Slack Post",
+  "description": "Writes a FlowAI marketing post about AI trends using recent news, checks AI relevance, gets human approval, then posts to your Slack channel",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": { "prompt": "Write a Slack marketing post about FlowAI in the context of AI trends" }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Marketing Post Writer",
+        "model": "gpt-4o",
+        "tool_ids": "news_fetch",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "You are a marketing copywriter for FlowAI.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target audience: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer — never corporate or salesy\n\nSteps:\n1. Use news_fetch to search for 'AI productivity tools 2025' and 'future of work artificial intelligence'.\n2. Pick 1-2 relevant AI trends that connect naturally to FlowAI's value proposition.\n3. Write a compelling Slack post that ties those trends to FlowAI.\n\nPost requirements:\n- Strong opening hook that names FlowAI\n- Reference 1-2 real AI trends from the news\n- 2-3 bullet points with specific FlowAI benefits (use the stats above)\n- One short call-to-action at the end\n- Use Slack markdown: *bold*, _italic_, • bullets\n- Maximum 200 words\n- Do NOT use generic filler content\n\nReturn ONLY the post text, ready to paste into Slack. No preamble, no commentary."
+      }
+    },
+    {
+      "id": "3",
+      "type": "condition",
+      "config": {
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "approval",
+      "config": {
+        "message": "Review the FlowAI Slack post below. Approve to post it to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "5",
+      "type": "output",
+      "config": { "delivery": "slack" }
+    },
+    {
+      "id": "6",
+      "type": "output",
+      "config": { "delivery": "none" }
+    },
+    {
+      "id": "7",
+      "type": "agent",
+      "config": {
+        "name": "Post Rewriter",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "The Slack post you received was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so that it clearly connects to concrete upcoming AI developments.\n\nCompany context:\n- FlowAI: AI productivity software, tagline 'Work less. Flow more.'\n- Saves users 2 hours/day, 10,000+ users, 50+ integrations\n- Voice: direct, peer-to-peer, never corporate\n\nRequirements:\n- Reference at least one specific near-future AI trend\n- Connect that trend directly to FlowAI's value\n- Keep Slack markdown: *bold*, _italic_, • bullets\n- Maximum 200 words\n- End with a call-to-action\n\nReturn ONLY the revised post text. No preamble, no commentary."
+      }
+    },
+    {
+      "id": "8",
+      "type": "approval",
+      "config": {
+        "message": "Review the rewritten Slack post. Approve to post it to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "9",
+      "type": "output",
+      "config": { "delivery": "slack" }
+    },
+    {
+      "id": "10",
+      "type": "output",
+      "config": { "delivery": "none" }
+    }
+  ],
+  "edges": [
+    {"source": "1",  "target": "2"},
+    {"source": "2",  "target": "3"},
+    {"source": "3",  "target": "4",  "source_port": "output_1"},
+    {"source": "3",  "target": "7",  "source_port": "output_2"},
+    {"source": "4",  "target": "5",  "source_port": "output_1"},
+    {"source": "4",  "target": "6",  "source_port": "output_2"},
+    {"source": "7",  "target": "8"},
+    {"source": "8",  "target": "9",  "source_port": "output_1"},
+    {"source": "8",  "target": "10", "source_port": "output_2"}
+  ]
+}

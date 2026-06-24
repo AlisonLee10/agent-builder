@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import uuid
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -118,6 +119,14 @@ def delete_workflow(wf_id: str):
 
 class RunBody(BaseModel):
     prompt: str = ""
+    approval_decisions: dict[str, Any] = {}
+    run_id: str = ""
+
+
+import asyncio as _asyncio
+import os as _os
+
+_WORKFLOW_TIMEOUT = int(_os.getenv("WORKFLOW_TIMEOUT", "120"))
 
 
 @router.post("/workflows/{wf_id}/run")
@@ -129,7 +138,12 @@ async def run_workflow(wf_id: str, body: RunBody):
     if not workflow.get("nodes"):
         raise HTTPException(400, "Workflow has no nodes")
     try:
-        return await execute_workflow(workflow, body.prompt)
+        return await _asyncio.wait_for(
+            execute_workflow(workflow, body.prompt, body.approval_decisions, run_id=body.run_id or None),
+            timeout=_WORKFLOW_TIMEOUT,
+        )
+    except _asyncio.TimeoutError:
+        raise HTTPException(504, f"Workflow timed out after {_WORKFLOW_TIMEOUT} seconds.")
     except ValueError as e:
         raise HTTPException(400, str(e))
     except Exception as e:
@@ -336,3 +350,33 @@ def delete_rag_doc(doc_id: str):
         raise HTTPException(404, "RAG document not found")
     _save_rag(data)
     return {"deleted": doc_id}
+
+
+# ── API Keys ───────────────────────────────────────────────────────────────────
+
+@router.get("/keys")
+def get_keys():
+    from engine.key_store import list_keys
+    return list_keys()
+
+
+class KeyBody(BaseModel):
+    env: str
+    value: str
+
+
+@router.post("/keys")
+def set_key(body: KeyBody):
+    from engine.key_store import set_key as _set, KEY_REGISTRY
+    if not any(k["env"] == body.env for k in KEY_REGISTRY):
+        raise HTTPException(400, f"Unknown key: {body.env}")
+    _set(body.env, body.value)
+    return {"env": body.env, "is_set": True}
+
+
+@router.delete("/keys/{env_name}")
+def delete_key(env_name: str):
+    from engine.key_store import delete_key as _delete
+    if not _delete(env_name):
+        raise HTTPException(404, "Key not found")
+    return {"env": env_name, "is_set": False}
