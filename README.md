@@ -14,7 +14,6 @@ Drag-and-drop nodes onto a canvas, connect them, and execute the workflow agains
 | Python | 3.10+ |
 | pip | 23+ |
 | OpenAI API key | — (required for GPT-4o / GPT-4o-mini nodes) |
-| Anthropic API key | — (required for Claude nodes, optional) |
 
 ---
 
@@ -81,6 +80,7 @@ LANGCHAIN_PROJECT=agent-builder
 
 ```bash
 python server.py
+OR input python3 server.py depending on the version of Python installed in your device.
 ```
 
 The server starts on **http://localhost:8000** with hot-reload enabled.
@@ -96,7 +96,7 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 ### Using the Workflow Builder
 
 1. Open **http://localhost:8000** in your browser.
-2. Click **＋ New Workflow** to create a blank canvas.
+2. Click **New** to create a blank canvas.
 3. Drag node types from the left palette onto the canvas:
 
 | Node | Purpose |
@@ -111,7 +111,8 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 4. Connect node handles by dragging from an output circle to an input circle.
 5. Click a node to configure it in the right panel.
 6. Click **▶ Run** to execute the workflow with a prompt.
-7. Click **💾 Save** to persist the workflow.
+7. Click **Save** to persist the workflow.
+8. Click **📝** to create a sticky note over the canvas.
 
 ---
 
@@ -119,7 +120,7 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 
 Domain packs inject rich context (brand guidelines, vocabulary, style examples) into Agent nodes.
 
-The built-in **Marketing** domain is located at `domains/marketing/` and includes:
+The built-in **Email (Sales)** domain is located at `domains/marketing/` and includes:
 
 | File | Purpose |
 |---|---|
@@ -133,7 +134,7 @@ The built-in **Marketing** domain is located at `domains/marketing/` and include
 | `templates/persona.j2` | Jinja2 agent persona template |
 | `templates/hashtags.j2` | Jinja2 hashtag generation rules |
 
-To add a new domain, create a new folder under `domains/` with the same structure and register it in the UI under the **Domains** tab.
+To add a new domain, create a new folder under `domains/` with the same structure and register it in the UI under the **Email (Sales)** tab.
 
 ---
 
