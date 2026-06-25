@@ -22,7 +22,7 @@ Drag-and-drop nodes onto a canvas, connect them, and execute the workflow agains
 **1. Clone the repository**
 
 ```bash
-git clone <repo-url>
+git clone <https://github.com/AlisonLee10/agent-builder.git>
 cd agent-builder
 ```
 
@@ -43,6 +43,8 @@ pip install -r requirements.txt
 ---
 
 ### Environment Setup
+
+> **Tip:** API keys can also be entered directly in the UI under the **Keys** tab — no restart required.
 
 Create a `.env` file in the project root (same directory as `server.py`):
 
@@ -71,8 +73,6 @@ LANGCHAIN_PROJECT=agent-builder
 # ── Optional: Workflow execution timeout (seconds) ─────────
 # WORKFLOW_TIMEOUT=120
 ```
-
-> **Tip:** API keys can also be entered directly in the UI under the **Keys** tab — no restart required.
 
 ---
 
