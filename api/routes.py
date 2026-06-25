@@ -125,8 +125,22 @@ class RunBody(BaseModel):
 
 import asyncio as _asyncio
 import os as _os
+import time as _time
 
 _WORKFLOW_TIMEOUT = int(_os.getenv("WORKFLOW_TIMEOUT", "120"))
+
+# Wrap execute_workflow in a LangSmith traceable span so LangSmith records
+# the full E2E duration as the parent run encompassing all child LLM calls.
+try:
+    from langsmith import traceable as _ls_traceable
+
+    @_ls_traceable(name="e2e_workflow_run", run_type="chain")
+    async def _traced_execute(workflow: dict, prompt: str, decisions: dict, run_id: str | None) -> dict:
+        return await execute_workflow(workflow, prompt, decisions, run_id=run_id)
+
+except ImportError:
+    async def _traced_execute(workflow: dict, prompt: str, decisions: dict, run_id: str | None) -> dict:  # type: ignore[misc]
+        return await execute_workflow(workflow, prompt, decisions, run_id=run_id)
 
 
 @router.post("/workflows/{wf_id}/run")
@@ -137,9 +151,10 @@ async def run_workflow(wf_id: str, body: RunBody):
     workflow = json.loads(path.read_text())
     if not workflow.get("nodes"):
         raise HTTPException(400, "Workflow has no nodes")
+    t0 = _time.perf_counter()
     try:
-        return await _asyncio.wait_for(
-            execute_workflow(workflow, body.prompt, body.approval_decisions, run_id=body.run_id or None),
+        result = await _asyncio.wait_for(
+            _traced_execute(workflow, body.prompt, body.approval_decisions, body.run_id or None),
             timeout=_WORKFLOW_TIMEOUT,
         )
     except _asyncio.TimeoutError:
@@ -148,6 +163,13 @@ async def run_workflow(wf_id: str, body: RunBody):
         raise HTTPException(400, str(e))
     except Exception as e:
         raise HTTPException(500, str(e))
+
+    elapsed = round(_time.perf_counter() - t0, 2)
+    # Only attach timing for completed runs (not mid-approval pauses)
+    if isinstance(result, dict) and not result.get("__approval_pending__"):
+        result["elapsed_s"] = elapsed
+        print(f"[E2E] Workflow '{wf_id}' completed in {elapsed:.2f}s", flush=True)
+    return result
 
 
 # ── User Tool Registry ─────────────────────────────────────────────────────────

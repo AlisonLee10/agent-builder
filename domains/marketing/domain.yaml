@@ -95,4 +95,5 @@ model_hints:
 # ── Persona Template ──────────────────────────────────────────────────────────
 # Jinja2 template used to build the agent's system prompt.
 # Replaces the hardcoded strings in services/ai.py and agent.py (Phase 1b).
-persona_template: ./templates/persona.j2
+persona_template:   ./templates/persona.j2
+hashtags_template:  ./templates/hashtags.j2

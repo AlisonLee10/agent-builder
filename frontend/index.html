@@ -152,6 +152,7 @@
     #run-modal .result-box { background: var(--surface); border: 1px solid var(--border); border-radius: 7px; padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; max-height: 320px; overflow-y: auto; margin-bottom: 12px; }
     #run-modal .trace-toggle { font-size: 11px; color: var(--muted); cursor: pointer; text-decoration: underline; display: block; margin-bottom: 7px; }
     #run-modal .trace-box { background: var(--bg); border-radius: 7px; padding: 9px; font-size: 11px; font-family: monospace; max-height: 160px; overflow-y: auto; white-space: pre; display: none; }
+    .elapsed-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 2px 7px; margin-bottom: 8px; }
 
     /* Drag-select */
     #sel-box { position: absolute; border: 2px dashed var(--accent); background: rgba(99,102,241,.12); pointer-events: none; z-index: 999; display: none; border-radius: 4px; }
@@ -476,7 +477,10 @@
       </div>
     </div>
     <div id="run-result-section" style="display:none">
-      <div class="field-group"><label>Result</label></div>
+      <div class="field-group" style="display:flex;align-items:center;justify-content:space-between">
+        <label>Result</label>
+        <span class="elapsed-badge" id="run-elapsed-badge" style="display:none">⏱ <span id="run-elapsed-text"></span></span>
+      </div>
       <div class="result-box" id="run-result-text"></div>
       <a class="trace-toggle" onclick="toggleTrace()">Show execution trace</a>
       <div class="trace-box" id="run-trace-box"></div>
@@ -1046,6 +1050,7 @@ function openRunModal() {
   document.getElementById('run-input-section').style.display = '';
   document.getElementById('run-approval-section').style.display = 'none';
   document.getElementById('run-result-section').style.display = 'none';
+  document.getElementById('run-elapsed-badge').style.display = 'none';
   document.getElementById('run-prompt').value = '';
   document.getElementById('run-modal').classList.remove('hidden');
 }
@@ -1057,6 +1062,7 @@ function runAgain()  {
   document.getElementById('run-input-section').style.display = '';
   document.getElementById('run-approval-section').style.display = 'none';
   document.getElementById('run-result-section').style.display = 'none';
+  document.getElementById('run-elapsed-badge').style.display = 'none';
 }
 function toggleTrace() {
   const b = document.getElementById('run-trace-box');
@@ -1128,9 +1134,18 @@ async function _executeRun() {
     document.getElementById('run-trace-box').textContent    = JSON.stringify(data.trace, null, 2);
     document.getElementById('run-trace-box').style.display  = 'none';
     document.getElementById('run-result-section').style.display = '';
+    // Elapsed time badge
+    const elapsedBadge = document.getElementById('run-elapsed-badge');
+    if (data.elapsed_s != null) {
+      document.getElementById('run-elapsed-text').textContent = `${data.elapsed_s}s`;
+      elapsedBadge.style.display = '';
+    } else {
+      elapsedBadge.style.display = 'none';
+    }
     // Populate the persistent result drawer
     const wfName = document.getElementById('wf-name').value.trim() || 'Workflow';
-    document.getElementById('result-drawer-label').textContent = `Last Result — ${wfName}`;
+    const elapsedSuffix = data.elapsed_s != null ? ` — ${data.elapsed_s}s` : '';
+    document.getElementById('result-drawer-label').textContent = `Last Result — ${wfName}${elapsedSuffix}`;
     document.getElementById('result-drawer-text').textContent = result;
     const drawer = document.getElementById('result-drawer');
     drawer.classList.add('has-result');

@@ -1,0 +1,52 @@
+version: "1.0"
+description: >
+  Entity relationships for the marketing / B2B outbound email domain.
+  Injected into the agent system prompt to reduce hallucination on
+  domain-specific concepts and enforce structural constraints.
+
+entities:
+  email_type:
+    description: The category of outbound email being written
+    values:
+      cold_email:  "First outreach to a prospect with no prior contact"
+      follow_up:   "Continuation of a prior thread or unanswered outreach"
+      break_up:    "Final email to a prospect who has gone silent"
+      nurture:     "Ongoing relationship-building for warm or existing contacts"
+
+  sender_role:
+    description: The sales representative's function within the team
+    values:
+      SDR:  "Sales Development Rep — books discovery calls, does not close"
+      AE:   "Account Executive — runs discovery to contract, owns the close"
+      CSM:  "Customer Success Manager — manages renewals, expansion, and health"
+
+  prospect_level:
+    description: Seniority of the target contact
+    values:
+      IC:       "Individual contributor — rarely a buyer, useful as a champion"
+      manager:  "Team lead or manager — influencer, may surface to a buyer"
+      director: "Director — functional budget holder in many organisations"
+      vp:       "VP — strategic buyer, cares about ROI and risk"
+      c_suite:  "C-level (CEO, CFO, CTO, CMO) — ultimate authority, very short attention"
+
+  email_sequence_stage:
+    description: Position in the outbound cadence
+    values:
+      step1:  "Initial outreach — establish relevance, earn a reply"
+      step2:  "First follow-up — add value, reframe angle, low-friction ask"
+      step3:  "Break-up — honest close or open door to re-engage later"
+
+relationships:
+  # SDRs own step1 + step2; AEs take over when warming has occurred
+  sender_to_stage:
+    SDR: [step1, step2]
+    AE:  [step2, step3]
+    CSM: [nurture]
+
+  # C-suite targets demand shorter emails; ICs can absorb more context
+  prospect_level_to_length:
+    IC:       "150–220 words"
+    manager:  "120–180 words"
+    director: "100–150 words"
+    vp:       "80–120 words"
+    c_suite:  "50–90 words"

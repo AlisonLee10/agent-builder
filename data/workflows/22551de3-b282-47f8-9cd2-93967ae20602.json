@@ -1,0 +1,448 @@
+{
+  "id": "22551de3-b282-47f8-9cd2-93967ae20602",
+  "name": "AI Future Slack Post",
+  "nodes": [
+    {
+      "id": "1",
+      "type": "input",
+      "config": {
+        "prompt": "Write a Slack marketing post about FlowAI in the context of AI trends"
+      }
+    },
+    {
+      "id": "2",
+      "type": "agent",
+      "config": {
+        "name": "Marketing Post Writer",
+        "model": "gpt-4o",
+        "tool_ids": "news_fetch",
+        "mcp_ids": "",
+        "domain_id": "",
+        "instructions": "You are a marketing copywriter for FlowAI.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target audience: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer \u2014 never corporate or salesy\n\nSteps:\n1. Use news_fetch to search for 'AI productivity tools 2025' and 'future of work artificial intelligence'.\n2. Pick 1-2 relevant AI trends that connect naturally to FlowAI's value proposition.\n3. Write a compelling Slack post that ties those trends to FlowAI.\n\nPost requirements:\n- Strong opening hook that names FlowAI\n- Reference 1-2 real AI trends from the news\n- 2-3 bullet points with specific FlowAI benefits (use the stats above)\n- One short call-to-action at the end\n- Use Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- Do NOT use generic filler content\n\nReturn ONLY the post text, ready to paste into Slack. No preamble, no commentary."
+      }
+    },
+    {
+      "id": "3",
+      "type": "condition",
+      "config": {
+        "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
+      }
+    },
+    {
+      "id": "4",
+      "type": "approval",
+      "config": {
+        "message": "Review the FlowAI Slack post below. Approve to post it to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "5",
+      "type": "output",
+      "config": {
+        "delivery": "slack"
+      }
+    },
+    {
+      "id": "6",
+      "type": "output",
+      "config": {
+        "delivery": "none"
+      }
+    },
+    {
+      "id": "7",
+      "type": "agent",
+      "config": {
+        "name": "Post Rewriter",
+        "model": "gpt-4o",
+        "tool_ids": "",
+        "mcp_ids": "7b65a8bf-ced6-4c4f-b54c-f7a51224390b",
+        "domain_id": "",
+        "instructions": "The Slack post you received was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so that it clearly connects to concrete upcoming AI developments.\n\nCompany context:\n- FlowAI: AI productivity software, tagline 'Work less. Flow more.'\n- Saves users 2 hours/day, 10,000+ users, 50+ integrations\n- Voice: direct, peer-to-peer, never corporate\n\nRequirements:\n- Reference at least one specific near-future AI trend\n- Connect that trend directly to FlowAI's value\n- Keep Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- End with a call-to-action\n\nReturn ONLY the revised post text. No preamble, no commentary."
+      }
+    },
+    {
+      "id": "8",
+      "type": "approval",
+      "config": {
+        "message": "Review the rewritten Slack post. Approve to post it to your Slack channel, or reject to end the workflow."
+      }
+    },
+    {
+      "id": "9",
+      "type": "output",
+      "config": {
+        "delivery": "slack"
+      }
+    },
+    {
+      "id": "10",
+      "type": "output",
+      "config": {
+        "delivery": "none"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "1",
+      "target": "2",
+      "source_port": "output_1"
+    },
+    {
+      "source": "2",
+      "target": "3",
+      "source_port": "output_1"
+    },
+    {
+      "source": "3",
+      "target": "4",
+      "source_port": "output_1"
+    },
+    {
+      "source": "3",
+      "target": "7",
+      "source_port": "output_1"
+    },
+    {
+      "source": "4",
+      "target": "5",
+      "source_port": "output_1"
+    },
+    {
+      "source": "4",
+      "target": "6",
+      "source_port": "output_1"
+    },
+    {
+      "source": "7",
+      "target": "8",
+      "source_port": "output_1"
+    },
+    {
+      "source": "8",
+      "target": "9",
+      "source_port": "output_1"
+    },
+    {
+      "source": "8",
+      "target": "10",
+      "source_port": "output_1"
+    }
+  ],
+  "drawflow": {
+    "drawflow": {
+      "Home": {
+        "data": {
+          "1": {
+            "id": 1,
+            "name": "input",
+            "data": {
+              "prompt": "Write a Slack marketing post about FlowAI in the context of AI trends"
+            },
+            "class": "input",
+            "html": "<div class=\"df-node-head\" style=\"background:#10b98122;border-bottom:2px solid #10b981\">\n      <span>\ud83d\udce5</span><span>Input</span>\n    </div>\n    <div class=\"df-node-body\" style=\"padding:8px 10px 10px\">\n      <textarea df-prompt rows=\"3\" placeholder=\"Type your prompt here\u2026\" style=\"width:100%;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:5px 7px;font-size:11px;color:var(--text);resize:vertical;font-family:inherit;line-height:1.5\">Write a Slack marketing post about FlowAI in the context of AI trends</textarea>\n    </div>",
+            "typenode": false,
+            "inputs": {},
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 80
+          },
+          "2": {
+            "id": 2,
+            "name": "agent",
+            "data": {
+              "name": "Marketing Post Writer",
+              "model": "gpt-4o",
+              "tool_ids": "news_fetch",
+              "mcp_ids": "",
+              "domain_id": "",
+              "instructions": "You are a marketing copywriter for FlowAI.\n\nCompany context:\n- Name: FlowAI\n- Tagline: \"Work less. Flow more.\"\n- What: AI productivity software that gives professionals 2 hours back every day\n- Key stats: 10,000+ users, integrates with 50+ tools\n- Target audience: Busy professionals aged 25-40 in tech, marketing, finance, consulting\n- Voice: Inspirational, direct, peer-to-peer \u2014 never corporate or salesy\n\nSteps:\n1. Use news_fetch to search for 'AI productivity tools 2025' and 'future of work artificial intelligence'.\n2. Pick 1-2 relevant AI trends that connect naturally to FlowAI's value proposition.\n3. Write a compelling Slack post that ties those trends to FlowAI.\n\nPost requirements:\n- Strong opening hook that names FlowAI\n- Reference 1-2 real AI trends from the news\n- 2-3 bullet points with specific FlowAI benefits (use the stats above)\n- One short call-to-action at the end\n- Use Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- Do NOT use generic filler content\n\nReturn ONLY the post text, ready to paste into Slack. No preamble, no commentary."
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Marketing Post Writer \u00b7 gpt-4o</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "1",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 310,
+            "pos_y": 80
+          },
+          "3": {
+            "id": 3,
+            "name": "condition",
+            "data": {
+              "conditions": "[{\"label\":\"if\",\"expr\":\"The content is specifically about future AI trends, upcoming AI developments, or the future impact of AI on productivity and work\"}]"
+            },
+            "class": "condition",
+            "html": "<div class=\"df-node-head\" style=\"background:#8b5cf622;border-bottom:2px solid #8b5cf6\">\n    <span>\ud83d\udd00</span><span>Condition</span>\n  </div>\n  <div class=\"df-node-body\">IF The content is specificall / ELSE</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "2",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "output": "input_1"
+                  },
+                  {
+                    "node": "7",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 540,
+            "pos_y": 80
+          },
+          "4": {
+            "id": 4,
+            "name": "approval",
+            "data": {
+              "message": "Review the FlowAI Slack post below. Approve to post it to your Slack channel, or reject to end the workflow."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "5",
+                    "output": "input_1"
+                  },
+                  {
+                    "node": "6",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 240
+          },
+          "5": {
+            "id": 5,
+            "name": "output",
+            "data": {
+              "delivery": "slack"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 310,
+            "pos_y": 240
+          },
+          "6": {
+            "id": 6,
+            "name": "output",
+            "data": {
+              "delivery": "none"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "4",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 540,
+            "pos_y": 240
+          },
+          "7": {
+            "id": 7,
+            "name": "agent",
+            "data": {
+              "name": "Post Rewriter",
+              "model": "gpt-4o",
+              "tool_ids": "",
+              "mcp_ids": "7b65a8bf-ced6-4c4f-b54c-f7a51224390b",
+              "domain_id": "",
+              "instructions": "The Slack post you received was flagged as not focused enough on future AI trends. Rewrite it for FlowAI so that it clearly connects to concrete upcoming AI developments.\n\nCompany context:\n- FlowAI: AI productivity software, tagline 'Work less. Flow more.'\n- Saves users 2 hours/day, 10,000+ users, 50+ integrations\n- Voice: direct, peer-to-peer, never corporate\n\nRequirements:\n- Reference at least one specific near-future AI trend\n- Connect that trend directly to FlowAI's value\n- Keep Slack markdown: *bold*, _italic_, \u2022 bullets\n- Maximum 200 words\n- End with a call-to-action\n\nReturn ONLY the revised post text. No preamble, no commentary."
+            },
+            "class": "agent",
+            "html": "<div class=\"df-node-head\" style=\"background:#0891b222;border-bottom:2px solid #0891b2\">\n    <span>\ud83e\udd16</span><span>Agent</span>\n  </div>\n  <div class=\"df-node-body\">Post Rewriter \u00b7 gpt-4o</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "3",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "8",
+                    "output": "input_1"
+                  }
+                ]
+              }
+            },
+            "pos_x": 80,
+            "pos_y": 400
+          },
+          "8": {
+            "id": 8,
+            "name": "approval",
+            "data": {
+              "message": "Review the rewritten Slack post. Approve to post it to your Slack channel, or reject to end the workflow."
+            },
+            "class": "approval",
+            "html": "<div class=\"df-node-head\" style=\"background:#f9731622;border-bottom:2px solid #f97316\">\n    <span>\ud83d\ude4b</span><span>Human Approval</span>\n  </div>\n  <div class=\"df-node-body\">\ud83d\ude4b Waiting for human decision</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "7",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {
+              "output_1": {
+                "connections": [
+                  {
+                    "node": "9",
+                    "output": "input_1"
+                  },
+                  {
+                    "node": "10",
+                    "output": "input_1"
+                  }
+                ]
+              },
+              "output_2": {
+                "connections": []
+              }
+            },
+            "pos_x": 310,
+            "pos_y": 400
+          },
+          "9": {
+            "id": 9,
+            "name": "output",
+            "data": {
+              "delivery": "slack"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "8",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 540,
+            "pos_y": 400
+          },
+          "10": {
+            "id": 10,
+            "name": "output",
+            "data": {
+              "delivery": "none"
+            },
+            "class": "output",
+            "html": "<div class=\"df-node-head\" style=\"background:#ef444422;border-bottom:2px solid #ef4444\">\n    <span>\ud83d\udce4</span><span>Output</span>\n  </div>\n  <div class=\"df-node-body\">\u2192 Final output</div>",
+            "typenode": false,
+            "inputs": {
+              "input_1": {
+                "connections": [
+                  {
+                    "node": "8",
+                    "input": "output_1"
+                  }
+                ]
+              }
+            },
+            "outputs": {},
+            "pos_x": 80,
+            "pos_y": 560
+          }
+        }
+      }
+    },
+    "sticky_notes": []
+  }
+}

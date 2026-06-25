@@ -37,6 +37,18 @@ def load_rich_context(folder: str | Path) -> str:
     td  = cfg.get("training_data", {})
 
     parts: list[str] = []
+    tpl_vars = {
+        "domain_name": cfg.get("name", ""),
+        "description":  cfg.get("description", "").strip(),
+        "max_tags": 5,
+    }
+
+    # ── 0. Persona template (prepended — sets agent identity before all rules) ─
+    persona_tpl = cfg.get("persona_template", "")
+    if persona_tpl:
+        rendered = _render_template(_resolve(path, persona_tpl.lstrip("./")), tpl_vars)
+        if rendered:
+            parts.append("## Agent Persona\n\n" + rendered)
 
     # ── 1. Brand guidelines ────────────────────────────────────────────────────
     bg_path = _resolve(path, gov.get("brand_guidelines", "governance/brand_guidelines.md"))
@@ -76,6 +88,20 @@ def load_rich_context(folder: str | Path) -> str:
             "Do NOT replicate their tone, structure, phrasing, or content:\n\n"
             + "\n\n---\n\n".join(rejected_examples)
         )
+
+    # ── 5. Semantic layer — vocabulary + ontology ─────────────────────────────
+    sem = cfg.get("semantic", {})
+    if sem:
+        sem_block = _load_semantic(path, sem)
+        if sem_block:
+            parts.append(sem_block)
+
+    # ── 6. Hashtag generation rules (template) ────────────────────────────────
+    hashtags_tpl = cfg.get("hashtags_template", "")
+    if hashtags_tpl:
+        rendered = _render_template(_resolve(path, hashtags_tpl.lstrip("./")), tpl_vars)
+        if rendered:
+            parts.append("## Hashtag Generation Rules\n\n" + rendered)
 
     return "\n\n".join(parts)
 
@@ -157,6 +183,91 @@ def _format_rules(rules: list) -> str:
                 warnings.append(f"⚠️  {line}")
 
     return "\n".join(errors + warnings)
+
+
+def _render_template(tpl_path: Path, context: dict) -> str:
+    """Render a Jinja2 .j2 template file with the given context dict."""
+    if not tpl_path.exists():
+        return ""
+    try:
+        from jinja2 import Template
+        return Template(tpl_path.read_text(encoding="utf-8")).render(**context).strip()
+    except Exception:
+        return ""
+
+
+def _load_semantic(base: Path, sem_cfg: dict) -> str:
+    """
+    Build a Domain Vocabulary + Ontology block from vocabulary.json and
+    ontology.yaml so the LLM understands the domain's canonical terms,
+    entity types, and structural constraints without hallucinating them.
+    """
+    import json as _json
+    blocks: list[str] = []
+
+    # ── Vocabulary: NL phrase → canonical parameter value ─────────────────
+    vocab_path = _resolve(base, sem_cfg.get("vocabulary", "semantic/vocabulary.json"))
+    if vocab_path.exists():
+        try:
+            vocab = _json.loads(vocab_path.read_text(encoding="utf-8"))
+            mappings = vocab.get("mappings", [])
+            if mappings:
+                # Group phrases by (parameter, value) so each value gets one line
+                grouped: dict[tuple[str, str], list[str]] = {}
+                for m in mappings:
+                    key = (m["parameter"], m["value"])
+                    grouped.setdefault(key, []).append(f'"{m["phrase"]}"')
+                lines = [
+                    f"- {' / '.join(phrases)} → **{param}: {value}**"
+                    for (param, value), phrases in grouped.items()
+                ]
+                blocks.append(
+                    "## Domain Vocabulary\n\n"
+                    "Interpret these user terms using their canonical domain meanings:\n\n"
+                    + "\n".join(lines)
+                )
+        except Exception:
+            pass
+
+    # ── Ontology: entity types and structural constraints ──────────────────
+    onto_path = _resolve(base, sem_cfg.get("ontology", "semantic/ontology.yaml"))
+    if onto_path.exists():
+        try:
+            onto = _load_yaml(onto_path) or {}
+            entities = onto.get("entities", {})
+            relationships = onto.get("relationships", {})
+            lines: list[str] = []
+
+            for entity_name, entity_data in entities.items():
+                values = entity_data.get("values", {})
+                desc = entity_data.get("description", "")
+                if values:
+                    val_str = " | ".join(values.keys())
+                    lines.append(f"- **{entity_name}** ({desc}): {val_str}")
+
+            if relationships:
+                length_map = relationships.get("prospect_level_to_length", {})
+                if length_map:
+                    lines.append("\nEmail length by prospect seniority:")
+                    for level, length in length_map.items():
+                        lines.append(f"  - {level}: {length}")
+
+                stage_map = relationships.get("sender_to_stage", {})
+                if stage_map:
+                    lines.append("\nTypical sequence stages by sender role:")
+                    for role, stages in stage_map.items():
+                        lines.append(f"  - {role}: {', '.join(stages)}")
+
+            if lines:
+                blocks.append(
+                    "## Domain Ontology\n\n"
+                    "Domain entities and structural constraints:\n\n"
+                    + "\n".join(lines)
+                )
+        except Exception:
+            pass
+
+    return "\n\n".join(blocks)
 
 
 def _sample_examples(approved_path: Path, n: int = 3) -> list[str]:
