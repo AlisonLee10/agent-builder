@@ -52,9 +52,6 @@ Create a `.env` file in the project root (same directory as `server.py`):
 # ── Required ───────────────────────────────────────────────
 OPENAI_API_KEY=sk-...            # GPT-4o / GPT-4o-mini
 
-# ── Optional: Claude models ────────────────────────────────
-ANTHROPIC_API_KEY=sk-ant-...
-
 # ── Optional: Built-in tools ───────────────────────────────
 NEWS_API_KEY=...                 # NewsAPI (news search tool)
 SERP_API_KEY=...                 # SerpAPI (web search tool)
@@ -80,7 +77,7 @@ LANGCHAIN_PROJECT=agent-builder
 
 ```bash
 python server.py
-OR input python3 server.py depending on the version of Python installed in your device.
+# OR input python3 server.py depending on the version of Python installed in your device.
 ```
 
 The server starts on **http://localhost:8000** with hot-reload enabled.
@@ -102,7 +99,7 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 | Node | Purpose |
 |---|---|
 | **Input** | Entry point — receives the user's prompt |
-| **LLM** | Direct LLM call (GPT-4o, Claude, etc.) |
+| **LLM** | Direct LLM call (GPT-4o) |
 | **Agent** | LLM with tools, MCP servers, and domain context |
 | **Condition** | Routes the flow with IF / ELSE IF / ELSE logic |
 | **Human Approval** | Pauses for manual Approve / Deny before continuing |
@@ -205,7 +202,6 @@ agent-builder/
 | Python | 3.10+ |
 | pip | 23+ |
 | OpenAI API 키 | — (GPT-4o / GPT-4o-mini 노드 사용 시 필수) |
-| Anthropic API 키 | — (Claude 노드 사용 시 필요, 선택) |
 
 ---
 
@@ -214,7 +210,7 @@ agent-builder/
 **1. 저장소 복제**
 
 ```bash
-git clone <repo-url>
+git clone <https://github.com/AlisonLee10/agent-builder>
 cd agent-builder
 ```
 
@@ -236,14 +232,13 @@ pip install -r requirements.txt
 
 ### 환경 변수 설정
 
+> **팁:** API 키는 UI의 **Keys** 탭에서 직접 입력할 수도 있습니다. 서버 재시작 없이 즉시 반영됩니다.
+
 프로젝트 루트(server.py와 같은 디렉터리)에 `.env` 파일을 생성합니다:
 
 ```env
 # ── 필수 ───────────────────────────────────────────────────
 OPENAI_API_KEY=sk-...            # GPT-4o / GPT-4o-mini
-
-# ── 선택: Claude 모델 ──────────────────────────────────────
-ANTHROPIC_API_KEY=sk-ant-...
 
 # ── 선택: 내장 도구 ────────────────────────────────────────
 NEWS_API_KEY=...                 # NewsAPI (뉴스 검색)
@@ -264,14 +259,14 @@ LANGCHAIN_PROJECT=agent-builder
 # WORKFLOW_TIMEOUT=120
 ```
 
-> **팁:** API 키는 UI의 **Keys** 탭에서 직접 입력할 수도 있습니다. 서버 재시작 없이 즉시 반영됩니다.
-
 ---
 
 ### 서버 기동
 
 ```bash
 python server.py
+# 또는 버전에 따라서 python3 server.py를 입력하실 수 있습니다.
+
 ```
 
 서버는 **http://localhost:8000** 에서 실행되며 코드 변경 시 자동으로 재시작됩니다.
@@ -293,7 +288,7 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 | 노드 | 역할 |
 |---|---|
 | **Input** | 진입점 — 사용자의 프롬프트를 받습니다 |
-| **LLM** | 직접 LLM 호출 (GPT-4o, Claude 등) |
+| **LLM** | 직접 LLM 호출 (GPT-4o) |
 | **Agent** | 도구·MCP 서버·도메인 컨텍스트를 갖춘 LLM 에이전트 |
 | **Condition** | IF / ELSE IF / ELSE 조건 분기 |
 | **Human Approval** | 실행을 일시 중단하고 Approve / Deny 대기 |
@@ -302,7 +297,8 @@ uvicorn server:app --host 0.0.0.0 --port 9000 --reload
 4. 출력 핸들(원)을 드래그해 다른 노드의 입력 핸들에 연결합니다.
 5. 노드를 클릭하면 우측 패널에서 설정을 변경할 수 있습니다.
 6. **▶ Run** 을 클릭해 프롬프트와 함께 워크플로우를 실행합니다.
-7. **💾 Save** 를 클릭해 워크플로우를 저장합니다.
+7. **Save** 를 클릭해 워크플로우를 저장합니다.
+8. **📝** 를 클릭해 포스트잇을 캔버스 위에 붙일 수 있습니다.
 
 ---
 
